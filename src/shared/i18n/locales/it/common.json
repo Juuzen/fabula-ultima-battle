@@ -19,5 +19,13 @@
     "it": "Italiano",
     "en": "English"
   },
-  "notFound": "Pagina non trovata"
+  "notFound": "Pagina non trovata",
+  "status": {
+    "slow": "Lento",
+    "dazed": "Confuso",
+    "weak": "Debole",
+    "shaken": "Scosso",
+    "enraged": "Furente",
+    "poisoned": "Avvelenato"
+  }
 }
