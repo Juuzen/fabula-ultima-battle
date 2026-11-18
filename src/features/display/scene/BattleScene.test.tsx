@@ -8,26 +8,62 @@ import { demoBattle } from '../demo/demoBattle'
 import { BattleScene } from './BattleScene'
 
 describe('BattleScene', () => {
-  it('shows ally HP numbers and Crisis / KO tags in the party window', () => {
-    render(<BattleScene battle={demoBattle} />)
-    const party = screen.getByRole('region', { name: 'Party' })
+  describe('party panel', () => {
+    it('shows one slot per ally with HP, MP, statuses and Crisis / KO', () => {
+      render(<BattleScene battle={demoBattle} />)
+      const party = screen.getByRole('region', { name: 'Party' })
 
-    const lyra = within(party).getByTestId('party-row-a1')
-    expect(lyra).toHaveTextContent('Lyra')
-    expect(lyra).toHaveTextContent('48 / 62')
+      const lyra = within(party).getByTestId('party-slot-a1')
+      expect(lyra).toHaveTextContent('Lyra')
+      expect(within(lyra).getByTestId('gauge-hp')).toHaveTextContent('PV48 / 62')
+      expect(within(lyra).getByTestId('gauge-mp')).toHaveTextContent('PM35 / 50')
 
-    expect(within(party).getByTestId('party-row-a2')).toHaveTextContent('Crisi')
-    expect(within(party).getByTestId('party-row-a3')).toHaveTextContent('KO')
-    expect(within(party).getByTestId('party-row-a4')).toHaveTextContent('Lento')
+      expect(within(party).getByTestId('party-slot-a2')).toHaveAttribute('data-state', 'crisis')
+      expect(within(party).getByTestId('party-slot-a2')).toHaveTextContent('Crisi')
+      expect(within(party).getByTestId('party-slot-a3')).toHaveTextContent('KO')
+      expect(within(party).getByTestId('party-slot-a4')).toHaveTextContent('Lento')
+    })
+
+    it('omits the MP gauge for allies without MP', () => {
+      const battle: BattleState = {
+        ...createEmptyBattle(),
+        combatants: [createCombatant({ id: 'w', name: 'Warrior', side: 'ally', maxHp: 50 })],
+      }
+      render(<BattleScene battle={battle} />)
+      const slot = screen.getByTestId('party-slot-w')
+      expect(within(slot).queryByTestId('gauge-mp')).not.toBeInTheDocument()
+    })
   })
 
-  it('hides exact enemy HP from players', () => {
-    render(<BattleScene battle={demoBattle} />)
-    const enemies = screen.getByRole('region', { name: 'Nemici' })
-    const shaman = within(enemies).getByTestId('enemy-row-e2')
-    expect(shaman).toHaveTextContent('Goblin Sciamano')
-    expect(shaman).toHaveTextContent('Crisi')
-    expect(shaman).not.toHaveTextContent('12')
+  describe('enemies', () => {
+    it('always label every enemy on the field, KO included', () => {
+      render(<BattleScene battle={demoBattle} />)
+      expect(screen.getByTestId('nameplate-e2')).toHaveTextContent('Goblin Sciamano')
+      expect(screen.getByTestId('nameplate-e2')).toHaveTextContent('Crisi')
+      expect(screen.getByTestId('nameplate-e2')).toHaveTextContent('Avvelenato')
+      expect(screen.getByTestId('nameplate-e4')).toHaveTextContent('KO')
+    })
+
+    it('show exact HP/MP only for revealed foes', () => {
+      render(<BattleScene battle={demoBattle} />)
+      const shaman = screen.getByTestId('enemy-info-e2') // revealed
+      expect(within(shaman).getByTestId('gauge-hp')).toHaveTextContent('12 / 32')
+      expect(within(shaman).getByTestId('gauge-mp')).toHaveTextContent('25 / 40')
+
+      const wolf = screen.getByTestId('enemy-info-e3') // hidden
+      expect(within(wolf).queryByTestId('gauge-hp')).not.toBeInTheDocument()
+      expect(wolf).not.toHaveTextContent('90')
+    })
+
+    it('"reveal all" overrides the per-enemy flag', () => {
+      const battle: BattleState = {
+        ...demoBattle,
+        presentation: { ...demoBattle.presentation, revealAllEnemyStats: true },
+      }
+      render(<BattleScene battle={battle} />)
+      const wolf = screen.getByTestId('enemy-info-e3')
+      expect(within(wolf).getByTestId('gauge-hp')).toHaveTextContent('90 / 90')
+    })
   })
 
   it('marks sprite states for styling', () => {
@@ -37,21 +73,32 @@ describe('BattleScene', () => {
     expect(screen.getByTestId('sprite-a3')).toHaveAttribute('data-state', 'ko')
   })
 
-  it('omits a window when its side is empty', () => {
-    const onlyAllies: BattleState = {
-      ...createEmptyBattle(),
-      combatants: [createCombatant({ id: 'a', name: 'Solo', side: 'ally', maxHp: 10 })],
-    }
-    render(<BattleScene battle={onlyAllies} />)
-    expect(screen.queryByRole('region', { name: 'Nemici' })).not.toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Party' })).toBeInTheDocument()
+  it('omits the party panel and enemy window when their side is empty', () => {
+    render(<BattleScene battle={createEmptyBattle()} />)
+    expect(screen.queryByRole('region', { name: 'Party' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId(/enemy-info-/)).not.toBeInTheDocument()
   })
 
-  it('renders resolved assets for background and sprites, mirroring when asked', () => {
+  it('uses portrait, then sprite, then placeholder in party slots; mirrors sprites on request', () => {
     const battle: BattleState = {
-      name: '',
+      ...createEmptyBattle(),
       backgroundAssetId: 'bg',
       combatants: [
+        createCombatant({
+          id: 'p',
+          name: 'Portrait',
+          side: 'ally',
+          maxHp: 10,
+          portraitAssetId: 'face',
+          spriteAssetId: 'body',
+        }),
+        createCombatant({
+          id: 's',
+          name: 'SpriteOnly',
+          side: 'ally',
+          maxHp: 10,
+          spriteAssetId: 'body2',
+        }),
         createCombatant({
           id: 'x',
           name: 'Drake',
@@ -62,15 +109,17 @@ describe('BattleScene', () => {
         }),
       ],
     }
-    const { container } = render(
+    render(
       <AssetResolverProvider resolver={(id) => `blob:${id}`}>
         <BattleScene battle={battle} />
       </AssetResolverProvider>,
     )
     expect(screen.queryByTestId('default-backdrop')).not.toBeInTheDocument()
-    const sources = [...container.querySelectorAll('img')].map((img) => img.getAttribute('src'))
-    expect(sources).toEqual(['blob:bg', 'blob:drake'])
-    const sprite = screen.getByTestId('sprite-x').querySelector('img')!.parentElement!
-    expect(sprite.style.transform).toBe('scaleX(-1)')
+    const src = (el: HTMLElement) => el.querySelector('img')?.getAttribute('src')
+    expect(src(screen.getByTestId('party-slot-p'))).toBe('blob:face')
+    expect(src(screen.getByTestId('party-slot-s'))).toBe('blob:body2')
+
+    const drake = screen.getByTestId('sprite-x').querySelector('img')!.parentElement!
+    expect(drake.style.transform).toBe('scaleX(-1)')
   })
 })

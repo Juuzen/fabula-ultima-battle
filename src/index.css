@@ -27,6 +27,20 @@
   .sprite-crisis {
     animation: crisis-glow 1.4s ease-in-out infinite;
   }
+
+  .slot-crisis {
+    animation: slot-crisis 1.4s ease-in-out infinite;
+  }
+}
+
+@keyframes slot-crisis {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgba(251, 191, 36, 0);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(251, 191, 36, 0.75);
+  }
 }
 
 @keyframes crisis-glow {
@@ -40,6 +54,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .slot-crisis {
+    animation: none;
+  }
   .sprite-crisis {
     animation: none;
     filter: drop-shadow(0 0 10px rgba(255, 60, 40, 0.8));

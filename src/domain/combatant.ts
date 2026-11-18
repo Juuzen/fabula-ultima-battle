@@ -9,6 +9,8 @@ export type Side = z.infer<typeof SideSchema>
 export const CombatantIdSchema = z.string().min(1)
 export type CombatantId = z.infer<typeof CombatantIdSchema>
 
+const AssetRefSchema = z.string().min(1).nullable()
+
 export const CombatantSchema = z
   .object({
     id: CombatantIdSchema,
@@ -16,14 +18,22 @@ export const CombatantSchema = z
     side: SideSchema,
     maxHp: z.int().min(1),
     hp: z.int().min(0),
+    /** Mind Points. `maxMp: 0` means the combatant has no MP gauge. */
+    maxMp: z.int().min(0),
+    mp: z.int().min(0),
     /** Visual-only markers, kept unique and in insertion order. */
     statuses: z.array(StatusIdSchema),
-    /** Reference to an asset in the local asset library (phase 7); null = placeholder. */
-    spriteAssetId: z.string().min(1).nullable(),
+    /** Battlefield sprite (asset library, phase 7); null = placeholder. */
+    spriteAssetId: AssetRefSchema,
+    /** Portrait for the party panel; null = falls back to the sprite, then a placeholder. */
+    portraitAssetId: AssetRefSchema,
     /** Mirror the sprite horizontally, for images drawn facing the "wrong" way. */
     flipSprite: z.boolean(),
+    /** Enemies only: the GM revealed this foe's exact HP/MP to the players. */
+    revealStats: z.boolean(),
   })
   .refine((c) => c.hp <= c.maxHp, { message: 'hp cannot exceed maxHp', path: ['hp'] })
+  .refine((c) => c.mp <= c.maxMp, { message: 'mp cannot exceed maxMp', path: ['mp'] })
   .refine((c) => new Set(c.statuses).size === c.statuses.length, {
     message: 'statuses must be unique',
     path: ['statuses'],
@@ -32,15 +42,20 @@ export const CombatantSchema = z
 export type Combatant = z.infer<typeof CombatantSchema>
 
 export type NewCombatant = Pick<Combatant, 'id' | 'name' | 'side' | 'maxHp'> &
-  Partial<Pick<Combatant, 'hp' | 'statuses' | 'spriteAssetId' | 'flipSprite'>>
+  Partial<Omit<Combatant, 'id' | 'name' | 'side' | 'maxHp'>>
 
-/** Builds a combatant with sensible defaults (full HP, no statuses, no sprite). */
+/** Builds a combatant with sensible defaults (full HP/MP, no statuses, no art, stats hidden). */
 export function createCombatant(input: NewCombatant): Combatant {
+  const maxMp = input.maxMp ?? 0
   return {
     hp: input.maxHp,
+    maxMp,
+    mp: maxMp,
     statuses: [],
     spriteAssetId: null,
+    portraitAssetId: null,
     flipSprite: false,
+    revealStats: false,
     ...input,
   }
 }
@@ -62,6 +77,7 @@ export function isInCrisis(c: Pick<Combatant, 'hp' | 'maxHp'>): boolean {
   return c.hp > 0 && c.hp <= crisisThreshold(c.maxHp)
 }
 
-export function clampHp(hp: number, maxHp: number): number {
-  return Math.min(Math.max(Math.trunc(hp), 0), maxHp)
+/** Clamps a resource value (HP or MP) to [0, max], dropping decimals. */
+export function clampResource(value: number, max: number): number {
+  return Math.min(Math.max(Math.trunc(value), 0), max)
 }

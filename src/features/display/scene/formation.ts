@@ -8,11 +8,11 @@ export type Slot = { x: number; y: number; scale: number; zIndex: number }
 /** Tunables of the battlefield, in logical stage pixels (1920×1080). */
 export const FIELD = {
   /** Vertical band where feet can be placed (the HUD sits below). */
-  top: 320,
-  bottom: 740,
+  top: 390,
+  bottom: 770,
   /** Distance of the front column from the stage centre. */
   frontOffset: 230,
-  columnGap: 250,
+  columnGap: 320,
   /** Horizontal shift per row, for the classic JRPG diagonal. */
   stagger: 95,
   maxPerColumn: 4,

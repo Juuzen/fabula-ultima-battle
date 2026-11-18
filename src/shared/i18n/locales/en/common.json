@@ -16,7 +16,9 @@
     "party": "Party",
     "enemies": "Enemies",
     "crisis": "Crisis",
-    "ko": "KO"
+    "ko": "KO",
+    "hp": "HP",
+    "mp": "MP"
   },
   "language": {
     "label": "Language",

@@ -13,8 +13,10 @@ import {
 } from '@/domain'
 import { createEventBus, type EventBus } from '@/shared/lib/eventBus'
 
+import { migratePersistedBattle } from './migrations'
+
 export const BATTLE_STORAGE_KEY = 'fu-battle.battle'
-export const BATTLE_STORAGE_VERSION = 1
+export const BATTLE_STORAGE_VERSION = 2
 const DEFAULT_HISTORY_LIMIT = 50
 
 /** Published after every state change; the sync layer (phase 4) will forward it to the Display. */
@@ -111,8 +113,9 @@ export function createBattleStore(options: BattleStoreOptions = {}): BattleStore
             storage: createJSONStorage<PersistedBattle>(() => storage),
             partialize: (s): PersistedBattle => ({ battle: s.battle }),
             merge: mergePersisted,
-            // Add cases here when the persisted shape changes (bump BATTLE_STORAGE_VERSION).
-            migrate: (persisted) => persisted as PersistedBattle,
+            // Bump BATTLE_STORAGE_VERSION and extend migrations.ts when the shape changes.
+            migrate: (persisted, version) =>
+              migratePersistedBattle(persisted, version) as PersistedBattle,
           }),
         )
 

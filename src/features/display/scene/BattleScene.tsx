@@ -1,10 +1,12 @@
 import { combatantsOnSide, type BattleState, type Combatant, type Side } from '@/domain'
 
-import { EnemyWindow } from '../hud/EnemyWindow'
-import { PartyWindow } from '../hud/PartyWindow'
+import { EnemyInfoWindow } from '../hud/EnemyInfoWindow'
+import { PartyPanel } from '../hud/PartyPanel'
+import { useEnemyPanelVisibility } from '../hud/useEnemyPanelVisibility'
 import { Backdrop } from './Backdrop'
 import { CombatantSprite } from './CombatantSprite'
 import { formationSlots } from './formation'
+import { NameplateLayer } from './NameplateLayer'
 
 function SideFormation({ combatants, side }: { combatants: Combatant[]; side: Side }) {
   const slots = formationSlots(combatants.length, side)
@@ -15,6 +17,7 @@ function SideFormation({ combatants, side }: { combatants: Combatant[]; side: Si
 export function BattleScene({ battle }: { battle: BattleState }) {
   const allies = combatantsOnSide(battle, 'ally')
   const enemies = combatantsOnSide(battle, 'enemy')
+  const enemyPanelVisible = useEnemyPanelVisibility(battle)
 
   return (
     <div className="absolute inset-0">
@@ -25,12 +28,21 @@ export function BattleScene({ battle }: { battle: BattleState }) {
         <SideFormation combatants={allies} side="ally" />
       </div>
 
-      <div className="absolute inset-x-6 bottom-6 flex h-[250px] gap-6">
-        <div className="w-[720px] shrink-0">
-          {enemies.length > 0 && <EnemyWindow enemies={enemies} />}
+      <NameplateLayer enemies={enemies} slots={formationSlots(enemies.length, 'enemy')} />
+
+      {enemies.length > 0 && (
+        <EnemyInfoWindow
+          enemies={enemies}
+          presentation={battle.presentation}
+          visible={enemyPanelVisible}
+        />
+      )}
+
+      {allies.length > 0 && (
+        <div className="absolute inset-x-0 bottom-5 h-[262px]" style={{ zIndex: 1400 }}>
+          <PartyPanel allies={allies} />
         </div>
-        <div className="min-w-0 flex-1">{allies.length > 0 && <PartyWindow allies={allies} />}</div>
-      </div>
+      )}
     </div>
   )
 }

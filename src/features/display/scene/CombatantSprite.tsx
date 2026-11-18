@@ -5,7 +5,7 @@ import { StatusBadges } from '../hud/StatusBadges'
 import type { Slot } from './formation'
 import { PlaceholderSprite } from './PlaceholderSprite'
 
-const SPRITE_BOX = { width: 200, height: 220 } as const
+import { SPRITE_BOX } from './spriteBox'
 
 type Props = { combatant: Combatant; slot: Slot }
 
@@ -52,7 +52,8 @@ export function CombatantSprite({ combatant, slot }: Props) {
         )}
       </div>
 
-      {!ko && (
+      {/* Enemies show statuses on their nameplate (see NameplateLayer). */}
+      {combatant.side === 'ally' && !ko && (
         <div className="absolute -top-9 left-1/2 -translate-x-1/2">
           <StatusBadges statuses={combatant.statuses} size="sm" wrap={false} />
         </div>

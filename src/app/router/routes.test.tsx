@@ -36,7 +36,7 @@ describe('routes', () => {
 
   it('renders the sample encounter with ?demo=1', async () => {
     renderAt('/display?demo=1')
-    expect(await screen.findByTestId('party-row-a1')).toHaveTextContent('Lyra')
+    expect(await screen.findByTestId('party-slot-a1')).toHaveTextContent('Lyra')
     useDisplayStore.getState().showBattle(null)
   })
 })

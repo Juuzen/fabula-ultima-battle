@@ -115,11 +115,44 @@ describe('battle store', () => {
         ],
       }
       const storage = memoryStorage({
-        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: corrupt }, version: 1 }),
+        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: corrupt }, version: 2 }),
       })
 
       const store = createBattleStore({ storage })
       expect(store.getState().battle).toEqual(createEmptyBattle())
+    })
+
+    it('upgrades a v1 save (no MP, portraits or presentation settings)', () => {
+      const v1 = {
+        name: 'Old',
+        backgroundAssetId: null,
+        combatants: [
+          {
+            id: 'h',
+            name: 'Hero',
+            side: 'ally',
+            maxHp: 30,
+            hp: 12,
+            statuses: ['slow'],
+            spriteAssetId: null,
+            flipSprite: false,
+          },
+        ],
+      }
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: v1 }, version: 1 }),
+      })
+
+      const store = createBattleStore({ storage })
+      const hero = store.getState().battle.combatants[0]
+      expect(hero).toMatchObject({
+        hp: 12,
+        maxMp: 0,
+        mp: 0,
+        revealStats: false,
+        statuses: ['slow'],
+      })
+      expect(store.getState().battle.presentation.enemyPanel.mode).toBe('auto')
     })
   })
 })

@@ -9,7 +9,7 @@ function battleWith(): BattleState {
     ...createEmptyBattle('Test'),
     combatants: [
       createCombatant({ id: 'hero', name: 'Hero', side: 'ally', maxHp: 40 }),
-      createCombatant({ id: 'mage', name: 'Mage', side: 'ally', maxHp: 30 }),
+      createCombatant({ id: 'mage', name: 'Mage', side: 'ally', maxHp: 30, maxMp: 40 }),
       createCombatant({ id: 'gob1', name: 'Goblin', side: 'enemy', maxHp: 20 }),
       createCombatant({ id: 'gob2', name: 'Goblin', side: 'enemy', maxHp: 20 }),
     ],
@@ -200,5 +200,78 @@ describe('applyCommand', () => {
     broken.combatants.push(broken.combatants[0]!)
     const bad = applyCommand(createEmptyBattle(), { type: 'LOAD_BATTLE', state: broken })
     expect(bad).toMatchObject({ ok: false, error: { code: 'INVALID_BATTLE' } })
+  })
+
+  describe('MP', () => {
+    const mpOf = (st: BattleState, id: string) => st.combatants.find((c) => c.id === id)?.mp
+
+    it('spends and restores MP, clamped and without Crisis side effects', () => {
+      const spent = run(battleWith(), { type: 'SPEND_MP', id: 'mage', amount: 30 })
+      expect(mpOf(spent.state, 'mage')).toBe(10)
+      expect(spent.events).toEqual([{ type: 'MP_SPENT', id: 'mage', amount: 30, mp: 10 }])
+
+      const restored = run(spent.state, { type: 'RESTORE_MP', id: 'mage', amount: 99 })
+      expect(restored.events).toEqual([{ type: 'MP_RESTORED', id: 'mage', amount: 30, mp: 40 }])
+    })
+
+    it('cannot go below zero and SET_MP clamps to the maximum', () => {
+      const { state } = run(battleWith(), { type: 'SPEND_MP', id: 'mage', amount: 99 })
+      expect(mpOf(state, 'mage')).toBe(0)
+      const set = run(state, { type: 'SET_MP', id: 'mage', mp: 500 })
+      expect(set.events).toEqual([{ type: 'MP_SET', id: 'mage', mp: 40 }])
+    })
+
+    it('lowering max MP drags MP down', () => {
+      const { state } = run(battleWith(), {
+        type: 'UPDATE_COMBATANT',
+        id: 'mage',
+        changes: { maxMp: 15 },
+      })
+      expect(mpOf(state, 'mage')).toBe(15)
+    })
+  })
+
+  describe('enemy info visibility', () => {
+    it('SET_REVEAL_STATS toggles a single combatant, idempotently', () => {
+      const shown = run(battleWith(), { type: 'SET_REVEAL_STATS', id: 'gob1', reveal: true })
+      expect(shown.state.combatants.find((c) => c.id === 'gob1')?.revealStats).toBe(true)
+      expect(shown.events).toEqual([{ type: 'STATS_REVEAL_CHANGED', id: 'gob1', reveal: true }])
+      expect(
+        run(shown.state, { type: 'SET_REVEAL_STATS', id: 'gob1', reveal: true }).events,
+      ).toEqual([])
+    })
+
+    it('SET_PRESENTATION merges partial changes', () => {
+      const { state, events } = run(battleWith(), {
+        type: 'SET_PRESENTATION',
+        changes: { enemyPanel: { mode: 'manual', visible: true } },
+      })
+      expect(state.presentation.enemyPanel).toEqual({
+        mode: 'manual',
+        visible: true,
+        autoHideSeconds: 6,
+      })
+      expect(events[0]?.type).toBe('PRESENTATION_CHANGED')
+    })
+
+    it('SET_PRESENTATION rejects an out-of-range auto-hide delay', () => {
+      const result = applyCommand(battleWith(), {
+        type: 'SET_PRESENTATION',
+        changes: { enemyPanel: { autoHideSeconds: 0 } },
+      })
+      expect(result).toMatchObject({ ok: false, error: { code: 'INVALID_PRESENTATION' } })
+    })
+  })
+
+  it('END_BATTLE removes enemies, keeps the party and resets enemy visibility', () => {
+    const prepared = run(battleWith(), {
+      type: 'SET_PRESENTATION',
+      changes: { revealAllEnemyStats: true, enemyPanel: { visible: true } },
+    }).state
+    const { state, events } = run(prepared, { type: 'END_BATTLE' })
+    expect(state.combatants.map((c) => c.id)).toEqual(['hero', 'mage'])
+    expect(state.presentation.revealAllEnemyStats).toBe(false)
+    expect(state.presentation.enemyPanel.visible).toBe(false)
+    expect(events).toEqual([{ type: 'BATTLE_ENDED', removedEnemyIds: ['gob1', 'gob2'] }])
   })
 })

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  clampHp,
+  clampResource,
   CombatantSchema,
   createCombatant,
   crisisThreshold,
@@ -30,11 +30,11 @@ describe('crisis', () => {
   })
 })
 
-describe('clampHp', () => {
+describe('clampResource', () => {
   it('clamps to [0, maxHp] and drops decimals', () => {
-    expect(clampHp(-5, 30)).toBe(0)
-    expect(clampHp(45, 30)).toBe(30)
-    expect(clampHp(12.9, 30)).toBe(12)
+    expect(clampResource(-5, 30)).toBe(0)
+    expect(clampResource(45, 30)).toBe(30)
+    expect(clampResource(12.9, 30)).toBe(12)
   })
 })
 
@@ -47,9 +47,13 @@ describe('createCombatant', () => {
       side: 'ally',
       maxHp: 50,
       hp: 50,
+      maxMp: 0,
+      mp: 0,
       statuses: [],
       spriteAssetId: null,
+      portraitAssetId: null,
       flipSprite: false,
+      revealStats: false,
     })
     expect(CombatantSchema.safeParse(c).success).toBe(true)
   })
@@ -60,6 +64,16 @@ describe('CombatantSchema', () => {
 
   it('rejects hp above maxHp', () => {
     expect(CombatantSchema.safeParse({ ...base, hp: 51 }).success).toBe(false)
+  })
+
+  it('rejects mp above maxMp', () => {
+    expect(CombatantSchema.safeParse({ ...base, maxMp: 10, mp: 11 }).success).toBe(false)
+  })
+
+  it('starts with full MP when a maximum is given', () => {
+    expect(createCombatant({ id: 'm', name: 'Mage', side: 'ally', maxHp: 30, maxMp: 45 }).mp).toBe(
+      45,
+    )
   })
 
   it('rejects duplicate statuses', () => {
