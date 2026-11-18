@@ -21,7 +21,7 @@ import type { BattleEvent } from './events'
 import type { StatusId } from './status'
 
 type EditableFields =
-  'name' | 'maxHp' | 'maxMp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
+  'name' | 'maxHp' | 'maxMp' | 'hp' | 'mp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
 
 export type PresentationChanges = {
   revealAllEnemyStats?: boolean
@@ -170,7 +170,7 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
       const current = findCombatant(state, command.id)
       if (!current) return notFound(command.id)
       const merged = { ...current, ...command.changes }
-      // Lowering a maximum drags the current value down with it.
+      // Current values never exceed the (possibly lowered) maximums.
       merged.hp = Math.min(merged.hp, merged.maxHp)
       merged.mp = Math.min(merged.mp, merged.maxMp)
       const parsed = CombatantSchema.safeParse(merged)

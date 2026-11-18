@@ -7,7 +7,80 @@
     "subtitle": "Control the battle shown to your players from here.",
     "openDisplay": "Open player screen",
     "openDisplayHint": "Move the window to the second screen and press F11 for full screen.",
-    "popupBlocked": "The browser blocked the window. Allow pop-ups for this site."
+    "popupBlocked": "The browser blocked the window. Allow pop-ups for this site.",
+    "undo": "Undo last action",
+    "undoShortcut": "Ctrl+Z",
+    "battleName": "Battle name",
+    "battleNamePlaceholder": "E.g. Ambush at the docks",
+    "preview": "Player screen preview",
+    "party": "Party",
+    "enemies": "Enemies",
+    "emptyParty": "No characters in the party.",
+    "emptyEnemies": "No enemies on the field.",
+    "add": {
+      "title": "Add",
+      "name": "Name",
+      "maxHp": "Max HP",
+      "maxMp": "Max MP",
+      "submit": "Add",
+      "placeholderAlly": "E.g. Lyra",
+      "placeholderEnemy": "E.g. Goblin"
+    },
+    "combatant": {
+      "amount": "Amount",
+      "damage": "Damage",
+      "heal": "Heal",
+      "spendMp": "− MP",
+      "restoreMp": "+ MP",
+      "edit": "Edit",
+      "remove": "Remove",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "statuses": "Statuses",
+      "reveal": "HP/MP visible",
+      "revealHint": "Show this enemy's HP and MP to the players",
+      "revealedByAll": "Visible for all"
+    },
+    "edit": {
+      "title": "Edit {{name}}",
+      "name": "Name",
+      "maxHp": "Max HP",
+      "maxMp": "Max MP",
+      "hp": "Current HP",
+      "mp": "Current MP",
+      "flip": "Mirror sprite",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "enemyPanel": {
+      "title": "Enemy window",
+      "mode": "Mode",
+      "manual": "Manual",
+      "auto": "Automatic",
+      "show": "Show",
+      "hide": "Hide",
+      "visibleNow": "Visible now",
+      "autoHide": "Hide after (seconds)",
+      "autoHint": "Pops up when something changes on the enemies and hides after the given seconds.",
+      "manualHint": "Stays as you set it.",
+      "revealAll": "Show HP/MP of all enemies"
+    },
+    "battle": {
+      "title": "Battle",
+      "end": "End battle",
+      "endConfirm": "Confirm: remove all enemies",
+      "endCancel": "Cancel",
+      "endHint": "Enemies leave the field, the party stays as it is."
+    },
+    "errors": {
+      "dismiss": "Dismiss",
+      "COMBATANT_NOT_FOUND": "Combatant not found.",
+      "DUPLICATE_ID": "A combatant with this id already exists.",
+      "INVALID_AMOUNT": "Enter a positive whole number.",
+      "INVALID_COMBATANT": "Invalid combatant data: check name and values.",
+      "INVALID_BATTLE": "Invalid battle.",
+      "INVALID_PRESENTATION": "Invalid setting."
+    }
   },
   "display": {
     "waiting": "Waiting for battle…",

@@ -1,44 +1,72 @@
+import { MonitorUp, Undo2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useBattleActions, useCanUndo } from '@/app/store'
+import { Button } from '@/shared/ui/Button'
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 
+import { BattleControls } from './controls/BattleControls'
+import { EnemyPanelControls } from './controls/EnemyPanelControls'
+import { ErrorBanner } from './controls/ErrorBanner'
 import { openDisplayWindow } from './openDisplayWindow'
+import { DisplayPreview } from './preview/DisplayPreview'
+import { RosterSection } from './roster/RosterSection'
+import { useUndoShortcut } from './useUndoShortcut'
 
-/** Game Master dashboard. Owns the authoritative battle state (from phase 1 on). */
+/** Game Master dashboard: owns the authoritative battle state. */
 export function MasterPage() {
   const { t } = useTranslation()
+  const { undo } = useBattleActions()
+  const canUndo = useCanUndo()
   const [popupBlocked, setPopupBlocked] = useState(false)
-
-  const handleOpenDisplay = () => {
-    setPopupBlocked(openDisplayWindow() === null)
-  }
+  useUndoShortcut()
 
   return (
-    <main className="min-h-screen bg-slate-950 p-8 text-slate-100">
-      <header className="mb-8 flex items-start justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl tracking-wide">{t('master.title')}</h1>
-          <p className="mt-1 text-slate-400">{t('master.subtitle')}</p>
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <header className="sticky top-0 z-10 flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 bg-slate-950/95 px-6 py-3 backdrop-blur">
+        <h1 className="font-display text-2xl tracking-wide">{t('master.title')}</h1>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            onClick={undo}
+            disabled={!canUndo}
+            title={`${t('master.undo')} (${t('master.undoShortcut')})`}
+          >
+            <Undo2 className="h-4 w-4" aria-hidden="true" />
+            {t('master.undo')}
+          </Button>
+          <Button
+            variant="primary"
+            title={t('master.openDisplayHint')}
+            onClick={() => setPopupBlocked(openDisplayWindow() === null)}
+          >
+            <MonitorUp className="h-4 w-4" aria-hidden="true" />
+            {t('master.openDisplay')}
+          </Button>
+          <LanguageSwitcher />
         </div>
-        <LanguageSwitcher />
       </header>
 
-      <section className="max-w-xl rounded-lg border border-slate-800 bg-slate-900 p-6">
-        <button
-          type="button"
-          onClick={handleOpenDisplay}
-          className="rounded-md bg-indigo-600 px-4 py-2 font-medium hover:bg-indigo-500"
-        >
-          {t('master.openDisplay')}
-        </button>
-        <p className="mt-3 text-sm text-slate-400">{t('master.openDisplayHint')}</p>
+      <main className="flex flex-col gap-4 p-6">
         {popupBlocked && (
-          <p role="alert" className="mt-3 text-sm text-rose-400">
+          <p role="alert" className="text-sm text-rose-400">
             {t('master.popupBlocked')}
           </p>
         )}
-      </section>
-    </main>
+        <ErrorBanner />
+
+        <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(420px,36%)]">
+          <div className="flex min-w-0 flex-col gap-6">
+            <RosterSection side="ally" />
+            <RosterSection side="enemy" />
+          </div>
+          <aside className="flex flex-col gap-6 xl:sticky xl:top-20">
+            <DisplayPreview />
+            <EnemyPanelControls />
+            <BattleControls />
+          </aside>
+        </div>
+      </main>
+    </div>
   )
 }

@@ -7,7 +7,80 @@
     "subtitle": "Da qui controlli la battaglia mostrata ai giocatori.",
     "openDisplay": "Apri schermo giocatori",
     "openDisplayHint": "Sposta la finestra sul secondo schermo e premi F11 per lo schermo intero.",
-    "popupBlocked": "Il browser ha bloccato la finestra. Consenti i popup per questo sito."
+    "popupBlocked": "Il browser ha bloccato la finestra. Consenti i popup per questo sito.",
+    "undo": "Annulla ultima azione",
+    "undoShortcut": "Ctrl+Z",
+    "battleName": "Nome battaglia",
+    "battleNamePlaceholder": "Es. Agguato al porto",
+    "preview": "Anteprima schermo giocatori",
+    "party": "Party",
+    "enemies": "Nemici",
+    "emptyParty": "Nessun personaggio nel party.",
+    "emptyEnemies": "Nessun nemico in campo.",
+    "add": {
+      "title": "Aggiungi",
+      "name": "Nome",
+      "maxHp": "PV max",
+      "maxMp": "PM max",
+      "submit": "Aggiungi",
+      "placeholderAlly": "Es. Lyra",
+      "placeholderEnemy": "Es. Goblin"
+    },
+    "combatant": {
+      "amount": "Valore",
+      "damage": "Danno",
+      "heal": "Cura",
+      "spendMp": "− PM",
+      "restoreMp": "+ PM",
+      "edit": "Modifica",
+      "remove": "Rimuovi",
+      "moveUp": "Sposta su",
+      "moveDown": "Sposta giù",
+      "statuses": "Status",
+      "reveal": "PV/PM visibili",
+      "revealHint": "Mostra PV e PM di questo nemico ai giocatori",
+      "revealedByAll": "Visibili a tutti"
+    },
+    "edit": {
+      "title": "Modifica {{name}}",
+      "name": "Nome",
+      "maxHp": "PV max",
+      "maxMp": "PM max",
+      "hp": "PV attuali",
+      "mp": "PM attuali",
+      "flip": "Specchia sprite",
+      "save": "Salva",
+      "cancel": "Annulla"
+    },
+    "enemyPanel": {
+      "title": "Finestra nemici",
+      "mode": "Modalità",
+      "manual": "Manuale",
+      "auto": "Automatica",
+      "show": "Mostra",
+      "hide": "Nascondi",
+      "visibleNow": "Visibile ora",
+      "autoHide": "Nascondi dopo (secondi)",
+      "autoHint": "Compare da sola quando cambia qualcosa sui nemici e sparisce dopo i secondi indicati.",
+      "manualHint": "Resta come la imposti tu.",
+      "revealAll": "Mostra PV/PM di tutti i nemici"
+    },
+    "battle": {
+      "title": "Battaglia",
+      "end": "Termina battaglia",
+      "endConfirm": "Conferma: rimuovi tutti i nemici",
+      "endCancel": "Annulla",
+      "endHint": "I nemici escono dal campo, il party resta com'è."
+    },
+    "errors": {
+      "dismiss": "Chiudi",
+      "COMBATANT_NOT_FOUND": "Combattente non trovato.",
+      "DUPLICATE_ID": "Esiste già un combattente con questo identificativo.",
+      "INVALID_AMOUNT": "Inserisci un numero intero positivo.",
+      "INVALID_COMBATANT": "Dati del combattente non validi: controlla nome e valori.",
+      "INVALID_BATTLE": "Battaglia non valida.",
+      "INVALID_PRESENTATION": "Impostazione non valida."
+    }
   },
   "display": {
     "waiting": "In attesa della battaglia…",
