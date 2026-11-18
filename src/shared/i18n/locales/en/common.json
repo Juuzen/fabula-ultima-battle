@@ -1,0 +1,23 @@
+{
+  "app": {
+    "title": "Fabula Ultima Battle Screen"
+  },
+  "master": {
+    "title": "Game Master Dashboard",
+    "subtitle": "Control the battle shown to your players from here.",
+    "openDisplay": "Open player screen",
+    "openDisplayHint": "Move the window to the second screen and press F11 for full screen.",
+    "popupBlocked": "The browser blocked the window. Allow pop-ups for this site."
+  },
+  "display": {
+    "waiting": "Waiting for battle…",
+    "start": "Press to start",
+    "startHint": "A click is needed to enable audio on the player screen."
+  },
+  "language": {
+    "label": "Language",
+    "it": "Italiano",
+    "en": "English"
+  },
+  "notFound": "Page not found"
+}
