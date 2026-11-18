@@ -4,7 +4,7 @@ import { sortStatuses, STATUS_TIER, type StatusId } from '@/domain'
 
 import { STATUS_VISUALS } from './statusVisuals'
 
-function StatusIcon({ status, size }: { status: StatusId; size: number }) {
+export function StatusIcon({ status, size }: { status: StatusId; size: number }) {
   const { t } = useTranslation()
   const { icon: Icon, colour } = STATUS_VISUALS[status]
   const label = t(`status.${status}`)

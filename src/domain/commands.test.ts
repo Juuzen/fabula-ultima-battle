@@ -129,6 +129,17 @@ describe('applyCommand', () => {
     })
   })
 
+  it('UPDATE_COMBATANT edits current HP/MP in a single step, clamped to the maximums', () => {
+    const { state, events } = run(battleWith(), {
+      type: 'UPDATE_COMBATANT',
+      id: 'mage',
+      changes: { name: 'Archmage', maxHp: 36, hp: 10, mp: 99 },
+    })
+    const mage = state.combatants.find((c) => c.id === 'mage')
+    expect(mage).toMatchObject({ name: 'Archmage', maxHp: 36, hp: 10, mp: 40 })
+    expect(events.map((e) => e.type)).toEqual(['COMBATANT_UPDATED', 'CRISIS_ENTERED'])
+  })
+
   describe('SET_STATUS', () => {
     it('adds and removes statuses, idempotently', () => {
       const added = run(battleWith(), {

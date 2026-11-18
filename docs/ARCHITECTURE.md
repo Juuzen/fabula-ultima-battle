@@ -89,6 +89,26 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 - **Anteprima:** `#/display?demo=1` carica un incontro di esempio che copre tutti gli stati visivi.
 - **Font:** Cinzel e Inter sono inclusi nel pacchetto (`@fontsource`), quindi funzionano anche offline.
 
+## Plancia del Master (fase 3)
+
+- **Layout:** a sinistra le sezioni Party e Nemici; a destra l'anteprima dal vivo dello schermo dei giocatori, i controlli della finestra nemici e quelli della battaglia. L'header resta fisso in alto con "Annulla ultima azione", "Apri schermo giocatori" e la lingua.
+- **Scheda combattente:**
+  - riordino ▲▼ all'interno del proprio lato;
+  - nome con il tag Crisi/KO;
+  - lettura di PV e PM, con le colonne allineate tra le schede;
+  - campo **Valore** con i pulsanti Danno, Cura, −PM e +PM. Invio applica il danno, Maiusc+Invio la cura, e il valore resta nel campo per riapplicarlo;
+  - interruttori degli status con le stesse icone del Display;
+  - per i nemici, l'interruttore "PV/PM visibili", che si disattiva quando è attivo "mostra tutti";
+  - modifica in linea: nome, PV e PM attuali e massimi, specchiatura dello sprite. Il salvataggio è un unico `UPDATE_COMBATANT`, quindi si annulla con un passo solo;
+  - rimozione.
+- **Aggiunta:** nome, PV max e PM max (opzionale, 0 se vuoto). Dopo l'aggiunta il nome si svuota ma le statistiche restano, così è veloce inserire nemici uguali.
+- **Finestra nemici:** modalità Manuale o Automatica, pulsante Mostra/Nascondi, secondi di auto-nascondi (registrati quando si esce dal campo; i valori fuori da 1–120 vengono annullati) e "Mostra PV/PM di tutti i nemici".
+- **Battaglia:** il nome viene registrato quando si esce dal campo. "Termina battaglia" chiede una conferma in due passi.
+- **Annulla:** con il pulsante o con Ctrl/Cmd+Z, tranne mentre si scrive in un campo. I campi di testo registrano il valore solo all'uscita, per non riempire la cronologia a ogni tasto.
+- **Errori di dominio:** compaiono in un banner localizzato in base al codice, che si può chiudere.
+- **Componenti UI condivisi** (`src/shared/ui`): `Button`, `TextField`, `NumberField`, `Toggle` (`role="switch"`) e `Panel`.
+- **Code splitting:** Master e Display sono caricati separatamente (`lazy` di React Router), e il service worker li mette entrambi in cache per l'uso offline.
+
 ## Rotte
 
 Si usa l'hash routing, che funziona offline e su qualsiasi host statico:
@@ -118,7 +138,7 @@ Le sequenze di attacco sono dati (`advance → wait → fx → impact → shake 
 | 0    | Impalcatura: Vite, TS strict, lint, CI, PWA, routing, i18n                                                                          | ✅    |
 | 1    | Dominio (combattenti, PV, Crisi, status visivi) + store + persistenza                                                               |       |
 | 2    | Display statico: sfondo, sprite, barre PV                                                                                           |       |
-| 3    | Master: roster, modifica PV/PM e status, controlli della finestra nemici (manuale/auto, secondi), rivelazione PV/PM, fine battaglia |       |
+| 3    | Master: roster, modifica PV/PM e status, controlli della finestra nemici (manuale/auto, secondi), rivelazione PV/PM, fine battaglia | ✅    |
 | 4    | Ponte BroadcastChannel: snapshot e riconnessione                                                                                    |       |
 | 5    | Animazioni base: barre fluide, shake, testo dei danni                                                                               |       |
 | 6    | Coreografia completa con FX `.webm` e SFX                                                                                           |       |

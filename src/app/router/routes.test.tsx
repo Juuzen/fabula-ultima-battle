@@ -23,13 +23,13 @@ describe('routes', () => {
   it('shows a pop-up warning when the Display window is blocked', async () => {
     vi.spyOn(window, 'open').mockReturnValue(null)
     renderAt('/master')
-    await userEvent.click(screen.getByRole('button', { name: 'Apri schermo giocatori' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Apri schermo giocatori' }))
     expect(screen.getByRole('alert')).toHaveTextContent(/popup/i)
   })
 
   it('renders the Display behind an audio-unlock gate', async () => {
     renderAt('/display')
-    expect(screen.getByTestId('battle-stage')).toBeInTheDocument()
+    expect(await screen.findByTestId('battle-stage')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: /Premi per iniziare/ }))
     expect(screen.getByText('In attesa della battaglia…')).toBeInTheDocument()
   })
