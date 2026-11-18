@@ -1,0 +1,18 @@
+@import 'tailwindcss';
+
+@theme {
+  /* JRPG-flavoured display face; falls back to system serif until a bundled font is added. */
+  --font-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  -webkit-font-smoothing: antialiased;
+}

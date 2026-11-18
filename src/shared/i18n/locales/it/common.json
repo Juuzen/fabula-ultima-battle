@@ -1,0 +1,23 @@
+{
+  "app": {
+    "title": "Fabula Ultima Battle Screen"
+  },
+  "master": {
+    "title": "Plancia del Master",
+    "subtitle": "Da qui controlli la battaglia mostrata ai giocatori.",
+    "openDisplay": "Apri schermo giocatori",
+    "openDisplayHint": "Sposta la finestra sul secondo schermo e premi F11 per lo schermo intero.",
+    "popupBlocked": "Il browser ha bloccato la finestra. Consenti i popup per questo sito."
+  },
+  "display": {
+    "waiting": "In attesa della battaglia…",
+    "start": "Premi per iniziare",
+    "startHint": "Serve un clic per attivare l'audio sullo schermo dei giocatori."
+  },
+  "language": {
+    "label": "Lingua",
+    "it": "Italiano",
+    "en": "English"
+  },
+  "notFound": "Pagina non trovata"
+}
