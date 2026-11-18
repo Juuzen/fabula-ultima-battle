@@ -53,6 +53,25 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 - Lo stato della battaglia viene salvato in `localStorage` (`fu-battle.battle`) ed è versionato. Al ricaricamento viene validato con Zod; se è corrotto viene scartato.
 - Gli hook per React sono `useBattleStore`, `useBattleActions`, `useCombatants(side)`, `useCombatant(id)` e `useCanUndo`.
 
+## Display statico (fase 2)
+
+- **Stage:** lo spazio logico è 1920×1080. I nemici stanno a sinistra, il party a destra.
+- **Formazioni:** `formationSlots(count, side)` è una funzione pura e testata.
+  - Fino a 4 combattenti stanno in una colonna sola; oltre si aggiungono altre colonne, con le righe sfalsate in diagonale come nei JRPG classici.
+  - Gli sprite più in basso sono un po' più grandi e vengono disegnati sopra gli altri.
+  - I gruppi numerosi vengono compressi per restare dentro lo schermo.
+- **Sprite:** finché non c'è un'immagine si usa un placeholder (una sagoma con l'iniziale, nel colore del lato). Non c'è nessuna specchiatura automatica: `flipSprite` specchia solo le immagini vere.
+- **Stati sullo sprite:** in Crisi ha un bagliore rosso pulsante, che con `prefers-reduced-motion` diventa statico. Se è KO appare desaturato e semitrasparente. Gli status sono badge sopra la testa.
+- **HUD in stile FF:**
+  - La finestra del party mostra nome, tag Crisi/KO, status, `PV / PV max` e la barra.
+  - La finestra nemici mostra nome, barra e tag Crisi, ma **non i PV esatti**: decide il GM quanto rivelare.
+  - Oltre 4 alleati, o oltre 4 nemici, la finestra passa a un layout compatto.
+- **Sfondo:** se non è impostato, si usa un fondale al tramonto con una griglia prospettica.
+- **Asset:** `useAssetUrl(id)` legge da `AssetResolverContext`. Per ora non risolve nulla; nella fase 7 diventerà IndexedDB.
+- **`useDisplayStore`:** contiene la battaglia mostrata, che non è lo stato autorevole. Nella fase 4 la alimenterà la sincronizzazione.
+- **Anteprima:** `#/display?demo=1` carica un incontro di esempio che copre tutti gli stati visivi.
+- **Font:** Cinzel e Inter sono inclusi nel pacchetto (`@fontsource`), quindi funzionano anche offline.
+
 ## Rotte
 
 Si usa l'hash routing, che funziona offline e su qualsiasi host statico:

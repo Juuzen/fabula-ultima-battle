@@ -12,7 +12,11 @@
   "display": {
     "waiting": "In attesa della battaglia…",
     "start": "Premi per iniziare",
-    "startHint": "Serve un clic per attivare l'audio sullo schermo dei giocatori."
+    "startHint": "Serve un clic per attivare l'audio sullo schermo dei giocatori.",
+    "party": "Party",
+    "enemies": "Nemici",
+    "crisis": "Crisi",
+    "ko": "KO"
   },
   "language": {
     "label": "Lingua",
