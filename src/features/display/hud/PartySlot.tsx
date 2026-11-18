@@ -6,7 +6,7 @@ import { useAssetUrl } from '@/infra/assets/assetResolver'
 import { PlaceholderPortrait } from './PlaceholderPortrait'
 import { ResourceGauge } from './ResourceGauge'
 import { StateTag } from './StateTag'
-import { StatusBadges } from './StatusBadges'
+import { StatusIcons } from './StatusIcons'
 
 /**
  * One party member in the bottom panel: portrait as background, name plate on top,
@@ -55,7 +55,7 @@ export function PartySlot({ combatant, width }: { combatant: Combatant; width: n
 
       {/* Statuses */}
       <div className="absolute inset-x-3 top-12">
-        <StatusBadges statuses={combatant.statuses} size="sm" />
+        <StatusIcons statuses={combatant.statuses} size={30} />
       </div>
 
       {/* Gauges */}

@@ -8,6 +8,7 @@ import {
   isInCrisis,
   isKnockedOut,
 } from './combatant'
+import { sortStatuses } from './status'
 
 describe('crisis', () => {
   it.each([
@@ -27,6 +28,12 @@ describe('crisis', () => {
   it('a knocked-out combatant is not in Crisis', () => {
     expect(isInCrisis({ hp: 0, maxHp: 40 })).toBe(false)
     expect(isKnockedOut({ hp: 0 })).toBe(true)
+  })
+})
+
+describe('sortStatuses', () => {
+  it('returns statuses in canonical order (basic first, then major)', () => {
+    expect(sortStatuses(['poisoned', 'weak', 'slow'])).toEqual(['slow', 'weak', 'poisoned'])
   })
 })
 

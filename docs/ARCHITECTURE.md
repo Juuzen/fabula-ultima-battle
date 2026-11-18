@@ -73,9 +73,16 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
   La larghezza degli slot (`partySlotWidth`) si adatta al numero di alleati, così il pannello sta sempre nello schermo ed è bilanciato.
 
 - **Targhette nemici:** sono su un livello sopra tutti gli sprite e mostrano nome, Crisi/KO e status. Restano visibili anche a KO finché il GM non termina la battaglia (`END_BATTLE`).
-- **Finestra nemici (in alto, centrata):** è speculare al pannello del party, con una carta per nemico. PV e PM compaiono solo se rivelati, con `revealStats` sul singolo nemico oppure `presentation.revealAllEnemyStats` per tutti. La visibilità la decide `useEnemyPanelVisibility`:
+- **Icone di stato:** sono le stesse ovunque: party, targhette, campo e finestra nemici. Ogni icona è un glifo bianco (Lucide, incluso nel pacchetto) su sfondo colorato. Gli status base (Lento, Confuso, Debole, Scosso) stanno in un **cerchio**, quelli maggiori (Furente, Avvelenato) in un **rombo**. L'ordine è sempre lo stesso (`sortStatuses`), così le icone non si spostano. Crisi e KO restano tag testuali. Tutti e 6 gli status più Crisi stanno su una riga sola.
+- **Finestra nemici (in alto, centrata):** è speculare al pannello del party, con carte compatte. Ogni carta ha tre righe fisse:
+  1. il nome, con ellissi se è troppo lungo;
+  2. le icone di stato e il tag Crisi/KO;
+  3. PV e PM come barre sottili affiancate, solo se rivelati (`revealStats` sul singolo nemico oppure `presentation.revealAllEnemyStats`).
+
+  Tutte le carte hanno la stessa altezza: con 10 nemici la fascia sta su 2 righe, alte circa 225px in tutto. La visibilità la decide `useEnemyPanelVisibility`:
   - `manual`: la finestra segue il flag `visible` impostato dal GM;
   - `auto`: compare quando cambia qualcosa che i giocatori possono vedere sui nemici e sparisce dopo `autoHideSeconds`. Ogni nuova modifica fa ripartire il conto alla rovescia, e il GM può comunque forzarla con `visible`.
+
 - **Sfondo:** se non è impostato, si usa un fondale al tramonto con una griglia prospettica.
 - **Asset:** `useAssetUrl(id)` legge da `AssetResolverContext`. Per ora non risolve nulla; nella fase 7 diventerà IndexedDB.
 - **`useDisplayStore`:** contiene la battaglia mostrata, che non è lo stato autorevole. Nella fase 4 la alimenterà la sincronizzazione.

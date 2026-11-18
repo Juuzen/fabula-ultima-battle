@@ -4,13 +4,14 @@ import { areStatsRevealed, isKnockedOut, type Combatant, type Presentation } fro
 
 import { ResourceGauge } from './ResourceGauge'
 import { StateTag } from './StateTag'
-import { StatusBadges } from './StatusBadges'
+import { StatusIcons } from './StatusIcons'
 
 type Props = { enemies: Combatant[]; presentation: Presentation; visible: boolean }
 
 /**
  * Pop-up enemy info, as a centred band at the top of the screen (mirroring the party panel).
- * Always shows name, Crisis/KO and statuses; exact HP/MP only for foes the GM revealed.
+ * Every card has the same three fixed rows, so the band stays compact and tidy:
+ *   1. name (ellipsis)   2. status icons + Crisis/KO   3. HP / MP (only if revealed)
  */
 export function EnemyInfoWindow({ enemies, presentation, visible }: Props) {
   const { t } = useTranslation()
@@ -26,7 +27,7 @@ export function EnemyInfoWindow({ enemies, presentation, visible }: Props) {
         aria-label={t('display.enemies')}
         aria-hidden={!visible}
         data-visible={visible}
-        className="jrpg-window flex h-auto! max-w-[1840px] flex-wrap items-start justify-center gap-3 px-3! py-3!"
+        className="jrpg-window flex h-auto! max-w-[1840px] flex-wrap justify-center gap-2.5 px-3! py-3!"
       >
         {enemies.map((e) => {
           const ko = isKnockedOut(e)
@@ -35,41 +36,43 @@ export function EnemyInfoWindow({ enemies, presentation, visible }: Props) {
             <article
               key={e.id}
               data-testid={`enemy-info-${e.id}`}
-              className={`flex w-[290px] flex-col gap-1.5 rounded-lg bg-slate-950/45 px-3 py-2 ring-1 ${
+              className={`flex w-[290px] flex-col gap-1 rounded-lg bg-slate-950/45 px-3 py-1.5 ring-1 ${
                 ko ? 'ring-red-500/50' : 'ring-white/20'
               }`}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span
-                  className={`font-display truncate text-xl font-semibold ${
-                    ko ? 'text-slate-500 line-through' : 'text-white'
-                  }`}
-                >
-                  {e.name}
-                </span>
-                <StateTag combatant={e} />
+              <span
+                className={`font-display truncate text-lg leading-7 font-semibold ${
+                  ko ? 'text-slate-500 line-through' : 'text-white'
+                }`}
+              >
+                {e.name}
+              </span>
+              <div className="flex h-7 items-center gap-1.5">
+                <StatusIcons statuses={e.statuses} size={26} />
+                <StateTag combatant={e} size="sm" />
               </div>
-              <StatusBadges statuses={e.statuses} size="sm" />
-              {revealed && (
-                <div className="flex flex-col gap-1">
-                  <ResourceGauge
-                    kind="hp"
-                    label={t('display.hp')}
-                    value={e.hp}
-                    max={e.maxHp}
-                    size="sm"
-                  />
-                  {e.maxMp > 0 && (
+              <div className="flex h-5 items-center gap-3">
+                {revealed && (
+                  <>
                     <ResourceGauge
-                      kind="mp"
-                      label={t('display.mp')}
-                      value={e.mp}
-                      max={e.maxMp}
-                      size="sm"
+                      kind="hp"
+                      label={t('display.hp')}
+                      value={e.hp}
+                      max={e.maxHp}
+                      layout="inline"
                     />
-                  )}
-                </div>
-              )}
+                    {e.maxMp > 0 && (
+                      <ResourceGauge
+                        kind="mp"
+                        label={t('display.mp')}
+                        value={e.mp}
+                        max={e.maxMp}
+                        layout="inline"
+                      />
+                    )}
+                  </>
+                )}
+              </div>
             </article>
           )
         })}

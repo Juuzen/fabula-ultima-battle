@@ -21,7 +21,9 @@ describe('BattleScene', () => {
       expect(within(party).getByTestId('party-slot-a2')).toHaveAttribute('data-state', 'crisis')
       expect(within(party).getByTestId('party-slot-a2')).toHaveTextContent('Crisi')
       expect(within(party).getByTestId('party-slot-a3')).toHaveTextContent('KO')
-      expect(within(party).getByTestId('party-slot-a4')).toHaveTextContent('Lento')
+      expect(
+        within(within(party).getByTestId('party-slot-a4')).getByRole('img', { name: 'Lento' }),
+      ).toBeInTheDocument()
     })
 
     it('omits the MP gauge for allies without MP', () => {
@@ -40,15 +42,17 @@ describe('BattleScene', () => {
       render(<BattleScene battle={demoBattle} />)
       expect(screen.getByTestId('nameplate-e2')).toHaveTextContent('Goblin Sciamano')
       expect(screen.getByTestId('nameplate-e2')).toHaveTextContent('Crisi')
-      expect(screen.getByTestId('nameplate-e2')).toHaveTextContent('Avvelenato')
+      expect(
+        within(screen.getByTestId('nameplate-e2')).getByRole('img', { name: 'Avvelenato' }),
+      ).toBeInTheDocument()
       expect(screen.getByTestId('nameplate-e4')).toHaveTextContent('KO')
     })
 
     it('show exact HP/MP only for revealed foes', () => {
       render(<BattleScene battle={demoBattle} />)
       const shaman = screen.getByTestId('enemy-info-e2') // revealed
-      expect(within(shaman).getByTestId('gauge-hp')).toHaveTextContent('12 / 32')
-      expect(within(shaman).getByTestId('gauge-mp')).toHaveTextContent('25 / 40')
+      expect(within(shaman).getByTestId('gauge-hp')).toHaveTextContent('PV12/32')
+      expect(within(shaman).getByTestId('gauge-mp')).toHaveTextContent('PM25/40')
 
       const wolf = screen.getByTestId('enemy-info-e3') // hidden
       expect(within(wolf).queryByTestId('gauge-hp')).not.toBeInTheDocument()
@@ -62,7 +66,7 @@ describe('BattleScene', () => {
       }
       render(<BattleScene battle={battle} />)
       const wolf = screen.getByTestId('enemy-info-e3')
-      expect(within(wolf).getByTestId('gauge-hp')).toHaveTextContent('90 / 90')
+      expect(within(wolf).getByTestId('gauge-hp')).toHaveTextContent('PV90/90')
     })
   })
 

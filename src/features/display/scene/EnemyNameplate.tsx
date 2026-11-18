@@ -1,7 +1,7 @@
 import type { Combatant } from '@/domain'
 
 import { StateTag } from '../hud/StateTag'
-import { StatusBadges } from '../hud/StatusBadges'
+import { StatusIcons } from '../hud/StatusIcons'
 
 /**
  * Always-visible label above an enemy: name, Crisis/KO and statuses.
@@ -17,9 +17,9 @@ export function EnemyNameplate({ enemy }: { enemy: Combatant }) {
         <span className="font-display max-w-[230px] truncate text-base font-bold text-white [text-shadow:0_2px_0_rgba(0,0,0,.7)]">
           {enemy.name}
         </span>
-        <StateTag combatant={enemy} />
+        <StateTag combatant={enemy} size="sm" />
       </div>
-      <StatusBadges statuses={enemy.statuses} size="sm" wrap={false} />
+      <StatusIcons statuses={enemy.statuses} size={24} />
     </div>
   )
 }

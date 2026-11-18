@@ -1,7 +1,7 @@
 import { isInCrisis, isKnockedOut, type Combatant } from '@/domain'
 import { useAssetUrl } from '@/infra/assets/assetResolver'
 
-import { StatusBadges } from '../hud/StatusBadges'
+import { StatusIcons } from '../hud/StatusIcons'
 import type { Slot } from './formation'
 import { PlaceholderSprite } from './PlaceholderSprite'
 
@@ -54,8 +54,8 @@ export function CombatantSprite({ combatant, slot }: Props) {
 
       {/* Enemies show statuses on their nameplate (see NameplateLayer). */}
       {combatant.side === 'ally' && !ko && (
-        <div className="absolute -top-9 left-1/2 -translate-x-1/2">
-          <StatusBadges statuses={combatant.statuses} size="sm" wrap={false} />
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2">
+          <StatusIcons statuses={combatant.statuses} size={26} />
         </div>
       )}
     </div>
