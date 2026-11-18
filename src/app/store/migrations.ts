@@ -39,5 +39,18 @@ export function migratePersistedBattle(persisted: unknown, fromVersion: number):
     }
   }
 
+  if (fromVersion < 4 && data?.battle) {
+    // v4: configurable waiting-screen background.
+    const battle = data.battle
+    const presentation = (battle.presentation ?? createDefaultPresentation()) as Record<
+      string,
+      unknown
+    >
+    data = {
+      ...data,
+      battle: { ...battle, presentation: { waitingBackgroundAssetId: null, ...presentation } },
+    }
+  }
+
   return data
 }

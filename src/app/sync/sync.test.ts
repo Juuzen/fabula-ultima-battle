@@ -77,19 +77,21 @@ describe('Master ↔ Display sync', () => {
   })
 
   describe('preparation phase', () => {
-    it('never sends hidden enemies or their events to the Display', () => {
+    it('sends no combatant (waiting screen) and no combatant events', () => {
       const hub = createMemoryHub()
       const store = makeStore('preparation')
       startMasterSync({ store, transport: hub.connect() })
       const screen = display(hub.connect())
-      expect(ids(screen.last()?.state)).toEqual(['hero'])
+      expect(screen.last()?.state.phase).toBe('preparation')
+      expect(ids(screen.last()?.state)).toEqual([])
 
       store.getState().dispatch({ type: 'DAMAGE', id: 'orc', amount: 5 })
-      expect(ids(screen.last()?.state)).toEqual(['hero'])
+      store.getState().dispatch({ type: 'DAMAGE', id: 'hero', amount: 5 })
+      expect(ids(screen.last()?.state)).toEqual([])
       expect(screen.last()?.events).toEqual([])
     })
 
-    it('reveals the enemies on START_BATTLE', () => {
+    it('reveals party and enemies on START_BATTLE', () => {
       const hub = createMemoryHub()
       const store = makeStore('preparation')
       startMasterSync({ store, transport: hub.connect() })

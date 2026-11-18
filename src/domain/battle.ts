@@ -20,6 +20,8 @@ export const PresentationSchema = z.object({
   enemyPanel: EnemyPanelSchema,
   /** Shortcut: reveal HP/MP of every enemy, regardless of each one's flag. */
   revealAllEnemyStats: z.boolean(),
+  /** Background of the waiting screen shown during preparation; null = built-in artwork. */
+  waitingBackgroundAssetId: z.string().min(1).nullable(),
 })
 export type Presentation = z.infer<typeof PresentationSchema>
 
@@ -49,6 +51,7 @@ export function createDefaultPresentation(): Presentation {
   return {
     enemyPanel: { mode: 'auto', visible: false, autoHideSeconds: 6 },
     revealAllEnemyStats: false,
+    waitingBackgroundAssetId: null,
   }
 }
 

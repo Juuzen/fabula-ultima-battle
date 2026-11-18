@@ -31,7 +31,8 @@ describe('routes', () => {
     renderAt('/display')
     expect(await screen.findByTestId('battle-stage')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: /Premi per iniziare/ }))
-    expect(screen.getByText('In attesa della plancia del Master…')).toBeInTheDocument()
+    expect(screen.getByTestId('waiting-screen')).toHaveTextContent('In attesa della battaglia…')
+    expect(screen.getByText('Plancia del Master non collegata')).toBeInTheDocument()
   })
 
   it('renders the sample encounter with ?demo=1', async () => {

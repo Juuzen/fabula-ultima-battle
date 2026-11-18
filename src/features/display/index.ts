@@ -2,4 +2,5 @@
 export { StatusIcon, StatusIcons } from './hud/StatusIcons'
 export { StateTag } from './hud/StateTag'
 export { BattleScene } from './scene/BattleScene'
+export { PlayerScreen } from './scene/PlayerScreen'
 export { ScaledStage } from './stage/ScaledStage'

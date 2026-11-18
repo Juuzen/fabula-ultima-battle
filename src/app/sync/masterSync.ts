@@ -29,7 +29,6 @@ export function startMasterSync({
 }: Options): () => void {
   const session = crypto.randomUUID()
   let seq = 0
-  let previous = store.getState().battle
   const displays = new Map<string, number>() // displayId → last seen
 
   const publish = (events: BattleEvent[]) => {
@@ -51,9 +50,7 @@ export function startMasterSync({
   }
 
   const stopChanges = store.changes.subscribe((change) => {
-    const events = projectEventsForPlayers(change.events, previous, change.state)
-    previous = change.state
-    publish(events)
+    publish(projectEventsForPlayers(change.events, change.state))
   })
 
   const stopMessages = transport.subscribe((data) => {

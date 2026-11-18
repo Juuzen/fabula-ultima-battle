@@ -115,7 +115,7 @@ describe('battle store', () => {
         ],
       }
       const storage = memoryStorage({
-        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: corrupt }, version: 3 }),
+        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: corrupt }, version: 4 }),
       })
 
       const store = createBattleStore({ storage })
@@ -166,6 +166,16 @@ describe('battle store', () => {
         [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: v2 }, version: 2 }),
       })
       expect(createBattleStore({ storage }).getState().battle.phase).toBe('active')
+    })
+
+    it('upgrades a v3 save with the default waiting background', () => {
+      const v3 = structuredClone(createEmptyBattle()) as BattleState
+      delete (v3.presentation as Partial<BattleState['presentation']>).waitingBackgroundAssetId
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: v3 }, version: 3 }),
+      })
+      const presentation = createBattleStore({ storage }).getState().battle.presentation
+      expect(presentation.waitingBackgroundAssetId).toBeNull()
     })
   })
 })

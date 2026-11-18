@@ -19,12 +19,15 @@ function battle(phase: BattleState['phase']): BattleState {
 function step(state: BattleState, command: BattleCommand) {
   const result = applyCommand(state, command)
   if (!result.ok) throw new Error(result.error.message)
-  return projectEventsForPlayers(result.events, state, result.state)
+  return projectEventsForPlayers(result.events, result.state)
 }
 
 describe('projectForPlayers', () => {
-  it('removes enemies during preparation', () => {
-    expect(projectForPlayers(battle('preparation')).combatants.map((c) => c.id)).toEqual(['hero'])
+  it('sends no combatant at all during preparation (players see the waiting screen)', () => {
+    const projected = projectForPlayers(battle('preparation'))
+    expect(projected.combatants).toEqual([])
+    expect(projected.phase).toBe('preparation')
+    expect(projected.presentation).toEqual(battle('preparation').presentation)
   })
 
   it('shows everything once the battle is active', () => {
@@ -34,22 +37,21 @@ describe('projectForPlayers', () => {
 })
 
 describe('projectEventsForPlayers', () => {
-  it('hides enemy events during preparation, keeps party events', () => {
+  it('drops every combatant event during preparation, party included', () => {
     expect(step(battle('preparation'), { type: 'DAMAGE', id: 'orc', amount: 5 })).toEqual([])
-    expect(step(battle('preparation'), { type: 'DAMAGE', id: 'hero', amount: 5 })).toHaveLength(1)
-  })
-
-  it('hides additions and removals of enemies during preparation', () => {
+    expect(step(battle('preparation'), { type: 'DAMAGE', id: 'hero', amount: 5 })).toEqual([])
     expect(
       step(battle('preparation'), {
         type: 'ADD_COMBATANT',
         combatant: { id: 'gob', name: 'Goblin', side: 'enemy', maxHp: 10 },
       }),
     ).toEqual([])
-    expect(step(battle('preparation'), { type: 'REMOVE_COMBATANT', id: 'orc' })).toEqual([])
-    expect(step(battle('preparation'), { type: 'REMOVE_COMBATANT', id: 'hero' })).toEqual([
-      { type: 'COMBATANT_REMOVED', id: 'hero' },
-    ])
+  })
+
+  it('keeps battle-level events during preparation', () => {
+    expect(
+      step(battle('preparation'), { type: 'SET_BACKGROUND', assetId: 'forest' }).map((e) => e.type),
+    ).toEqual(['BACKGROUND_CHANGED'])
   })
 
   it('lets everything through when active, except the full-state load event', () => {

@@ -25,6 +25,7 @@ type EditableFields =
 
 export type PresentationChanges = {
   revealAllEnemyStats?: boolean
+  waitingBackgroundAssetId?: string | null
   enemyPanel?: Partial<EnemyPanel>
 }
 
@@ -144,6 +145,10 @@ function setResource(
 function mergePresentation(current: Presentation, changes: PresentationChanges): Presentation {
   return {
     revealAllEnemyStats: changes.revealAllEnemyStats ?? current.revealAllEnemyStats,
+    waitingBackgroundAssetId:
+      changes.waitingBackgroundAssetId === undefined
+        ? current.waitingBackgroundAssetId
+        : changes.waitingBackgroundAssetId,
     enemyPanel: { ...current.enemyPanel, ...changes.enemyPanel },
   }
 }

@@ -191,12 +191,17 @@ describe('MasterPage', () => {
       expect(screen.getByTestId('battle-phase')).toHaveTextContent('In preparazione')
       expect(screen.getByText('Nascosti ai giocatori')).toBeInTheDocument()
       const preview = screen.getByRole('region', { name: 'Anteprima schermo giocatori' })
-      expect(within(preview).queryByTestId('nameplate-orc')).not.toBeInTheDocument()
+      expect(within(preview).getByTestId('waiting-screen')).toHaveTextContent(
+        'In attesa della battaglia…',
+      )
+      expect(within(preview).queryByTestId('party-slot-hero')).not.toBeInTheDocument()
 
       await user.click(screen.getByRole('button', { name: 'Inizia battaglia' }))
       expect(battle().phase).toBe('active')
       expect(screen.getByTestId('battle-phase')).toHaveTextContent('In corso')
       expect(screen.queryByText('Nascosti ai giocatori')).not.toBeInTheDocument()
+      expect(within(preview).queryByTestId('waiting-screen')).not.toBeInTheDocument()
+      expect(within(preview).getByTestId('party-slot-hero')).toBeInTheDocument()
       expect(within(preview).getByTestId('nameplate-orc')).toBeInTheDocument()
     })
 
@@ -254,6 +259,7 @@ describe('MasterPage', () => {
   })
 
   it('renders a live preview of the player screen', () => {
+    seed({ phase: 'active' })
     setup()
     const preview = screen.getByRole('region', { name: 'Anteprima schermo giocatori' })
     expect(within(preview).getByTestId('party-slot-hero')).toBeInTheDocument()

@@ -89,10 +89,10 @@
     "connected": "Player screen connected",
     "notConnected": "Player screen not connected",
     "enemiesHidden": "Hidden from players",
-    "previewPreparation": "Preparing: players only see the party."
+    "previewPreparation": "Preparing: players see the waiting screen."
   },
   "display": {
-    "waiting": "Waiting for the Game Master's dashboard…",
+    "waiting": "Waiting for the battle…",
     "start": "Press to start",
     "startHint": "A click is needed to enable audio on the player screen.",
     "party": "Party",
@@ -100,7 +100,8 @@
     "crisis": "Crisis",
     "ko": "KO",
     "hp": "HP",
-    "mp": "MP"
+    "mp": "MP",
+    "masterOffline": "Game Master dashboard not connected"
   },
   "language": {
     "label": "Language",

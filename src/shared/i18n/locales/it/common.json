@@ -89,10 +89,10 @@
     "connected": "Schermo giocatori collegato",
     "notConnected": "Schermo giocatori non collegato",
     "enemiesHidden": "Nascosti ai giocatori",
-    "previewPreparation": "In preparazione: i giocatori vedono solo il party."
+    "previewPreparation": "In preparazione: i giocatori vedono la schermata di attesa."
   },
   "display": {
-    "waiting": "In attesa della plancia del Master…",
+    "waiting": "In attesa della battaglia…",
     "start": "Premi per iniziare",
     "startHint": "Serve un clic per attivare l'audio sullo schermo dei giocatori.",
     "party": "Party",
@@ -100,7 +100,8 @@
     "crisis": "Crisi",
     "ko": "KO",
     "hp": "PV",
-    "mp": "PM"
+    "mp": "PM",
+    "masterOffline": "Plancia del Master non collegata"
   },
   "language": {
     "label": "Lingua",
