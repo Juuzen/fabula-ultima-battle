@@ -47,7 +47,9 @@ export type BattleCommand =
   | { type: 'SET_BACKGROUND'; assetId: string | null }
   | { type: 'RENAME_BATTLE'; name: string }
   | { type: 'LOAD_BATTLE'; state: BattleState }
-  /** Ends the encounter: enemies leave the field, the party stays as it is. */
+  /** Reveals the prepared enemies to the players. */
+  | { type: 'START_BATTLE' }
+  /** Ends the encounter: enemies leave the field, the party stays, back to preparation. */
   | { type: 'END_BATTLE' }
 
 export type CommandResult =
@@ -264,11 +266,16 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
       return ok(parsed.data, [{ type: 'BATTLE_LOADED', state: parsed.data }])
     }
 
+    case 'START_BATTLE':
+      if (state.phase === 'active') return ok(state, [])
+      return ok({ ...state, phase: 'active' }, [{ type: 'BATTLE_STARTED' }])
+
     case 'END_BATTLE': {
       const removedEnemyIds = state.combatants.filter((c) => c.side === 'enemy').map((c) => c.id)
       return ok(
         {
           ...state,
+          phase: 'preparation',
           combatants: state.combatants.filter((c) => c.side !== 'enemy'),
           presentation: mergePresentation(state.presentation, {
             revealAllEnemyStats: false,

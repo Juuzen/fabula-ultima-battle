@@ -115,7 +115,7 @@ describe('battle store', () => {
         ],
       }
       const storage = memoryStorage({
-        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: corrupt }, version: 2 }),
+        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: corrupt }, version: 3 }),
       })
 
       const store = createBattleStore({ storage })
@@ -153,6 +153,19 @@ describe('battle store', () => {
         statuses: ['slow'],
       })
       expect(store.getState().battle.presentation.enemyPanel.mode).toBe('auto')
+      expect(store.getState().battle.phase).toBe('preparation') // no enemies in that save
+    })
+
+    it('treats a v2 save with enemies on the field as an active battle', () => {
+      const v2 = {
+        ...createEmptyBattle(),
+        combatants: [createCombatant({ id: 'o', name: 'Orc', side: 'enemy', maxHp: 10 })],
+      } as Partial<BattleState>
+      delete v2.phase
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: v2 }, version: 2 }),
+      })
+      expect(createBattleStore({ storage }).getState().battle.phase).toBe('active')
     })
   })
 })

@@ -1,4 +1,4 @@
-import { Flag } from 'lucide-react'
+import { Flag, Swords } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -40,12 +40,11 @@ function BattleNameField() {
 function EndBattleButton() {
   const { t } = useTranslation()
   const { dispatch } = useBattleActions()
-  const enemies = useCombatants('enemy')
   const [armed, setArmed] = useState(false)
 
   if (!armed) {
     return (
-      <Button variant="danger" disabled={enemies.length === 0} onClick={() => setArmed(true)}>
+      <Button variant="danger" onClick={() => setArmed(true)}>
         <Flag className="h-4 w-4" aria-hidden="true" />
         {t('master.battle.end')}
       </Button>
@@ -71,16 +70,54 @@ function EndBattleButton() {
   )
 }
 
-export function BattleControls() {
+function PhaseBadge({ active }: { active: boolean }) {
   const { t } = useTranslation()
   return (
-    <Panel title={t('master.battle.title')}>
+    <span
+      data-testid="battle-phase"
+      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold tracking-wide uppercase ${
+        active ? 'bg-rose-600 text-white' : 'bg-amber-400/90 text-amber-950'
+      }`}
+    >
+      {t(active ? 'master.battle.phaseActive' : 'master.battle.phasePreparation')}
+    </span>
+  )
+}
+
+/**
+ * Preparation → "Start battle" reveals the enemies to the players.
+ * Active → "End battle" removes them and goes back to preparation.
+ */
+export function BattleControls() {
+  const { t } = useTranslation()
+  const { dispatch } = useBattleActions()
+  const active = useBattleStore((s) => s.battle.phase === 'active')
+  const enemies = useCombatants('enemy')
+
+  return (
+    <Panel title={t('master.battle.title')} actions={<PhaseBadge active={active} />}>
       <div className="flex flex-col gap-4">
         <BattleNameField />
-        <div className="flex flex-col gap-1.5">
-          <EndBattleButton />
-          <p className="text-xs text-slate-400">{t('master.battle.endHint')}</p>
-        </div>
+        {active ? (
+          <div className="flex flex-col gap-1.5">
+            <EndBattleButton />
+            <p className="text-xs text-slate-400">{t('master.battle.endHint')}</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1.5">
+            <Button
+              variant="primary"
+              disabled={enemies.length === 0}
+              onClick={() => dispatch({ type: 'START_BATTLE' })}
+            >
+              <Swords className="h-4 w-4" aria-hidden="true" />
+              {t('master.battle.start')}
+            </Button>
+            <p className="text-xs text-slate-400">
+              {t('master.battle.prepHint')} {t('master.battle.startHint')}
+            </p>
+          </div>
+        )}
       </div>
     </Panel>
   )

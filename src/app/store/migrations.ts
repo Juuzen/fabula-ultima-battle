@@ -28,5 +28,16 @@ export function migratePersistedBattle(persisted: unknown, fromVersion: number):
     }
   }
 
+  if (fromVersion < 3 && data?.battle) {
+    // v3: battle phase. Older saves had their enemies on screen, so they count as active.
+    const battle = data.battle
+    const combatants = Array.isArray(battle.combatants) ? battle.combatants : []
+    const hasEnemies = combatants.some((c: Record<string, unknown>) => c.side === 'enemy')
+    data = {
+      ...data,
+      battle: { phase: hasEnemies ? 'active' : 'preparation', ...battle },
+    }
+  }
+
   return data
 }

@@ -31,7 +31,7 @@ describe('routes', () => {
     renderAt('/display')
     expect(await screen.findByTestId('battle-stage')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: /Premi per iniziare/ }))
-    expect(screen.getByText('In attesa della battaglia…')).toBeInTheDocument()
+    expect(screen.getByText('In attesa della plancia del Master…')).toBeInTheDocument()
   })
 
   it('renders the sample encounter with ?demo=1', async () => {

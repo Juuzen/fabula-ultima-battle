@@ -274,6 +274,21 @@ describe('applyCommand', () => {
     })
   })
 
+  describe('battle phase', () => {
+    it('starts in preparation; START_BATTLE makes it active (idempotent)', () => {
+      expect(createEmptyBattle().phase).toBe('preparation')
+      const started = run(battleWith(), { type: 'START_BATTLE' })
+      expect(started.state.phase).toBe('active')
+      expect(started.events).toEqual([{ type: 'BATTLE_STARTED' }])
+      expect(run(started.state, { type: 'START_BATTLE' }).events).toEqual([])
+    })
+
+    it('END_BATTLE goes back to preparation', () => {
+      const started = run(battleWith(), { type: 'START_BATTLE' }).state
+      expect(run(started, { type: 'END_BATTLE' }).state.phase).toBe('preparation')
+    })
+  })
+
   it('END_BATTLE removes enemies, keeps the party and resets enemy visibility', () => {
     const prepared = run(battleWith(), {
       type: 'SET_PRESENTATION',

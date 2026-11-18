@@ -4,16 +4,17 @@ Web app React offline che simula uno schermo di battaglia JRPG (Final Fantasy, O
 
 ## Decisioni di perimetro (v1)
 
-| Tema        | Decisione                                                                                                                                                                                                                                                |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Regole      | **PV** e soglia di **Crisi** (≤ metà PV max), **PM** tracciati e mostrati. Gli **status** (Lento, Confuso, Debole, Scosso, Furente, Avvelenato) sono **solo visivi**, senza effetti sul calcolo. **PI non gestiti.**                                     |
-| Turni       | Nessuna gestione dei turni: il GM sceglie chi agisce.                                                                                                                                                                                                    |
-| Asset       | Caricati dall'app e salvati in IndexedDB (disponibili offline).                                                                                                                                                                                          |
-| Audio       | Riprodotto dalla finestra **Display**.                                                                                                                                                                                                                   |
-| Sprite      | PNG statici o GIF animate, specchiati via CSS. **Ritratto separato** per lo slot del party.                                                                                                                                                              |
-| Info nemici | Nome, status e Crisi/KO sempre visibili (targhetta sul campo) fino a fine battaglia. PV/PM solo se rivelati dal GM, per singolo nemico o tutti insieme. Finestra nemici manuale o automatica (compare quando cambia qualcosa e sparisce dopo X secondi). |
-| Lingue      | Codice in inglese, UI localizzata (it di default, en).                                                                                                                                                                                                   |
-| Browser     | Basati su Chromium (Chrome/Edge): necessari per i video `.webm` con canale alpha.                                                                                                                                                                        |
+| Tema           | Decisione                                                                                                                                                                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Regole         | **PV** e soglia di **Crisi** (≤ metà PV max), **PM** tracciati e mostrati. Gli **status** (Lento, Confuso, Debole, Scosso, Furente, Avvelenato) sono **solo visivi**, senza effetti sul calcolo. **PI non gestiti.**                                     |
+| Turni          | Nessuna gestione dei turni: il GM sceglie chi agisce.                                                                                                                                                                                                    |
+| Asset          | Caricati dall'app e salvati in IndexedDB (disponibili offline).                                                                                                                                                                                          |
+| Audio          | Riprodotto dalla finestra **Display**.                                                                                                                                                                                                                   |
+| Sprite         | PNG statici o GIF animate, specchiati via CSS. **Ritratto separato** per lo slot del party.                                                                                                                                                              |
+| Info nemici    | Nome, status e Crisi/KO sempre visibili (targhetta sul campo) fino a fine battaglia. PV/PM solo se rivelati dal GM, per singolo nemico o tutti insieme. Finestra nemici manuale o automatica (compare quando cambia qualcosa e sparisce dopo X secondi). |
+| Fase battaglia | **In preparazione** (i nemici si aggiungono e si sistemano, ma non vengono inviati ai giocatori) → **Inizia battaglia** → **In corso** → **Termina battaglia** (nemici rimossi, si torna in preparazione).                                               |
+| Lingue         | Codice in inglese, UI localizzata (it di default, en).                                                                                                                                                                                                   |
+| Browser        | Basati su Chromium (Chrome/Edge): necessari per i video `.webm` con canale alpha.                                                                                                                                                                        |
 
 ## Principi
 
@@ -85,7 +86,7 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 
 - **Sfondo:** se non è impostato, si usa un fondale al tramonto con una griglia prospettica.
 - **Asset:** `useAssetUrl(id)` legge da `AssetResolverContext`. Per ora non risolve nulla; nella fase 7 diventerà IndexedDB.
-- **`useDisplayStore`:** contiene la battaglia mostrata, che non è lo stato autorevole. Nella fase 4 la alimenterà la sincronizzazione.
+- **`useDisplayStore`:** contiene la battaglia mostrata, che non è lo stato autorevole; la alimenta la sincronizzazione.
 - **Anteprima:** `#/display?demo=1` carica un incontro di esempio che copre tutti gli stati visivi.
 - **Font:** Cinzel e Inter sono inclusi nel pacchetto (`@fontsource`), quindi funzionano anche offline.
 
@@ -103,7 +104,7 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
   - rimozione.
 - **Aggiunta:** nome, PV max e PM max (opzionale, 0 se vuoto). Dopo l'aggiunta il nome si svuota ma le statistiche restano, così è veloce inserire nemici uguali.
 - **Finestra nemici:** modalità Manuale o Automatica, pulsante Mostra/Nascondi, secondi di auto-nascondi (registrati quando si esce dal campo; i valori fuori da 1–120 vengono annullati) e "Mostra PV/PM di tutti i nemici".
-- **Battaglia:** il nome viene registrato quando si esce dal campo. "Termina battaglia" chiede una conferma in due passi.
+- **Battaglia:** il nome viene registrato quando si esce dal campo. C'è un indicatore della fase (In preparazione / In corso). "Inizia battaglia" è disattivato se non ci sono nemici; "Termina battaglia" chiede una conferma in due passi. In preparazione la sezione Nemici mostra l'etichetta "Nascosti ai giocatori".
 - **Annulla:** con il pulsante o con Ctrl/Cmd+Z, tranne mentre si scrive in un campo. I campi di testo registrano il valore solo all'uscita, per non riempire la cronologia a ogni tasto.
 - **Errori di dominio:** compaiono in un banner localizzato in base al codice, che si può chiudere.
 - **Componenti UI condivisi** (`src/shared/ui`): `Button`, `TextField`, `NumberField`, `Toggle` (`role="switch"`) e `Panel`.
@@ -116,16 +117,26 @@ Si usa l'hash routing, che funziona offline e su qualsiasi host statico:
 - `#/master` è la plancia del GM;
 - `#/display` è lo schermo dei giocatori, aperto dal Master con `window.open`. Al primo clic sblocca l'audio.
 
-## Protocollo di sincronizzazione (dalla fase 4)
+## Sincronizzazione Master → Display (fase 4)
+
+- **Trasporto:** `SyncTransport` (`src/app/sync/transport.ts`). L'implementazione reale è su `BroadcastChannel('fu-battle.sync')` (`src/infra/sync`); ce n'è una in memoria per i test. Si può sostituire, per esempio con un WebSocket per un Display su un altro PC, senza toccare la logica.
+- **Protocollo** (`protocol.ts`, v1): ogni messaggio in arrivo è validato con Zod e quelli non validi vengono ignorati.
 
 ```ts
 type SyncMessage =
-  | { v: 1; type: 'HELLO' } // Display → Master
-  | { v: 1; type: 'SNAPSHOT'; state: BattleState } // Master → Display
-  | { v: 1; type: 'PRESENTATION'; seq: number; events: PresentationEvent[] }
+  | { v: 1; type: 'HELLO'; displayId } // Display → Master: "mandami lo stato"
+  | { v: 1; type: 'HEARTBEAT'; displayId } // Display → Master: ogni 4 s
+  | { v: 1; type: 'BYE'; displayId } // Display → Master: finestra in chiusura
+  | { v: 1; type: 'STATE'; session; seq; state; events } // Master → Display
 ```
 
-Ogni messaggio viene validato con Zod. Se `seq` presenta un buco, il Display richiede un nuovo `SNAPSHOT`. Il trasporto è astratto dietro `SyncTransport`, quindi BroadcastChannel si può sostituire in futuro (per esempio con WebSocket).
+- **`STATE`:** è sempre uno **snapshot completo** di ciò che i giocatori possono vedere, più gli eventi che l'hanno prodotto (serviranno alla coreografia nelle fasi 5–6). `session` cambia quando il Master viene ricaricato, `seq` cresce all'interno della sessione: il Display scarta i messaggi vecchi o duplicati e ricomincia a contare quando cambia la sessione.
+- **Proiezione** (`projectForPlayers` e `projectEventsForPlayers` nel dominio): in preparazione i nemici e i loro eventi **non vengono inviati** al Display, invece di essere solo nascosti a video. Anche l'anteprima nella plancia usa la stessa proiezione.
+- **Ordine di apertura:**
+  - Display aperto dopo il Master: manda `HELLO` e riceve subito lo stato.
+  - Master aperto o ricaricato dopo il Display: pubblica lo stato all'avvio, e il Display lo accetta come nuova sessione.
+- **Presenza:** il Master conta gli schermi collegati, aggiungendoli con `HELLO`/`HEARTBEAT` e togliendoli con `BYE` o dopo 12 s di silenzio. L'header mostra "Schermo giocatori collegato" oppure "non collegato".
+- **Hook React:** `useMasterSync` nella plancia e `useDisplaySync` nel Display, quest'ultimo disattivato con `?demo=1`.
 
 ## Coreografia (dalla fase 6)
 
@@ -139,7 +150,7 @@ Le sequenze di attacco sono dati (`advance → wait → fx → impact → shake 
 | 1    | Dominio (combattenti, PV, Crisi, status visivi) + store + persistenza                                                               |       |
 | 2    | Display statico: sfondo, sprite, barre PV                                                                                           |       |
 | 3    | Master: roster, modifica PV/PM e status, controlli della finestra nemici (manuale/auto, secondi), rivelazione PV/PM, fine battaglia | ✅    |
-| 4    | Ponte BroadcastChannel: snapshot e riconnessione                                                                                    |       |
+| 4    | Ponte BroadcastChannel: snapshot, riconnessione, presenza dello schermo, fase di preparazione                                       | ✅    |
 | 5    | Animazioni base: barre fluide, shake, testo dei danni                                                                               |       |
 | 6    | Coreografia completa con FX `.webm` e SFX                                                                                           |       |
 | 7    | Libreria asset (IndexedDB) e audio con crossfade                                                                                    |       |

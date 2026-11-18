@@ -1,9 +1,12 @@
-import { act, render, screen, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 import { battleStore } from '@/app/store'
+import { startDisplaySync } from '@/app/sync/displaySync'
+import { SYNC_CHANNEL_NAME } from '@/app/sync/protocol'
 import { createCombatant, createEmptyBattle, type BattleState } from '@/domain'
+import { createBroadcastChannelTransport } from '@/infra/sync/broadcastChannelTransport'
 
 import { MasterPage } from './MasterPage'
 
@@ -183,7 +186,28 @@ describe('MasterPage', () => {
   })
 
   describe('battle', () => {
-    it('ends the battle only after confirmation', async () => {
+    it('starts in preparation: enemies are hidden from players until "Inizia battaglia"', async () => {
+      const user = setup()
+      expect(screen.getByTestId('battle-phase')).toHaveTextContent('In preparazione')
+      expect(screen.getByText('Nascosti ai giocatori')).toBeInTheDocument()
+      const preview = screen.getByRole('region', { name: 'Anteprima schermo giocatori' })
+      expect(within(preview).queryByTestId('nameplate-orc')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Inizia battaglia' }))
+      expect(battle().phase).toBe('active')
+      expect(screen.getByTestId('battle-phase')).toHaveTextContent('In corso')
+      expect(screen.queryByText('Nascosti ai giocatori')).not.toBeInTheDocument()
+      expect(within(preview).getByTestId('nameplate-orc')).toBeInTheDocument()
+    })
+
+    it('cannot start a battle without enemies', () => {
+      seed({ combatants: [createCombatant({ id: 'a', name: 'Solo', side: 'ally', maxHp: 10 })] })
+      setup()
+      expect(screen.getByRole('button', { name: 'Inizia battaglia' })).toBeDisabled()
+    })
+
+    it('ends the battle only after confirmation, back to preparation', async () => {
+      seed({ phase: 'active' })
       const user = setup()
       await user.click(screen.getByRole('button', { name: 'Termina battaglia' }))
       expect(find('orc')).toBeDefined()
@@ -191,7 +215,8 @@ describe('MasterPage', () => {
       await user.click(screen.getByRole('button', { name: 'Conferma: rimuovi tutti i nemici' }))
       expect(find('orc')).toBeUndefined()
       expect(find('hero')).toBeDefined()
-      expect(screen.getByRole('button', { name: 'Termina battaglia' })).toBeDisabled()
+      expect(battle().phase).toBe('preparation')
+      expect(screen.getByRole('button', { name: 'Inizia battaglia' })).toBeDisabled()
     })
 
     it('renames the battle on blur', async () => {
@@ -211,6 +236,21 @@ describe('MasterPage', () => {
       await user.click(screen.getByRole('button', { name: 'Chiudi' }))
       expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     })
+  })
+
+  it('shows when a player screen is connected (real BroadcastChannel)', async () => {
+    setup()
+    expect(screen.getByTestId('display-connection')).toHaveTextContent('non collegato')
+
+    const transport = createBroadcastChannelTransport(SYNC_CHANNEL_NAME)
+    const received: string[] = []
+    const stop = startDisplaySync({ transport, onState: (state) => received.push(state.name) })
+    expect(await screen.findByText('Schermo giocatori collegato')).toBeInTheDocument()
+    await waitFor(() => expect(received.length).toBeGreaterThan(0))
+
+    stop()
+    transport.close()
+    expect(await screen.findByText('Schermo giocatori non collegato')).toBeInTheDocument()
   })
 
   it('renders a live preview of the player screen', () => {

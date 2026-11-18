@@ -6,9 +6,10 @@ import { demoBattle } from './demo/demoBattle'
 import { BattleScene } from './scene/BattleScene'
 import { Stage } from './stage/Stage'
 import { useDisplayStore } from './state/displayStore'
+import { useDisplaySync } from './state/useDisplaySync'
 
 /**
- * Player-facing screen. Read-only: it renders whatever the Master sends (phase 4).
+ * Player-facing screen. Read-only: it renders whatever the Master window publishes.
  * `#/display?demo=1` shows a sample encounter, handy to preview layouts and sprites.
  * The first click unlocks audio playback (browser autoplay policy).
  */
@@ -19,6 +20,8 @@ export function DisplayPage() {
   const isDemo = params.get('demo') === '1'
   const battle = useDisplayStore((s) => s.battle)
   const showBattle = useDisplayStore((s) => s.showBattle)
+
+  useDisplaySync(!isDemo)
 
   useEffect(() => {
     if (isDemo) showBattle(demoBattle)

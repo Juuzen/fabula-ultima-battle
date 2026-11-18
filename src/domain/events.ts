@@ -27,6 +27,7 @@ export type BattleEvent =
   | { type: 'BACKGROUND_CHANGED'; assetId: string | null }
   | { type: 'BATTLE_RENAMED'; name: string }
   | { type: 'BATTLE_LOADED'; state: BattleState }
+  | { type: 'BATTLE_STARTED' }
   | { type: 'BATTLE_ENDED'; removedEnemyIds: CombatantId[] }
 
 export type BattleEventType = BattleEvent['type']
