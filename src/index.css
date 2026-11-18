@@ -31,6 +31,20 @@
   .slot-crisis {
     animation: slot-crisis 1.4s ease-in-out infinite;
   }
+
+  .waiting-pulse {
+    animation: waiting-pulse 3s ease-in-out infinite;
+  }
+}
+
+@keyframes waiting-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
 }
 
 @keyframes slot-crisis {
@@ -54,7 +68,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .slot-crisis {
+  .slot-crisis,
+  .waiting-pulse {
     animation: none;
   }
   .sprite-crisis {

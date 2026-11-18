@@ -20,12 +20,20 @@ export const PresentationSchema = z.object({
   enemyPanel: EnemyPanelSchema,
   /** Shortcut: reveal HP/MP of every enemy, regardless of each one's flag. */
   revealAllEnemyStats: z.boolean(),
+  /** Background of the waiting screen shown during preparation; null = built-in artwork. */
+  waitingBackgroundAssetId: z.string().min(1).nullable(),
 })
 export type Presentation = z.infer<typeof PresentationSchema>
+
+export const BATTLE_PHASES = ['preparation', 'active'] as const
+export const BattlePhaseSchema = z.enum(BATTLE_PHASES)
+/** preparation: enemies are being set up and stay hidden from the players. active: fighting. */
+export type BattlePhase = z.infer<typeof BattlePhaseSchema>
 
 export const BattleStateSchema = z
   .object({
     name: z.string(),
+    phase: BattlePhaseSchema,
     /** Reference to an asset in the local asset library (phase 7); null = default backdrop. */
     backgroundAssetId: z.string().min(1).nullable(),
     /** Display order: array order within each side. */
@@ -43,12 +51,14 @@ export function createDefaultPresentation(): Presentation {
   return {
     enemyPanel: { mode: 'auto', visible: false, autoHideSeconds: 6 },
     revealAllEnemyStats: false,
+    waitingBackgroundAssetId: null,
   }
 }
 
 export function createEmptyBattle(name = ''): BattleState {
   return {
     name,
+    phase: 'preparation',
     backgroundAssetId: null,
     combatants: [],
     presentation: createDefaultPresentation(),

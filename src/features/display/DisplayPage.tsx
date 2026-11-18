@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import { demoBattle } from './demo/demoBattle'
-import { BattleScene } from './scene/BattleScene'
+import { PlayerScreen } from './scene/PlayerScreen'
+import { WaitingScreen } from './scene/WaitingScreen'
 import { Stage } from './stage/Stage'
 import { useDisplayStore } from './state/displayStore'
+import { useDisplaySync } from './state/useDisplaySync'
 
 /**
- * Player-facing screen. Read-only: it renders whatever the Master sends (phase 4).
+ * Player-facing screen. Read-only: it renders whatever the Master window publishes.
  * `#/display?demo=1` shows a sample encounter, handy to preview layouts and sprites.
  * The first click unlocks audio playback (browser autoplay policy).
  */
@@ -20,6 +22,8 @@ export function DisplayPage() {
   const battle = useDisplayStore((s) => s.battle)
   const showBattle = useDisplayStore((s) => s.showBattle)
 
+  useDisplaySync(!isDemo)
+
   useEffect(() => {
     if (isDemo) showBattle(demoBattle)
   }, [isDemo, showBattle])
@@ -27,16 +31,10 @@ export function DisplayPage() {
   return (
     <Stage>
       {battle ? (
-        <BattleScene battle={battle} />
+        <PlayerScreen battle={battle} />
       ) : (
-        <>
-          <div className="absolute inset-0 bg-linear-to-b from-indigo-950 via-slate-900 to-black" />
-          {started && (
-            <p className="font-display absolute inset-x-0 bottom-24 text-center text-4xl tracking-widest text-slate-300">
-              {t('display.waiting')}
-            </p>
-          )}
-        </>
+        // No dashboard yet: same waiting screen, plus a discreet hint for the GM.
+        <WaitingScreen backgroundAssetId={null} note={t('display.masterOffline')} />
       )}
 
       {!started && (

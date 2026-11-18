@@ -70,7 +70,12 @@
       "end": "Termina battaglia",
       "endConfirm": "Conferma: rimuovi tutti i nemici",
       "endCancel": "Annulla",
-      "endHint": "I nemici escono dal campo, il party resta com'è."
+      "endHint": "I nemici escono dal campo, il party resta com'è.",
+      "phasePreparation": "In preparazione",
+      "phaseActive": "In corso",
+      "start": "Inizia battaglia",
+      "startHint": "I nemici compaiono sullo schermo dei giocatori.",
+      "prepHint": "I nemici che aggiungi restano nascosti ai giocatori finché non inizi la battaglia."
     },
     "errors": {
       "dismiss": "Chiudi",
@@ -80,7 +85,11 @@
       "INVALID_COMBATANT": "Dati del combattente non validi: controlla nome e valori.",
       "INVALID_BATTLE": "Battaglia non valida.",
       "INVALID_PRESENTATION": "Impostazione non valida."
-    }
+    },
+    "connected": "Schermo giocatori collegato",
+    "notConnected": "Schermo giocatori non collegato",
+    "enemiesHidden": "Nascosti ai giocatori",
+    "previewPreparation": "In preparazione: i giocatori vedono la schermata di attesa."
   },
   "display": {
     "waiting": "In attesa della battaglia…",
@@ -91,7 +100,8 @@
     "crisis": "Crisi",
     "ko": "KO",
     "hp": "PV",
-    "mp": "PM"
+    "mp": "PM",
+    "masterOffline": "Plancia del Master non collegata"
   },
   "language": {
     "label": "Lingua",

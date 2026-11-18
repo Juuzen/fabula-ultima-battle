@@ -70,7 +70,12 @@
       "end": "End battle",
       "endConfirm": "Confirm: remove all enemies",
       "endCancel": "Cancel",
-      "endHint": "Enemies leave the field, the party stays as it is."
+      "endHint": "Enemies leave the field, the party stays as it is.",
+      "phasePreparation": "Preparing",
+      "phaseActive": "In progress",
+      "start": "Start battle",
+      "startHint": "Enemies appear on the player screen.",
+      "prepHint": "Enemies you add stay hidden from the players until you start the battle."
     },
     "errors": {
       "dismiss": "Dismiss",
@@ -80,10 +85,14 @@
       "INVALID_COMBATANT": "Invalid combatant data: check name and values.",
       "INVALID_BATTLE": "Invalid battle.",
       "INVALID_PRESENTATION": "Invalid setting."
-    }
+    },
+    "connected": "Player screen connected",
+    "notConnected": "Player screen not connected",
+    "enemiesHidden": "Hidden from players",
+    "previewPreparation": "Preparing: players see the waiting screen."
   },
   "display": {
-    "waiting": "Waiting for battle…",
+    "waiting": "Waiting for the battle…",
     "start": "Press to start",
     "startHint": "A click is needed to enable audio on the player screen.",
     "party": "Party",
@@ -91,7 +100,8 @@
     "crisis": "Crisis",
     "ko": "KO",
     "hp": "HP",
-    "mp": "MP"
+    "mp": "MP",
+    "masterOffline": "Game Master dashboard not connected"
   },
   "language": {
     "label": "Language",
