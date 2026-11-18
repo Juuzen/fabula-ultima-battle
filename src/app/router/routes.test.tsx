@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 
+import { useDisplayStore } from '@/features/display/state/displayStore'
+
 import { routes } from './routes'
 
 function renderAt(path: string) {
@@ -30,5 +32,11 @@ describe('routes', () => {
     expect(screen.getByTestId('battle-stage')).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: /Premi per iniziare/ }))
     expect(screen.getByText('In attesa della battaglia…')).toBeInTheDocument()
+  })
+
+  it('renders the sample encounter with ?demo=1', async () => {
+    renderAt('/display?demo=1')
+    expect(await screen.findByTestId('party-slot-a1')).toHaveTextContent('Lyra')
+    useDisplayStore.getState().showBattle(null)
   })
 })

@@ -12,7 +12,13 @@
   "display": {
     "waiting": "Waiting for battle…",
     "start": "Press to start",
-    "startHint": "A click is needed to enable audio on the player screen."
+    "startHint": "A click is needed to enable audio on the player screen.",
+    "party": "Party",
+    "enemies": "Enemies",
+    "crisis": "Crisis",
+    "ko": "KO",
+    "hp": "HP",
+    "mp": "MP"
   },
   "language": {
     "label": "Language",

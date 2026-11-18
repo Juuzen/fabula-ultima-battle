@@ -1,4 +1,4 @@
-import type { BattleState } from './battle'
+import type { BattleState, Presentation } from './battle'
 import type { Combatant, CombatantId } from './combatant'
 import type { StatusId } from './status'
 
@@ -14,13 +14,19 @@ export type BattleEvent =
   | { type: 'DAMAGED'; id: CombatantId; amount: number; hp: number }
   | { type: 'HEALED'; id: CombatantId; amount: number; hp: number }
   | { type: 'HP_SET'; id: CombatantId; hp: number }
+  | { type: 'MP_SPENT'; id: CombatantId; amount: number; mp: number }
+  | { type: 'MP_RESTORED'; id: CombatantId; amount: number; mp: number }
+  | { type: 'MP_SET'; id: CombatantId; mp: number }
   | { type: 'CRISIS_ENTERED'; id: CombatantId }
   | { type: 'CRISIS_EXITED'; id: CombatantId }
   | { type: 'KNOCKED_OUT'; id: CombatantId }
   | { type: 'REVIVED'; id: CombatantId }
   | { type: 'STATUS_CHANGED'; id: CombatantId; status: StatusId; active: boolean }
+  | { type: 'STATS_REVEAL_CHANGED'; id: CombatantId; reveal: boolean }
+  | { type: 'PRESENTATION_CHANGED'; presentation: Presentation }
   | { type: 'BACKGROUND_CHANGED'; assetId: string | null }
   | { type: 'BATTLE_RENAMED'; name: string }
   | { type: 'BATTLE_LOADED'; state: BattleState }
+  | { type: 'BATTLE_ENDED'; removedEnemyIds: CombatantId[] }
 
 export type BattleEventType = BattleEvent['type']
