@@ -35,6 +35,24 @@ src/
 
 Regola di dipendenza: `features → app → domain`; `infra` implementa le interfacce richieste da `app`. `domain` non importa nulla dagli altri livelli.
 
+## Dominio e store (fase 1)
+
+**Dominio (`src/domain`).** È TypeScript puro e gli schemi Zod sono l'unica fonte dei tipi.
+
+- `Combatant` ha `id`, `name`, `side` (`ally` o `enemy`), `maxHp`, `hp`, `statuses`, `spriteAssetId` e `flipSprite`.
+- Si è in **Crisi** quando `0 < hp ≤ floor(maxHp / 2)`. A 0 PV il combattente è **KO** e non conta come in Crisi.
+- Gli status (`slow`, `dazed`, `weak`, `shaken`, `enraged`, `poisoned`) sono solo marcatori visivi.
+- `applyCommand(state, command)` è un riduttore puro che restituisce `{ ok, state, events }` oppure `{ ok: false, error }`. Non modifica mai l'input.
+- I comandi disponibili sono `ADD_COMBATANT`, `UPDATE_COMBATANT`, `REMOVE_COMBATANT`, `MOVE_COMBATANT`, `DAMAGE`, `HEAL`, `SET_HP`, `SET_STATUS`, `SET_BACKGROUND`, `RENAME_BATTLE` e `LOAD_BATTLE`.
+- Gli eventi (`DAMAGED`, `HEALED`, `CRISIS_ENTERED`, `KNOCKED_OUT`, `REVIVED`…) descrivono cosa è successo. Riportano l'importo effettivamente applicato, cioè senza l'eccesso di danno o di cura. Il Display li userà per la coreografia.
+
+**Store (`src/app/store`).** Usa Zustand (vanilla), un'istanza sola e solo nel Master.
+
+- `dispatch(command)` applica il comando, salva lo stato precedente nella cronologia di annullamento (al massimo 50 passi, solo in memoria) e pubblica un `BattleChange` sul bus `battleStore.changes`. Dalla fase 4 il livello di sincronizzazione si collega lì.
+- Con `undo()` si torna indietro di un passo. I comandi senza effetto non finiscono nella cronologia.
+- Lo stato della battaglia viene salvato in `localStorage` (`fu-battle.battle`) ed è versionato. Al ricaricamento viene validato con Zod; se è corrotto viene scartato.
+- Gli hook per React sono `useBattleStore`, `useBattleActions`, `useCombatants(side)`, `useCombatant(id)` e `useCanUndo`.
+
 ## Rotte
 
 Si usa l'hash routing, che funziona offline e su qualsiasi host statico:
