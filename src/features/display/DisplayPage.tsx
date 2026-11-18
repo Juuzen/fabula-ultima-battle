@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
 import { demoBattle } from './demo/demoBattle'
+import { FxContext } from './fx/fxContext'
+import { useFxStore } from './fx/fxStore'
 import { PlayerScreen } from './scene/PlayerScreen'
 import { WaitingScreen } from './scene/WaitingScreen'
 import { Stage } from './stage/Stage'
@@ -21,6 +23,8 @@ export function DisplayPage() {
   const isDemo = params.get('demo') === '1'
   const battle = useDisplayStore((s) => s.battle)
   const showBattle = useDisplayStore((s) => s.showBattle)
+  const fxItems = useFxStore((s) => s.items)
+  const removeFx = useFxStore((s) => s.remove)
 
   useDisplaySync(!isDemo)
 
@@ -31,7 +35,9 @@ export function DisplayPage() {
   return (
     <Stage>
       {battle ? (
-        <PlayerScreen battle={battle} />
+        <FxContext value={{ items: fxItems, remove: removeFx }}>
+          <PlayerScreen battle={battle} />
+        </FxContext>
       ) : (
         // No dashboard yet: same waiting screen, plus a discreet hint for the GM.
         <WaitingScreen backgroundAssetId={null} note={t('display.masterOffline')} />

@@ -1,3 +1,4 @@
+import { MotionConfig } from 'motion/react'
 import { createHashRouter, RouterProvider } from 'react-router'
 
 import { routes } from './router/routes'
@@ -6,5 +7,10 @@ import { routes } from './router/routes'
 const router = createHashRouter(routes)
 
 export function App() {
-  return <RouterProvider router={router} />
+  // Animations honour the OS "reduce motion" setting.
+  return (
+    <MotionConfig reducedMotion="user">
+      <RouterProvider router={router} />
+    </MotionConfig>
+  )
 }

@@ -1,4 +1,8 @@
+import { useState } from 'react'
+
 import { isInCrisis, isKnockedOut } from '@/domain'
+
+import { AnimatedNumber } from './AnimatedNumber'
 
 type Props = {
   kind: 'hp' | 'mp'
@@ -18,21 +22,37 @@ function tone(kind: Props['kind'], value: number, max: number): { bar: string; t
   return { bar: 'from-emerald-500 to-lime-300', text: 'text-white' }
 }
 
-function Bar({
-  ratio,
-  colour,
-  label,
-  value,
-  max,
-  height,
-}: {
+type Direction = 'down' | 'up' | 'none'
+
+/** Remembers whether the gauge last went down or up ("derive from previous props"). */
+function useDirection(ratio: number): Direction {
+  const [previous, setPrevious] = useState(ratio)
+  const [direction, setDirection] = useState<Direction>('none')
+  if (ratio !== previous) {
+    setPrevious(ratio)
+    setDirection(ratio < previous ? 'down' : 'up')
+  }
+  return direction
+}
+
+type BarProps = {
   ratio: number
   colour: string
   label: string
   value: number
   max: number
   height: string
-}) {
+}
+
+/**
+ * JRPG gauge with a "trail": on damage the bar drops at once and a pale chunk drains
+ * after it; on healing a pale preview grows first and the bar fills up behind it.
+ */
+function Bar({ ratio, colour, label, value, max, height }: BarProps) {
+  const direction = useDirection(ratio)
+  const width = `${Math.round(ratio * 1000) / 10}%`
+  const trailColour = direction === 'up' ? 'bg-emerald-200/80' : 'bg-rose-100/90'
+
   return (
     <div
       role="meter"
@@ -40,11 +60,24 @@ function Bar({
       aria-valuemin={0}
       aria-valuemax={max}
       aria-valuenow={value}
-      className={`overflow-hidden rounded-full bg-black/60 ring-1 ring-white/30 ${height}`}
+      className={`relative overflow-hidden rounded-full bg-black/60 ring-1 ring-white/30 ${height}`}
     >
       <div
-        className={`h-full rounded-full bg-linear-to-r ${colour}`}
-        style={{ width: `${Math.round(ratio * 1000) / 10}%` }}
+        data-testid="gauge-trail"
+        className={`absolute inset-y-0 left-0 rounded-full motion-reduce:transition-none ${trailColour}`}
+        style={{
+          width,
+          transition:
+            direction === 'down' ? 'width 650ms ease-in-out 350ms' : 'width 250ms ease-out',
+        }}
+      />
+      <div
+        data-testid="gauge-fill"
+        className={`absolute inset-y-0 left-0 rounded-full bg-linear-to-r motion-reduce:transition-none ${colour}`}
+        style={{
+          width,
+          transition: direction === 'up' ? 'width 550ms ease-out 300ms' : 'width 200ms ease-out',
+        }}
       />
     </div>
   )
@@ -63,7 +96,7 @@ export function ResourceGauge({ kind, label, value, max, layout = 'stacked' }: P
           <Bar ratio={ratio} colour={bar} label={label} value={value} max={max} height="h-1.5" />
         </div>
         <span className={`text-sm font-semibold whitespace-nowrap tabular-nums ${text}`}>
-          {value}
+          <AnimatedNumber value={value} />
           <span className="text-xs text-slate-400">/{max}</span>
         </span>
       </div>
@@ -75,7 +108,7 @@ export function ResourceGauge({ kind, label, value, max, layout = 'stacked' }: P
       <div className="flex items-baseline justify-between">
         <span className="text-lg font-bold tracking-wide text-slate-200">{label}</span>
         <span className={`text-2xl font-semibold tabular-nums ${text}`}>
-          {value}
+          <AnimatedNumber value={value} />
           <span className="text-base text-slate-300"> / {max}</span>
         </span>
       </div>

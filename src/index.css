@@ -19,6 +19,13 @@
     text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
   }
 
+  /* KO fades in smoothly instead of snapping. */
+  .sprite-state {
+    transition:
+      filter 0.7s ease,
+      opacity 0.7s ease;
+  }
+
   .sprite-ko {
     filter: grayscale(1) brightness(0.55);
     opacity: 0.55;
