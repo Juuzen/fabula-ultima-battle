@@ -47,7 +47,7 @@ export function EnemyInfoWindow({ enemies, presentation, visible }: Props) {
               >
                 {e.name}
               </span>
-              <div className="flex h-7 items-center gap-1.5">
+              <div className="flex h-7 items-center gap-2.5">
                 <StatusIcons statuses={e.statuses} size={26} />
                 <StateTag combatant={e} size="sm" />
               </div>

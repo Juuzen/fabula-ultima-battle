@@ -39,7 +39,12 @@ function StatusIcon({ status, size }: { status: StatusId; size: number }) {
 export function StatusIcons({ statuses, size = 24 }: { statuses: StatusId[]; size?: number }) {
   if (statuses.length === 0) return null
   return (
-    <span className="inline-flex items-center gap-1" data-testid="status-icons">
+    <span
+      className="inline-flex items-center"
+      // Spacing scales with icon size (≈8px at 26px) so icons never look cramped.
+      style={{ gap: Math.round(size * 0.3) }}
+      data-testid="status-icons"
+    >
       {sortStatuses(statuses).map((s) => (
         <StatusIcon key={s} status={s} size={size} />
       ))}
