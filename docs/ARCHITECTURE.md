@@ -110,6 +110,29 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 - **Componenti UI condivisi** (`src/shared/ui`): `Button`, `TextField`, `NumberField`, `Toggle` (`role="switch"`) e `Panel`.
 - **Code splitting:** Master e Display sono caricati separatamente (`lazy` di React Router), e il service worker li mette entrambi in cache per l'uso offline.
 
+## Animazioni base (fase 5)
+
+Libreria: **Motion** (`motion/react`). `MotionConfig reducedMotion="user"` rispetta l'impostazione "riduci movimento" del sistema operativo, e anche le transizioni CSS hanno `motion-reduce`.
+
+- **Effetti visivi** (`src/features/display/fx`):
+  - `eventsToFx` è una funzione pura che trasforma gli eventi di dominio ricevuti con lo `STATE` in effetti: `damage`, `heal`, `mpLoss`, `mpGain`, `crisis`, `ko`, `revive`. Un danno 0 resta visibile ("0"); le variazioni di PM nulle no.
+  - `useFxStore` è la coda degli effetti in corso, limitata a 40 per non accumulare effetti scaduti se la scheda resta in background. Ogni effetto si toglie da solo a fine animazione.
+  - Gli effetti arrivano alla scena tramite `FxContext`: il Display lo fornisce, l'anteprima della plancia no, quindi lì non ci sono testi fluttuanti.
+- **Testo fluttuante:** sopra lo sprite compaiono i danni (bianco), le cure (verde, `+8`), i PM (azzurro, `−8 PM`), la Crisi ("Crisi!"), il KO e gli status applicati ("Avvelenato!", in una tinta chiara del colore del badge). I testi restano fermi e appaiono/scompaiono in dissolvenza. Ogni bersaglio ha due corsie che procedono in parallelo: i numeri dei PV (danni e cure), appena sotto, e tutti gli altri testi (Crisi, KO, PM, status). Così "12" compare insieme a "Crisi!". Dentro ogni corsia i testi vengono mostrati uno alla volta, sempre nello stesso punto e nell'ordine in cui sono avvenuti: il successivo parte quando il precedente è sparito. Bersagli diversi procedono in parallelo.
+- **Reazione dello sprite:**
+  - un danno lo fa tremare e lampeggiare;
+  - una cura o una rianimazione gli dà un bagliore verde;
+  - il passaggio a KO (desaturazione) avviene con una transizione.
+- **Barre con scia:**
+  - sul danno la barra scende subito e una scia rosa si svuota dopo 350 ms;
+  - sulla cura una scia verde chiara cresce subito e la barra la segue dopo 300 ms.
+
+  Anche i numeri di PV e PM scorrono verso il nuovo valore (`AnimatedNumber`, che aggiorna il DOM senza far ri-renderizzare React).
+
+- **Entrate e uscite:** i nemici entrano da sinistra e il party da destra, scaglionati di 0,12 s. Chi viene rimosso svanisce. Quando la formazione cambia (riordino, aggiunte), gli sprite e le targhette scivolano nelle nuove posizioni.
+- **Dissolvenze di inizio e fine battaglia:** `PlayerScreen` passa da attesa a battaglia e viceversa con una dissolvenza al nero di 0,6 s per lato (`AnimatePresence mode="wait"`). A fine battaglia la scena svanisce mostrando ancora l'ultimo fotogramma, nemici compresi, prima della schermata di attesa.
+- **Test:** `MotionGlobalConfig.skipAnimations = true`, così i test verificano gli stati finali e non i singoli fotogrammi.
+
 ## Rotte
 
 Si usa l'hash routing, che funziona offline e su qualsiasi host statico:
@@ -151,7 +174,7 @@ Le sequenze di attacco sono dati (`advance → wait → fx → impact → shake 
 | 2    | Display statico: sfondo, sprite, barre PV                                                                                                |       |
 | 3    | Master: roster, modifica PV/PM e status, controlli della finestra nemici (manuale/auto, secondi), rivelazione PV/PM, fine battaglia      | ✅    |
 | 4    | Ponte BroadcastChannel: snapshot, riconnessione, presenza dello schermo, fase di preparazione                                            | ✅    |
-| 5    | Animazioni base: barre fluide, shake, testo dei danni, **dissolvenze di inizio e fine battaglia**                                        |       |
+| 5    | Animazioni base: barre fluide, shake, testo dei danni, dissolvenze di inizio e fine battaglia                                            | ✅    |
 | 6    | Coreografia completa con FX `.webm` e SFX                                                                                                |       |
 | 7    | Libreria asset (IndexedDB) e audio con crossfade; scelta di sprite, ritratti, sfondo di battaglia e **sfondo della schermata di attesa** |       |
 | 8    | Rifinitura: preset incontri da importare ed esportare, banner di vittoria                                                                |       |
