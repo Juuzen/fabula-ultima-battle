@@ -1,3 +1,4 @@
+import { ActionSchema, type Action } from './action'
 import {
   BattleStateSchema,
   findCombatant,
@@ -50,6 +51,8 @@ export type BattleCommand =
   | { type: 'LOAD_BATTLE'; state: BattleState }
   /** Reveals the prepared enemies to the players. */
   | { type: 'START_BATTLE' }
+  /** A choreographed action (attack, spell…) on one or more targets: one undo step. */
+  | { type: 'PERFORM_ACTION'; action: Action }
   /** Ends the encounter: enemies leave the field, the party stays, back to preparation. */
   | { type: 'END_BATTLE' }
 
@@ -151,6 +154,58 @@ function mergePresentation(current: Presentation, changes: PresentationChanges):
         : changes.waitingBackgroundAssetId,
     enemyPanel: { ...current.enemyPanel, ...changes.enemyPanel },
   }
+}
+
+/**
+ * Applies an action as a chain of basic commands (MP cost, then each target's outcome and
+ * statuses), all or nothing. The chain's events follow ACTION_PERFORMED, which opens the
+ * sequence on the Display.
+ */
+function performAction(state: BattleState, input: Action): CommandResult {
+  if (state.phase !== 'active') {
+    return fail(domainError('BATTLE_NOT_ACTIVE', 'Actions need a battle in progress'))
+  }
+  const parsed = ActionSchema.safeParse(input)
+  if (!parsed.success) return fail(domainError('INVALID_ACTION', parsed.error.message))
+  const action = parsed.data
+
+  const actor = findCombatant(state, action.actorId)
+  if (!actor) return notFound(action.actorId)
+  for (const target of action.targets) {
+    if (!findCombatant(state, target.id)) return notFound(target.id)
+  }
+  if (action.mpCost > actor.mp) {
+    return fail(domainError('NOT_ENOUGH_MP', `${actor.name} has ${actor.mp} MP`))
+  }
+
+  const steps: BattleCommand[] = []
+  if (action.mpCost > 0) steps.push({ type: 'SPEND_MP', id: actor.id, amount: action.mpCost })
+  for (const target of action.targets) {
+    const type = { damage: 'DAMAGE', heal: 'HEAL', mpDamage: 'SPEND_MP' } as const
+    steps.push({ type: type[action.kind], id: target.id, amount: target.amount })
+    for (const status of action.statuses) {
+      steps.push({ type: 'SET_STATUS', id: target.id, status, active: true })
+    }
+  }
+
+  let current = state
+  const events: BattleEvent[] = [
+    {
+      type: 'ACTION_PERFORMED',
+      actorId: actor.id,
+      name: action.name,
+      effect: action.effect,
+      kind: action.kind,
+      targetIds: action.targets.map((t) => t.id),
+    },
+  ]
+  for (const step of steps) {
+    const result = applyCommand(current, step)
+    if (!result.ok) return result
+    current = result.state
+    events.push(...result.events)
+  }
+  return ok(current, events)
 }
 
 /**
@@ -270,6 +325,9 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
       if (!parsed.success) return fail(domainError('INVALID_BATTLE', parsed.error.message))
       return ok(parsed.data, [{ type: 'BATTLE_LOADED', state: parsed.data }])
     }
+
+    case 'PERFORM_ACTION':
+      return performAction(state, command.action)
 
     case 'START_BATTLE':
       if (state.phase === 'active') return ok(state, [])

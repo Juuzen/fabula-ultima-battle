@@ -3,6 +3,9 @@ import { useMemo } from 'react'
 
 import { combatantsOnSide, type BattleState, type Combatant, type Side } from '@/domain'
 
+import { useChoreoStore } from '../choreography/choreoStore'
+import { ActionBanner } from '../effects/ActionBanner'
+import { EffectLayer } from '../effects/EffectLayer'
 import { FloatingTextLayer, type Anchor } from '../fx/FloatingTextLayer'
 import { EnemyInfoWindow } from '../hud/EnemyInfoWindow'
 import { PartyPanel } from '../hud/PartyPanel'
@@ -30,12 +33,14 @@ function SideFormation({ combatants, slots }: { combatants: Combatant[]; slots: 
 }
 
 /** Where floating combat text appears: a bit above the middle of each sprite. */
-function anchorsOf(groups: [Combatant[], Slot[]][]): Map<string, Anchor> {
+function anchorsOf(groups: [Combatant[], Slot[]][], heightRatio = 0.55): Map<string, Anchor> {
   const anchors = new Map<string, Anchor>()
   for (const [combatants, slots] of groups) {
     combatants.forEach((c, i) => {
       const slot = slots[i]
-      if (slot) anchors.set(c.id, { x: slot.x, y: slot.y - SPRITE_BOX.height * slot.scale * 0.55 })
+      if (slot) {
+        anchors.set(c.id, { x: slot.x, y: slot.y - SPRITE_BOX.height * slot.scale * heightRatio })
+      }
     })
   }
   return anchors
@@ -58,7 +63,23 @@ export function BattleScene({ battle }: { battle: BattleState }) {
       ]),
     [enemySide, allySide],
   )
-  const enemyPanelVisible = useEnemyPanelVisibility(battle)
+  // Effects are centred on the body, a bit lower than the floating texts.
+  const centres = useMemo(
+    () =>
+      anchorsOf(
+        [
+          [enemySide.combatants, enemySide.slots],
+          [allySide.combatants, allySide.slots],
+        ],
+        0.45,
+      ),
+    [enemySide, allySide],
+  )
+  const enemyPanelWanted = useEnemyPanelVisibility(battle)
+  // During an action the top of the screen belongs to its name banner: the enemy band steps
+  // aside and comes back afterwards (in auto mode the action's outcome pops it up anyway).
+  const actionPlaying = useChoreoStore((s) => s.stage !== null)
+  const enemyPanelVisible = enemyPanelWanted && !actionPlaying
   const enemies = enemySide.combatants
   const allies = allySide.combatants
 
@@ -72,7 +93,9 @@ export function BattleScene({ battle }: { battle: BattleState }) {
       </div>
 
       <NameplateLayer enemies={enemies} slots={enemySide.slots} />
+      <EffectLayer centres={centres} />
       <FloatingTextLayer anchors={anchors} />
+      <ActionBanner />
 
       {enemies.length > 0 && (
         <EnemyInfoWindow

@@ -1,3 +1,4 @@
+import type { ActionKind, EffectId } from './action'
 import type { BattleState, Presentation } from './battle'
 import type { Combatant, CombatantId } from './combatant'
 import type { StatusId } from './status'
@@ -28,6 +29,18 @@ export type BattleEvent =
   | { type: 'BATTLE_RENAMED'; name: string }
   | { type: 'BATTLE_LOADED'; state: BattleState }
   | { type: 'BATTLE_STARTED' }
+  /**
+   * Opens an action's sequence. The events that follow (MP spent, damage, statuses…) are its
+   * outcome: the Display plays the choreography and applies them on impact.
+   */
+  | {
+      type: 'ACTION_PERFORMED'
+      actorId: CombatantId
+      name: string
+      effect: EffectId
+      kind: ActionKind
+      targetIds: CombatantId[]
+    }
   | { type: 'BATTLE_ENDED'; removedEnemyIds: CombatantId[] }
 
 export type BattleEventType = BattleEvent['type']

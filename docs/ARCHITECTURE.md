@@ -161,9 +161,46 @@ type SyncMessage =
 - **Presenza:** il Master conta gli schermi collegati, aggiungendoli con `HELLO`/`HEARTBEAT` e togliendoli con `BYE` o dopo 12 s di silenzio. L'header mostra "Schermo giocatori collegato" oppure "non collegato".
 - **Hook React:** `useMasterSync` nella plancia e `useDisplaySync` nel Display, quest'ultimo disattivato con `?demo=1`.
 
-## Coreografia (dalla fase 6)
+## Sequenza d'azione (fase 6)
 
-Le sequenze di attacco sono dati (`advance → wait → fx → impact → shake → floatText → retreat`), eseguite da un sequencer a coda nel Display.
+**Dominio.** `PERFORM_ACTION` riceve un'`Action` (`src/domain/action.ts`), validata con Zod:
+
+- `actorId`;
+- `name`, che diventa il banner sullo schermo dei giocatori;
+- `effect`, uno degli effetti integrati: `slash`, `impact`, `fire`, `ice`, `thunder`, `light`, `shadow`;
+- `kind`: `damage`, `heal` o `mpDamage`;
+- `mpCost`, pagato dall'attaccante;
+- `statuses`, applicati a tutti i bersagli all'impatto;
+- `targets`: uno o più bersagli, ognuno con il proprio `amount`.
+
+L'azione è applicata come catena di comandi base: tutto o niente, con un solo passo di annullamento. Si può eseguire solo a battaglia in corso (`BATTLE_NOT_ACTIVE`) e con PM sufficienti (`NOT_ENOUGH_MP`). Gli eventi si aprono con `ACTION_PERFORMED` (attaccante, nome, effetto, tipo, bersagli), seguito dagli esiti: PM spesi, danni o cure, soglie, status.
+
+**Display: il regista** (`choreography/sequencer.ts`, indipendente da React). Ogni aggiornamento del Master passa da una coda:
+
+- gli aggiornamenti normali vengono applicati subito;
+- quelli che si aprono con `ACTION_PERFORMED` vengono recitati come sequenza: `advance` (280 ms) → `cast` (240 ms) → `effect` → `retreat` (280 ms);
+- il nuovo stato viene applicato **solo all'impatto**, cioè al punto dell'effetto indicato da `EFFECT_TIMING[effect].impactAt`. È in quel momento che barre, targhette, numeri, scossa e Crisi si aggiornano;
+- l'ordine di arrivo è sempre rispettato;
+- con 3 o più aggiornamenti in attesa, le sequenze vengono saltate per tornare in pari;
+- con "riduci movimento" le azioni vengono applicate subito;
+- alla chiusura la sequenza si interrompe e viene mostrato l'ultimo stato.
+
+Il passo corrente si trova in `useChoreoStore`.
+
+**Display: la messa in scena.**
+
+- L'attaccante avanza di 90 px verso il centro e ha un bagliore di carica.
+- `EffectLayer` disegna l'effetto su ogni bersaglio, in SVG animato con Motion, con un proprio `AnimatePresence`: quello del cambio schermata con `initial={false}` altrimenti farebbe partire gli effetti dall'ultimo fotogramma.
+- `ActionBanner` mostra il nome in alto. Durante l'azione la fascia nemici si sposta e poi ritorna.
+- Nella fase 7 ogni effetto potrà usare un `.webm` caricato dall'utente al posto del disegno integrato.
+
+**Master: il pannello "Azione"** (`master/action`).
+
+- Campi: chi agisce, nome, effetto, tipo (Danno PV / Cura PV / Danno PM), costo PM (solo se l'attaccante ha PM), bersagli con i rispettivi valori, status all'impatto.
+- La bozza vive in `useActionDraft`, fuori dallo stato della battaglia: niente annullamento, niente sincronizzazione, niente salvataggio.
+- Dopo "Esegui" i valori si svuotano e il resto rimane, così è facile ripetere un'azione simile.
+- Il pulsante "Agisci" su una scheda sceglie quell'attaccante e porta in vista il pannello.
+- Le azioni rapide Danno/Cura restano istantanee, senza sequenza.
 
 ## Roadmap
 
@@ -175,6 +212,6 @@ Le sequenze di attacco sono dati (`advance → wait → fx → impact → shake 
 | 3    | Master: roster, modifica PV/PM e status, controlli della finestra nemici (manuale/auto, secondi), rivelazione PV/PM, fine battaglia      | ✅    |
 | 4    | Ponte BroadcastChannel: snapshot, riconnessione, presenza dello schermo, fase di preparazione                                            | ✅    |
 | 5    | Animazioni base: barre fluide, shake, testo dei danni, dissolvenze di inizio e fine battaglia                                            | ✅    |
-| 6    | Coreografia completa con FX `.webm` e SFX                                                                                                |       |
+| 6    | Sequenza d'azione: avanzata, carica, effetti integrati, impatto (stato visivo ritardato), ritorno; pannello Azione multi-bersaglio       | ✅    |
 | 7    | Libreria asset (IndexedDB) e audio con crossfade; scelta di sprite, ritratti, sfondo di battaglia e **sfondo della schermata di attesa** |       |
 | 8    | Rifinitura: preset incontri da importare ed esportare, banner di vittoria                                                                |       |

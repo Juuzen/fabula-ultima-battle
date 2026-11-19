@@ -6,6 +6,7 @@ import { useBattleActions, useCanUndo } from '@/app/store'
 import { Button } from '@/shared/ui/Button'
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 
+import { ActionPanel } from './action/ActionPanel'
 import { BattleControls } from './controls/BattleControls'
 import { EnemyPanelControls } from './controls/EnemyPanelControls'
 import { ErrorBanner } from './controls/ErrorBanner'
@@ -76,8 +77,10 @@ export function MasterPage() {
             <RosterSection side="ally" />
             <RosterSection side="enemy" />
           </div>
-          <aside className="flex flex-col gap-6 xl:sticky xl:top-20">
+          {/* Sticky on wide screens, with its own scroll: it is taller than the viewport. */}
+          <aside className="flex flex-col gap-6 xl:sticky xl:top-20 xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto xl:pr-1">
             <DisplayPreview />
+            <ActionPanel />
             <EnemyPanelControls />
             <BattleControls />
           </aside>

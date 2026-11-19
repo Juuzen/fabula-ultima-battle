@@ -1,4 +1,5 @@
 // Public API of the domain layer. Pure TypeScript: no React, no browser APIs.
+export * from './action'
 export * from './battle'
 export * from './combatant'
 export * from './commands'
