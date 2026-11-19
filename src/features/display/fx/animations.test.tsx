@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { cleanup, render, screen, waitFor } from '@testing-library/react'
+import { AnimatePresence } from 'motion/react'
 import { describe, expect, it, vi } from 'vitest'
 
 import { createEmptyBattle, type BattleState } from '@/domain'
@@ -23,26 +24,124 @@ describe('FloatingTextLayer', () => {
     return remove
   }
 
+  /** Renders the layer; `rerender(items)` simulates the store after a removal. */
+  function renderQueue(items: Fx[]) {
+    const remove = vi.fn<(id: number) => void>()
+    const layer = (list: Fx[]) => (
+      <FxContext value={{ items: list, remove }}>
+        <FloatingTextLayer anchors={anchors} />
+      </FxContext>
+    )
+    const { rerender } = render(layer(items))
+    return { remove, rerender: (list: Fx[]) => rerender(layer(list)) }
+  }
+
   it('shows damage, heal, MP and Crisis texts on their target', () => {
     renderLayer([
       { id: 1, kind: 'damage', targetId: 'orc', amount: 12 },
       { id: 2, kind: 'crisis', targetId: 'orc' },
-      { id: 3, kind: 'heal', targetId: 'orc', amount: 5 },
-      { id: 4, kind: 'mpLoss', targetId: 'orc', amount: 8 },
     ])
     expect(screen.getByTestId('fx-damage')).toHaveTextContent('12')
     expect(screen.getByTestId('fx-crisis')).toHaveTextContent('Crisi!')
+    cleanup()
+    renderLayer([
+      { id: 3, kind: 'heal', targetId: 'orc', amount: 5 },
+      { id: 4, kind: 'mpLoss', targetId: 'orc', amount: 8 },
+    ])
     expect(screen.getByTestId('fx-heal')).toHaveTextContent('+5')
     expect(screen.getByTestId('fx-mpLoss')).toHaveTextContent('−8 PM')
   })
 
-  it('stacks texts on the same target instead of overlapping them', () => {
+  it('announces an applied status by name, in a light tint of its badge colour', () => {
+    renderLayer([{ id: 1, kind: 'status', targetId: 'orc', status: 'poisoned' }])
+    const text = screen.getByTestId('fx-status')
+    expect(text).toHaveTextContent('Avvelenato!')
+    expect(text.className).toContain('text-emerald-300')
+  })
+
+  it('shows the HP number together with a text, below it', () => {
     renderLayer([
-      { id: 1, kind: 'damage', targetId: 'orc', amount: 12 },
-      { id: 2, kind: 'crisis', targetId: 'orc' },
+      { id: 1, kind: 'damage', targetId: 'orc', amount: 6 },
+      { id: 2, kind: 'status', targetId: 'orc', status: 'enraged' },
     ])
     const top = (id: string) => parseFloat(screen.getByTestId(id).style.top)
-    expect(top('fx-crisis')).toBeLessThan(top('fx-damage'))
+    expect(screen.getByTestId('fx-status')).toHaveTextContent('Furente!')
+    expect(top('fx-damage')).toBeGreaterThan(top('fx-status'))
+  })
+
+  it('plays the texts of a target one at a time, in order, in the same spot', () => {
+    const items: Fx[] = [
+      { id: 1, kind: 'crisis', targetId: 'orc' },
+      { id: 2, kind: 'status', targetId: 'orc', status: 'shaken' },
+      { id: 3, kind: 'mpLoss', targetId: 'orc', amount: 8 },
+    ]
+    const { rerender } = renderQueue(items)
+    expect(screen.getByTestId('fx-crisis')).toBeInTheDocument()
+    expect(screen.queryByTestId('fx-status')).toBeNull()
+    expect(screen.queryByTestId('fx-mpLoss')).toBeNull()
+    const spot = screen.getByTestId('fx-crisis').style.cssText
+
+    rerender(items.slice(1)) // "Crisi!" ended
+    expect(screen.getByTestId('fx-status').style.cssText).toBe(spot)
+    expect(screen.queryByTestId('fx-mpLoss')).toBeNull()
+
+    rerender(items.slice(2)) // "Scosso!" ended
+    expect(screen.getByTestId('fx-mpLoss').style.cssText).toBe(spot)
+  })
+
+  it('plays the HP numbers of a target one at a time, in order, in the same spot', () => {
+    const items: Fx[] = [
+      { id: 1, kind: 'damage', targetId: 'orc', amount: 12 },
+      { id: 2, kind: 'heal', targetId: 'orc', amount: 5 },
+    ]
+    const { rerender } = renderQueue(items)
+    expect(screen.getByTestId('fx-damage')).toBeInTheDocument()
+    expect(screen.queryByTestId('fx-heal')).toBeNull()
+    const spot = screen.getByTestId('fx-damage').style.cssText
+    rerender(items.slice(1))
+    expect(screen.getByTestId('fx-heal').style.cssText).toBe(spot)
+  })
+
+  it('plays texts on different targets at the same time', () => {
+    render(
+      <FxContext
+        value={{
+          items: [
+            { id: 1, kind: 'damage', targetId: 'orc', amount: 12 },
+            { id: 2, kind: 'heal', targetId: 'elf', amount: 5 },
+          ],
+          remove: vi.fn(),
+        }}
+      >
+        <FloatingTextLayer anchors={new Map([...anchors, ['elf', { x: 900, y: 400 }]])} />
+      </FxContext>,
+    )
+    expect(screen.getByTestId('fx-damage')).toBeInTheDocument()
+    expect(screen.getByTestId('fx-heal')).toBeInTheDocument()
+  })
+
+  it('does not let an effect without text (revive) hold up the line', () => {
+    renderQueue([
+      { id: 1, kind: 'revive', targetId: 'orc' },
+      { id: 2, kind: 'heal', targetId: 'orc', amount: 20 },
+    ])
+    expect(screen.getByTestId('fx-heal')).toBeInTheDocument()
+  })
+
+  it('still plays (and ends) inside an AnimatePresence with initial={false}, like the scene', async () => {
+    const remove = vi.fn<(id: number) => void>()
+    render(
+      <AnimatePresence initial={false}>
+        <div key="scene">
+          <FxContext
+            value={{ items: [{ id: 1, kind: 'damage', targetId: 'orc', amount: 3 }], remove }}
+          >
+            <FloatingTextLayer anchors={anchors} />
+          </FxContext>
+        </div>
+      </AnimatePresence>,
+    )
+    await waitFor(() => expect(remove).toHaveBeenCalledWith(1))
   })
 
   it('removes each effect when its animation ends, and drops effects on absent targets', async () => {

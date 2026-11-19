@@ -1,10 +1,12 @@
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 
 import type { CombatantId } from '@/domain'
 
 import type { Fx } from './fx'
+import { STATUS_VISUALS } from '../hud/statusVisuals'
 import { useFx } from './fxContext'
 
 export type Anchor = { x: number; y: number }
@@ -17,10 +19,10 @@ const STYLE: Record<Fx['kind'], string> = {
   crisis: 'text-amber-300 text-5xl tracking-widest uppercase',
   ko: 'text-red-500 text-6xl tracking-widest',
   revive: 'text-emerald-200 text-5xl',
+  status: 'text-5xl', // colour: the status badge's (see className below)
 }
 
-function useLabel(fx: Fx): string | null {
-  const { t } = useTranslation()
+function labelOf(fx: Fx, t: TFunction): string | null {
   switch (fx.kind) {
     case 'damage':
       return String(fx.amount)
@@ -36,28 +38,32 @@ function useLabel(fx: Fx): string | null {
       return t('display.ko')
     case 'revive':
       return null // the green glow on the sprite says it all
+    case 'status':
+      return fx.status ? `${t(`status.${fx.status}`)}!` : null
   }
 }
 
-/** State texts ("Crisi!", "KO") come right after the number that caused them. */
-const DELAY: Partial<Record<Fx['kind'], number>> = { crisis: 0.25, ko: 0.25 }
-
-function FloatingText({ fx, anchor, onDone }: { fx: Fx; anchor: Anchor; onDone: () => void }) {
-  const label = useLabel(fx)
-  if (label === null) return null
+function FloatingText({
+  fx,
+  label,
+  anchor,
+  onDone,
+}: {
+  fx: Fx
+  label: string
+  anchor: Anchor
+  onDone: () => void
+}) {
+  const colour = fx.kind === 'status' && fx.status ? STATUS_VISUALS[fx.status].textColour : ''
   return (
     <motion.div
       data-testid={`fx-${fx.kind}`}
-      className={`font-display absolute -translate-x-1/2 -translate-y-full font-black whitespace-nowrap [-webkit-text-stroke:6px_rgba(10,10,25,.9)] [paint-order:stroke_fill] ${STYLE[fx.kind]}`}
+      className={`font-display absolute -translate-x-1/2 -translate-y-full font-black whitespace-nowrap [-webkit-text-stroke:6px_rgba(10,10,25,.9)] [paint-order:stroke_fill] ${STYLE[fx.kind]} ${colour}`}
       style={{ left: anchor.x, top: anchor.y }}
-      initial={{ opacity: 0, y: 24, scale: 0.6 }}
-      animate={{ opacity: [0, 1, 1, 0], y: [24, -8, -40, -90], scale: [0.6, 1.2, 1, 1] }}
-      transition={{
-        duration: 1.4,
-        times: [0, 0.15, 0.7, 1],
-        ease: 'easeOut',
-        delay: DELAY[fx.kind] ?? 0,
-      }}
+      // Stays in place: fades in, holds, fades out.
+      initial={{ opacity: 0 }}
+      animate={{ opacity: [0, 1, 1, 0] }}
+      transition={{ duration: 1.4, times: [0, 0.15, 0.7, 1], ease: 'easeInOut' }}
       onAnimationComplete={onDone}
     >
       {label}
@@ -65,14 +71,30 @@ function FloatingText({ fx, anchor, onDone }: { fx: Fx; anchor: Anchor; onDone: 
   )
 }
 
-/** Gap between texts stacked on the same target (e.g. "12" then "Crisi!"): one line of text. */
-const STACK_GAP = 84
+/**
+ * Each combatant has two lanes, played side by side:
+ * - `number`: HP damage and healing ("12", "+8");
+ * - `text`: everything else ("Crisi!", "Avvelenato!", "KO", "−8 PM"…).
+ * Within a lane, effects play one at a time in order, always in the same spot.
+ */
+type Lane = 'number' | 'text'
+
+const laneOf = (fx: Fx): Lane => (fx.kind === 'damage' || fx.kind === 'heal' ? 'number' : 'text')
 
 /**
- * Floating combat text over the sprites ("12", "+8", "Crisi!"…). Each text removes its
- * effect from the queue when its animation ends.
+ * The number sits just below the text, over the sprite: the two never overlap and neither
+ * climbs towards the badges and nameplates above the sprite. ≈ one line of the number's size.
+ */
+const NUMBER_DROP = 76
+
+/**
+ * Floating combat text over the sprites. In each lane (see `Lane`) the next effect starts when
+ * the current one has faded out and removed itself from the queue, so "12" and "Crisi!" show
+ * together, while "Crisi!" then "Avvelenato!" follow one another. Different combatants play in
+ * parallel. Effects with no text (revive: the sprite glow) never hold up a lane.
  */
 export function FloatingTextLayer({ anchors }: { anchors: ReadonlyMap<CombatantId, Anchor> }) {
+  const { t } = useTranslation()
   const { items, remove } = useFx()
 
   // Effects on combatants no longer on screen would never finish: drop them.
@@ -80,21 +102,36 @@ export function FloatingTextLayer({ anchors }: { anchors: ReadonlyMap<CombatantI
     for (const fx of items) if (!anchors.has(fx.targetId)) remove(fx.id)
   }, [items, anchors, remove])
 
+  // Head of each lane: its oldest effect that has a text.
+  const current = new Map<string, { fx: Fx; label: string; lane: Lane }>()
+  for (const fx of [...items].sort((a, b) => a.id - b.id)) {
+    const lane = laneOf(fx)
+    const key = `${fx.targetId}:${lane}`
+    if (current.has(key)) continue
+    const label = labelOf(fx, t)
+    if (label !== null) current.set(key, { fx, label, lane })
+  }
+
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 1300 }}>
-      {items.map((fx) => {
-        const anchor = anchors.get(fx.targetId)
-        if (!anchor) return null
-        const stacked = items.filter((o) => o.targetId === fx.targetId && o.id < fx.id).length
-        return (
-          <FloatingText
-            key={fx.id}
-            fx={fx}
-            anchor={{ x: anchor.x, y: anchor.y - stacked * STACK_GAP }}
-            onDone={() => remove(fx.id)}
-          />
-        )
-      })}
+      {/* Own presence scope: the scene's AnimatePresence initial={false} (PlayerScreen) would
+          otherwise reach these texts and make them jump to their last keyframe, opacity 0. */}
+      <AnimatePresence>
+        {[...current.values()].map(({ fx, label, lane }) => {
+          const anchor = anchors.get(fx.targetId)
+          if (!anchor) return null
+          const y = lane === 'number' ? anchor.y + NUMBER_DROP : anchor.y
+          return (
+            <FloatingText
+              key={fx.id}
+              fx={fx}
+              label={label}
+              anchor={{ x: anchor.x, y }}
+              onDone={() => remove(fx.id)}
+            />
+          )
+        })}
+      </AnimatePresence>
     </div>
   )
 }

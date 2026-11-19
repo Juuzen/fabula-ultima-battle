@@ -1,7 +1,7 @@
-import type { BattleEvent, CombatantId } from '@/domain'
+import type { BattleEvent, CombatantId, StatusId } from '@/domain'
 
 /** A short-lived visual effect on one combatant (floating text, shake, glow…). */
-export type FxKind = 'damage' | 'heal' | 'mpLoss' | 'mpGain' | 'crisis' | 'ko' | 'revive'
+export type FxKind = 'damage' | 'heal' | 'mpLoss' | 'mpGain' | 'crisis' | 'ko' | 'revive' | 'status'
 
 export type Fx = {
   /** Unique and increasing: also tells components which hit is the latest. */
@@ -9,6 +9,8 @@ export type Fx = {
   kind: FxKind
   targetId: CombatantId
   amount?: number
+  /** For `status`: the status just applied. */
+  status?: StatusId
 }
 
 /**
@@ -45,6 +47,11 @@ export function eventsToFx(events: readonly BattleEvent[], firstId: number): Fx[
         break
       case 'REVIVED':
         add('revive', event.id)
+        break
+      case 'STATUS_CHANGED':
+        // Only a newly applied status is announced; removing one is silent.
+        if (event.active)
+          fx.push({ id: id++, kind: 'status', targetId: event.id, status: event.status })
         break
       default:
         break

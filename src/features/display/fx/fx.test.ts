@@ -39,6 +39,17 @@ describe('eventsToFx', () => {
     expect(fx.map((f) => f.kind)).toEqual(['damage'])
   })
 
+  it('announces a newly applied status, but not a removed one', () => {
+    const fx = eventsToFx(
+      [
+        { type: 'STATUS_CHANGED', id: 'orc', status: 'poisoned', active: true },
+        { type: 'STATUS_CHANGED', id: 'orc', status: 'slow', active: false },
+      ],
+      1,
+    )
+    expect(fx).toEqual([{ id: 1, kind: 'status', targetId: 'orc', status: 'poisoned' }])
+  })
+
   it('ignores events without a visual counterpart', () => {
     expect(eventsToFx([{ type: 'BATTLE_RENAMED', name: 'x' }], 1)).toEqual([])
   })

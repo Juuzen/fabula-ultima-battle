@@ -118,7 +118,7 @@ Libreria: **Motion** (`motion/react`). `MotionConfig reducedMotion="user"` rispe
   - `eventsToFx` è una funzione pura che trasforma gli eventi di dominio ricevuti con lo `STATE` in effetti: `damage`, `heal`, `mpLoss`, `mpGain`, `crisis`, `ko`, `revive`. Un danno 0 resta visibile ("0"); le variazioni di PM nulle no.
   - `useFxStore` è la coda degli effetti in corso, limitata a 40 per non accumulare effetti scaduti se la scheda resta in background. Ogni effetto si toglie da solo a fine animazione.
   - Gli effetti arrivano alla scena tramite `FxContext`: il Display lo fornisce, l'anteprima della plancia no, quindi lì non ci sono testi fluttuanti.
-- **Testo fluttuante:** sopra lo sprite compaiono i danni (bianco), le cure (verde, `+8`), i PM (azzurro, `−8 PM`), la Crisi ("Crisi!") e il KO. Più testi sullo stesso bersaglio si impilano; le scritte di stato arrivano 0,25 s dopo il numero che le ha causate.
+- **Testo fluttuante:** sopra lo sprite compaiono i danni (bianco), le cure (verde, `+8`), i PM (azzurro, `−8 PM`), la Crisi ("Crisi!"), il KO e gli status applicati ("Avvelenato!", in una tinta chiara del colore del badge). I testi restano fermi e appaiono/scompaiono in dissolvenza. Ogni bersaglio ha due corsie che procedono in parallelo: i numeri dei PV (danni e cure), appena sotto, e tutti gli altri testi (Crisi, KO, PM, status). Così "12" compare insieme a "Crisi!". Dentro ogni corsia i testi vengono mostrati uno alla volta, sempre nello stesso punto e nell'ordine in cui sono avvenuti: il successivo parte quando il precedente è sparito. Bersagli diversi procedono in parallelo.
 - **Reazione dello sprite:**
   - un danno lo fa tremare e lampeggiare;
   - una cura o una rianimazione gli dà un bagliore verde;
