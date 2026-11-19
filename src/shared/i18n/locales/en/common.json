@@ -39,7 +39,8 @@
       "statuses": "Statuses",
       "reveal": "HP/MP visible",
       "revealHint": "Show this enemy's HP and MP to the players",
-      "revealedByAll": "Visible for all"
+      "revealedByAll": "Visible for all",
+      "act": "Act"
     },
     "edit": {
       "title": "Edit {{name}}",
@@ -84,12 +85,38 @@
       "INVALID_AMOUNT": "Enter a positive whole number.",
       "INVALID_COMBATANT": "Invalid combatant data: check name and values.",
       "INVALID_BATTLE": "Invalid battle.",
-      "INVALID_PRESENTATION": "Invalid setting."
+      "INVALID_PRESENTATION": "Invalid setting.",
+      "INVALID_ACTION": "Invalid action: check targets and values.",
+      "BATTLE_NOT_ACTIVE": "Actions can only be performed once the battle has started.",
+      "NOT_ENOUGH_MP": "Not enough MP for this action."
     },
     "connected": "Player screen connected",
     "notConnected": "Player screen not connected",
     "enemiesHidden": "Hidden from players",
-    "previewPreparation": "Preparing: players see the waiting screen."
+    "previewPreparation": "Preparing: players see the waiting screen.",
+    "action": {
+      "title": "Action",
+      "actor": "Who acts",
+      "chooseActor": "Choose…",
+      "name": "Action name",
+      "namePlaceholder": "E.g. Fireball",
+      "effect": "Effect",
+      "kind": "Type",
+      "kinds": {
+        "damage": "HP damage",
+        "heal": "HP heal",
+        "mpDamage": "MP damage"
+      },
+      "targets": "Targets",
+      "amount": "Amount for {{name}}",
+      "mpCost": "MP cost",
+      "mpAvailable": "available: {{mp}}",
+      "statuses": "Statuses on impact",
+      "perform": "Perform",
+      "notActive": "Start the battle to perform actions with the animated sequence.",
+      "chooseTargets": "Choose at least one target and enter an amount.",
+      "notEnoughMp": "Not enough MP ({{mp}} available)."
+    }
   },
   "display": {
     "waiting": "Waiting for the battle…",
@@ -117,5 +144,14 @@
     "shaken": "Shaken",
     "enraged": "Enraged",
     "poisoned": "Poisoned"
+  },
+  "effects": {
+    "slash": "Slash",
+    "impact": "Impact",
+    "fire": "Fire",
+    "ice": "Ice",
+    "thunder": "Thunder",
+    "light": "Light",
+    "shadow": "Shadow"
   }
 }

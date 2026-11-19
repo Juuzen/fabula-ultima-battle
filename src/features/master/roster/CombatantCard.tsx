@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronUp, Pencil, Sparkles, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -8,6 +8,7 @@ import { StateTag } from '@/features/display'
 import { Button } from '@/shared/ui/Button'
 import { Toggle } from '@/shared/ui/fields'
 
+import { useActionDraft } from '../action/actionDraft'
 import { EditCombatantForm } from './EditCombatantForm'
 import { QuickActions } from './QuickActions'
 import { StatusToggles } from './StatusToggles'
@@ -48,6 +49,8 @@ export function CombatantCard({ combatant: c, index, count }: Props) {
   const { dispatch } = useBattleActions()
   const revealAll = useBattleStore((s) => s.battle.presentation.revealAllEnemyStats)
   const [editing, setEditing] = useState(false)
+  const actAs = useActionDraft((s) => s.actAs)
+  const battleActive = useBattleStore((s) => s.battle.phase === 'active')
 
   const ko = isKnockedOut(c)
   const hpTone = ko ? 'bg-red-600' : isInCrisis(c) ? 'bg-amber-400' : 'bg-emerald-500'
@@ -98,6 +101,17 @@ export function CombatantCard({ combatant: c, index, count }: Props) {
         )}
 
         <div className="flex gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            aria-label={t('master.combatant.act')}
+            title={t('master.combatant.act')}
+            disabled={!battleActive}
+            onClick={() => actAs(c.id)}
+            className="hover:text-amber-300"
+          >
+            <Sparkles className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="sm"

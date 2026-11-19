@@ -39,7 +39,8 @@
       "statuses": "Status",
       "reveal": "PV/PM visibili",
       "revealHint": "Mostra PV e PM di questo nemico ai giocatori",
-      "revealedByAll": "Visibili a tutti"
+      "revealedByAll": "Visibili a tutti",
+      "act": "Agisci"
     },
     "edit": {
       "title": "Modifica {{name}}",
@@ -84,12 +85,38 @@
       "INVALID_AMOUNT": "Inserisci un numero intero positivo.",
       "INVALID_COMBATANT": "Dati del combattente non validi: controlla nome e valori.",
       "INVALID_BATTLE": "Battaglia non valida.",
-      "INVALID_PRESENTATION": "Impostazione non valida."
+      "INVALID_PRESENTATION": "Impostazione non valida.",
+      "INVALID_ACTION": "Azione non valida: controlla bersagli e valori.",
+      "BATTLE_NOT_ACTIVE": "Le azioni si possono eseguire solo a battaglia iniziata.",
+      "NOT_ENOUGH_MP": "PM insufficienti per questa azione."
     },
     "connected": "Schermo giocatori collegato",
     "notConnected": "Schermo giocatori non collegato",
     "enemiesHidden": "Nascosti ai giocatori",
-    "previewPreparation": "In preparazione: i giocatori vedono la schermata di attesa."
+    "previewPreparation": "In preparazione: i giocatori vedono la schermata di attesa.",
+    "action": {
+      "title": "Azione",
+      "actor": "Chi agisce",
+      "chooseActor": "Scegli…",
+      "name": "Nome azione",
+      "namePlaceholder": "Es. Palla di fuoco",
+      "effect": "Effetto",
+      "kind": "Tipo",
+      "kinds": {
+        "damage": "Danno PV",
+        "heal": "Cura PV",
+        "mpDamage": "Danno PM"
+      },
+      "targets": "Bersagli",
+      "amount": "Valore per {{name}}",
+      "mpCost": "Costo PM",
+      "mpAvailable": "disponibili: {{mp}}",
+      "statuses": "Status all'impatto",
+      "perform": "Esegui",
+      "notActive": "Inizia la battaglia per eseguire azioni con la sequenza animata.",
+      "chooseTargets": "Scegli almeno un bersaglio e indica un valore.",
+      "notEnoughMp": "PM insufficienti ({{mp}} disponibili)."
+    }
   },
   "display": {
     "waiting": "In attesa della battaglia…",
@@ -117,5 +144,14 @@
     "shaken": "Scosso",
     "enraged": "Furente",
     "poisoned": "Avvelenato"
+  },
+  "effects": {
+    "slash": "Taglio",
+    "impact": "Impatto",
+    "fire": "Fuoco",
+    "ice": "Ghiaccio",
+    "thunder": "Fulmine",
+    "light": "Luce",
+    "shadow": "Ombra"
   }
 }
