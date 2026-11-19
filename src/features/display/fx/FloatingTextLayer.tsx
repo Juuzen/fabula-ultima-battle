@@ -100,8 +100,7 @@ export function FloatingTextLayer({ anchors }: { anchors: ReadonlyMap<CombatantI
   // Effects on combatants no longer on screen, or with no text to show, would never finish:
   // drop them (the sprite has already seen them in the render that added them).
   useEffect(() => {
-    for (const fx of items)
-      if (!anchors.has(fx.targetId) || labelOf(fx, t) === null) remove(fx.id)
+    for (const fx of items) if (!anchors.has(fx.targetId) || labelOf(fx, t) === null) remove(fx.id)
   }, [items, anchors, remove, t])
 
   // Head of each lane: its oldest effect that has a text.
