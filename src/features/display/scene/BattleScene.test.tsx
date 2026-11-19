@@ -77,6 +77,14 @@ describe('BattleScene', () => {
     expect(screen.getByTestId('sprite-a3')).toHaveAttribute('data-state', 'ko')
   })
 
+  it('draws the Crisis aura only on combatants in Crisis', () => {
+    render(<BattleScene battle={demoBattle} />)
+    const aura = (id: string) => screen.getByTestId(id).querySelector('[data-testid=crisis-aura]')
+    expect(aura('sprite-a2')).not.toBeNull() // Bastian, Crisis
+    expect(aura('sprite-a1')).toBeNull() // Lyra, healthy
+    expect(aura('sprite-a3')).toBeNull() // Mirelle, KO
+  })
+
   it('omits the party panel and enemy window when their side is empty', () => {
     render(<BattleScene battle={createEmptyBattle()} />)
     expect(screen.queryByRole('region', { name: 'Party' })).not.toBeInTheDocument()

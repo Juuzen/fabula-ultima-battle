@@ -9,19 +9,40 @@ export type Fx = {
   kind: FxKind
   targetId: CombatantId
   amount?: number
+  /**
+   * Vertical slot among the texts on the same target (0 = lowest). Fixed when the effect
+   * is queued, so a text never jumps when the one below it finishes.
+   */
+  stack: number
+}
+
+/** Smallest slot not used by the target's active effects. */
+function freeSlot(active: readonly Fx[], targetId: CombatantId): number {
+  const used = new Set(active.filter((f) => f.targetId === targetId).map((f) => f.stack))
+  let slot = 0
+  while (used.has(slot)) slot++
+  return slot
 }
 
 /**
  * Turns domain events into visual effects. Pure: the Display decides how they look,
  * the domain only says what happened. Events with no visual counterpart are ignored.
  */
-export function eventsToFx(events: readonly BattleEvent[], firstId: number): Fx[] {
+export function eventsToFx(
+  events: readonly BattleEvent[],
+  firstId: number,
+  active: readonly Fx[] = [],
+): Fx[] {
   const fx: Fx[] = []
   let id = firstId
-  const add = (kind: FxKind, targetId: CombatantId, amount?: number) =>
+  const add = (kind: FxKind, targetId: CombatantId, amount?: number) => {
+    const stack = freeSlot([...active, ...fx], targetId)
     fx.push(
-      amount === undefined ? { id: id++, kind, targetId } : { id: id++, kind, targetId, amount },
+      amount === undefined
+        ? { id: id++, kind, targetId, stack }
+        : { id: id++, kind, targetId, amount, stack },
     )
+  }
 
   for (const event of events) {
     switch (event.type) {

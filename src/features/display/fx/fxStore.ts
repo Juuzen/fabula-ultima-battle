@@ -21,7 +21,7 @@ export const useFxStore = create<FxStoreState>()((set) => ({
   nextId: 1,
   push: (events) =>
     set((s) => {
-      const fx = eventsToFx(events, s.nextId)
+      const fx = eventsToFx(events, s.nextId, s.items)
       if (fx.length === 0) return s
       return { items: [...s.items, ...fx].slice(-MAX_ACTIVE_FX), nextId: s.nextId + fx.length }
     }),

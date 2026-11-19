@@ -25,10 +25,10 @@ describe('FloatingTextLayer', () => {
 
   it('shows damage, heal, MP and Crisis texts on their target', () => {
     renderLayer([
-      { id: 1, kind: 'damage', targetId: 'orc', amount: 12 },
-      { id: 2, kind: 'crisis', targetId: 'orc' },
-      { id: 3, kind: 'heal', targetId: 'orc', amount: 5 },
-      { id: 4, kind: 'mpLoss', targetId: 'orc', amount: 8 },
+      { id: 1, kind: 'damage', targetId: 'orc', amount: 12, stack: 0 },
+      { id: 2, kind: 'crisis', targetId: 'orc', stack: 1 },
+      { id: 3, kind: 'heal', targetId: 'orc', amount: 5, stack: 2 },
+      { id: 4, kind: 'mpLoss', targetId: 'orc', amount: 8, stack: 3 },
     ])
     expect(screen.getByTestId('fx-damage')).toHaveTextContent('12')
     expect(screen.getByTestId('fx-crisis')).toHaveTextContent('Crisi!')
@@ -36,19 +36,41 @@ describe('FloatingTextLayer', () => {
     expect(screen.getByTestId('fx-mpLoss')).toHaveTextContent('−8 PM')
   })
 
-  it('stacks texts on the same target instead of overlapping them', () => {
+  it('places each text at its own fixed slot', () => {
     renderLayer([
-      { id: 1, kind: 'damage', targetId: 'orc', amount: 12 },
-      { id: 2, kind: 'crisis', targetId: 'orc' },
+      { id: 1, kind: 'damage', targetId: 'orc', amount: 12, stack: 0 },
+      { id: 2, kind: 'crisis', targetId: 'orc', stack: 1 },
     ])
     const top = (id: string) => parseFloat(screen.getByTestId(id).style.top)
     expect(top('fx-crisis')).toBeLessThan(top('fx-damage'))
   })
 
+  it('a text keeps its position when the one below it disappears', () => {
+    const crisis: Fx = { id: 2, kind: 'crisis', targetId: 'orc', stack: 1 }
+    const remove = vi.fn<(id: number) => void>()
+    const { rerender } = render(
+      <FxContext
+        value={{
+          items: [{ id: 1, kind: 'damage', targetId: 'orc', amount: 25, stack: 0 }, crisis],
+          remove,
+        }}
+      >
+        <FloatingTextLayer anchors={anchors} />
+      </FxContext>,
+    )
+    const before = screen.getByTestId('fx-crisis').style.top
+    rerender(
+      <FxContext value={{ items: [crisis], remove }}>
+        <FloatingTextLayer anchors={anchors} />
+      </FxContext>,
+    )
+    expect(screen.getByTestId('fx-crisis').style.top).toBe(before)
+  })
+
   it('removes each effect when its animation ends, and drops effects on absent targets', async () => {
     const remove = renderLayer([
-      { id: 1, kind: 'damage', targetId: 'orc', amount: 3 },
-      { id: 2, kind: 'damage', targetId: 'ghost', amount: 3 },
+      { id: 1, kind: 'damage', targetId: 'orc', amount: 3, stack: 0 },
+      { id: 2, kind: 'damage', targetId: 'ghost', amount: 3, stack: 0 },
     ])
     expect(remove).toHaveBeenCalledWith(2)
     await waitFor(() => expect(remove).toHaveBeenCalledWith(1))

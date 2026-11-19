@@ -31,8 +31,15 @@
     opacity: 0.55;
   }
 
-  .sprite-crisis {
-    animation: crisis-glow 1.4s ease-in-out infinite;
+  /* Red pulsing halo behind a sprite in Crisis: opacity/scale only, cheap and glitch-free. */
+  .crisis-aura {
+    background: radial-gradient(
+      ellipse at 50% 55%,
+      rgba(255, 60, 40, 0.55) 0%,
+      rgba(255, 60, 40, 0.25) 45%,
+      transparent 70%
+    );
+    animation: crisis-aura 1.4s ease-in-out infinite;
   }
 
   .slot-crisis {
@@ -64,13 +71,15 @@
   }
 }
 
-@keyframes crisis-glow {
+@keyframes crisis-aura {
   0%,
   100% {
-    filter: drop-shadow(0 0 0 rgba(255, 60, 40, 0));
+    opacity: 0.15;
+    transform: scale(0.94);
   }
   50% {
-    filter: drop-shadow(0 0 14px rgba(255, 60, 40, 0.9)) brightness(1.08);
+    opacity: 1;
+    transform: scale(1.04);
   }
 }
 
@@ -79,9 +88,9 @@
   .waiting-pulse {
     animation: none;
   }
-  .sprite-crisis {
+  .crisis-aura {
     animation: none;
-    filter: drop-shadow(0 0 10px rgba(255, 60, 40, 0.8));
+    opacity: 0.8;
   }
 }
 
