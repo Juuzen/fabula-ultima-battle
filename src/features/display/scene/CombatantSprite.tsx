@@ -1,5 +1,5 @@
-import { motion, useReducedMotion } from 'motion/react'
-import { useEffect, useRef } from 'react'
+import { motion, useAnimate, useReducedMotion } from 'motion/react'
+import { useEffect } from 'react'
 
 import { isInCrisis, isKnockedOut, type Combatant } from '@/domain'
 import { useAssetUrl } from '@/infra/assets/assetResolver'
@@ -17,51 +17,35 @@ type Props = {
   entranceDelay?: number
 }
 
-const SHAKE: Keyframe[] = [0, -16, 14, -10, 8, -4, 0].map((x) => ({
-  transform: `translateX(${x}px)`,
-}))
-// White hit flash on any sprite: brightening alone would turn a blue sprite cyan,
-// so saturation is dropped at the peak.
-const FLASH: Keyframe[] = [
-  { filter: 'brightness(1) saturate(1)' },
-  { filter: 'brightness(2.2) saturate(0)' },
-  { filter: 'brightness(1) saturate(1)' },
-]
-const HEAL_GLOW: Keyframe[] = [
-  { filter: 'drop-shadow(0 0 0 rgba(90,255,170,0))' },
-  { filter: 'drop-shadow(0 0 26px rgba(90,255,170,.95))' },
-  { filter: 'drop-shadow(0 0 0 rgba(90,255,170,0))' },
-]
+const SHAKE = { x: [0, -16, 14, -10, 8, -4, 0] }
+const FLASH = { filter: ['brightness(1)', 'brightness(2.6)', 'brightness(1)'] }
+const HEAL_GLOW = {
+  filter: [
+    'drop-shadow(0 0 0 rgba(90,255,170,0))',
+    'drop-shadow(0 0 26px rgba(90,255,170,.95))',
+    'drop-shadow(0 0 0 rgba(90,255,170,0))',
+  ],
+}
 
-/**
- * Shakes and flashes on damage, glows green on heal/revive. Uses the native Web Animations
- * API with `fill: 'none'`: once an effect ends nothing is left on the element (no leftover
- * filter keeping an extra GPU layer alive, which could glitch when the scene re-composites).
- */
+/** Shakes and flashes on damage, glows green on heal/revive. */
 function useHitReaction(combatantId: string) {
-  const ref = useRef<HTMLDivElement>(null)
+  const [scope, animate] = useAnimate<HTMLDivElement>()
   const hit = useLatestHit(combatantId)
   const reduceMotion = useReducedMotion()
   const hitId = hit?.id
   const hitKind = hit?.kind
 
   useEffect(() => {
-    const root = ref.current
-    if (hitId === undefined || reduceMotion || !root?.animate) return
-    const shake = root.querySelector<HTMLElement>('[data-shake]')
-    const flash = root.querySelector<HTMLElement>('[data-flash]')
-    const running: Animation[] = []
+    if (hitId === undefined || reduceMotion || !scope.current) return
     if (hitKind === 'damage') {
-      if (shake) running.push(shake.animate(SHAKE, { duration: 450, easing: 'ease-out' }))
-      if (flash) running.push(flash.animate(FLASH, { duration: 350 }))
-    } else if (flash) {
-      running.push(flash.animate(HEAL_GLOW, { duration: 900 }))
+      void animate('[data-shake]', SHAKE, { duration: 0.45, ease: 'easeOut' })
+      void animate('[data-flash]', FLASH, { duration: 0.35 })
+    } else {
+      void animate('[data-flash]', HEAL_GLOW, { duration: 0.9 })
     }
-    // A newer hit replaces this one instead of overlapping it.
-    return () => running.forEach((a) => a.cancel())
-  }, [hitId, hitKind, reduceMotion])
+  }, [hitId, hitKind, reduceMotion, animate, scope])
 
-  return ref
+  return scope
 }
 
 /** One combatant on the battlefield, anchored by its feet at `slot`. */
@@ -69,9 +53,9 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
   const url = useAssetUrl(combatant.spriteAssetId)
   const ko = isKnockedOut(combatant)
   const crisis = isInCrisis(combatant)
-  const hitRef = useHitReaction(combatant.id)
+  const scope = useHitReaction(combatant.id)
 
-  const stateClass = ko ? 'sprite-ko' : ''
+  const stateClass = ko ? 'sprite-ko' : crisis ? 'sprite-crisis' : ''
   const left = slot.x - SPRITE_BOX.width / 2
   const top = slot.y - SPRITE_BOX.height
   // Enemies come in from the left edge, the party from the right.
@@ -79,7 +63,7 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
 
   return (
     <motion.div
-      ref={hitRef}
+      ref={scope}
       data-testid={`sprite-${combatant.id}`}
       data-state={ko ? 'ko' : crisis ? 'crisis' : 'ok'}
       className="absolute"
@@ -103,15 +87,6 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
     >
       {/* Ground shadow */}
       <div className="absolute -bottom-3 left-1/2 h-6 w-36 -translate-x-1/2 rounded-[50%] bg-black/45 blur-sm" />
-
-      {/* Crisis aura: a separate element pulsing in opacity only (no animated filter). */}
-      {crisis && (
-        <div
-          data-testid="crisis-aura"
-          aria-hidden="true"
-          className="crisis-aura pointer-events-none absolute -inset-6 rounded-[45%]"
-        />
-      )}
 
       <div data-shake className="relative h-full w-full">
         <div data-flash className="h-full w-full">

@@ -18,13 +18,13 @@ describe('eventsToFx', () => {
       10,
     )
     expect(fx).toEqual([
-      { id: 10, kind: 'damage', targetId: 'orc', amount: 12, stack: 0 },
-      { id: 11, kind: 'crisis', targetId: 'orc', stack: 1 },
-      { id: 12, kind: 'heal', targetId: 'hero', amount: 5, stack: 0 },
-      { id: 13, kind: 'mpLoss', targetId: 'mage', amount: 10, stack: 0 },
-      { id: 14, kind: 'mpGain', targetId: 'mage', amount: 4, stack: 1 },
-      { id: 15, kind: 'ko', targetId: 'gob', stack: 0 },
-      { id: 16, kind: 'revive', targetId: 'gob', stack: 1 },
+      { id: 10, kind: 'damage', targetId: 'orc', amount: 12 },
+      { id: 11, kind: 'crisis', targetId: 'orc' },
+      { id: 12, kind: 'heal', targetId: 'hero', amount: 5 },
+      { id: 13, kind: 'mpLoss', targetId: 'mage', amount: 10 },
+      { id: 14, kind: 'mpGain', targetId: 'mage', amount: 4 },
+      { id: 15, kind: 'ko', targetId: 'gob' },
+      { id: 16, kind: 'revive', targetId: 'gob' },
     ])
   })
 
@@ -54,23 +54,6 @@ describe('useFxStore', () => {
     expect(useFxStore.getState().items.map((f) => f.id)).toEqual([1, 2])
     remove(1)
     expect(useFxStore.getState().items.map((f) => f.id)).toEqual([2])
-  })
-
-  it('gives each text a fixed slot: it never moves when the one below finishes', () => {
-    const { push, remove } = useFxStore.getState()
-    push([
-      { type: 'DAMAGED', id: 'orc', amount: 25, hp: 15 },
-      { type: 'CRISIS_ENTERED', id: 'orc' },
-    ])
-    const [damage, crisis] = useFxStore.getState().items
-    expect([damage?.stack, crisis?.stack]).toEqual([0, 1])
-
-    remove(damage!.id)
-    expect(useFxStore.getState().items).toEqual([crisis]) // same object, same slot (1)
-
-    // A new hit while "Crisi!" is still floating takes the free slot below it.
-    push([{ type: 'DAMAGED', id: 'orc', amount: 3, hp: 12 }])
-    expect(useFxStore.getState().items.map((f) => f.stack)).toEqual([1, 0])
   })
 
   it('caps the queue so stale effects cannot pile up', () => {

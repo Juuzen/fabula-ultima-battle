@@ -118,12 +118,10 @@ Libreria: **Motion** (`motion/react`). `MotionConfig reducedMotion="user"` rispe
   - `eventsToFx` è una funzione pura che trasforma gli eventi di dominio ricevuti con lo `STATE` in effetti: `damage`, `heal`, `mpLoss`, `mpGain`, `crisis`, `ko`, `revive`. Un danno 0 resta visibile ("0"); le variazioni di PM nulle no.
   - `useFxStore` è la coda degli effetti in corso, limitata a 40 per non accumulare effetti scaduti se la scheda resta in background. Ogni effetto si toglie da solo a fine animazione.
   - Gli effetti arrivano alla scena tramite `FxContext`: il Display lo fornisce, l'anteprima della plancia no, quindi lì non ci sono testi fluttuanti.
-- **Testo fluttuante:** sopra lo sprite compaiono i danni (bianco), le cure (verde, `+8`), i PM (azzurro, `−8 PM`), la Crisi ("Crisi!") e il KO. Più testi sullo stesso bersaglio si impilano: ognuno riceve una posizione fissa (`stack`) quando viene messo in coda, la più bassa libera, così non si sposta quando quello sotto finisce. Le scritte di stato arrivano 0,25 s dopo il numero che le ha causate.
+- **Testo fluttuante:** sopra lo sprite compaiono i danni (bianco), le cure (verde, `+8`), i PM (azzurro, `−8 PM`), la Crisi ("Crisi!") e il KO. Più testi sullo stesso bersaglio si impilano; le scritte di stato arrivano 0,25 s dopo il numero che le ha causate.
 - **Reazione dello sprite:**
-  - un danno lo fa tremare e gli dà un **lampo bianco** (schiarito e desaturato, così uno sprite blu non diventa ciano);
+  - un danno lo fa tremare e lampeggiare;
   - una cura o una rianimazione gli dà un bagliore verde;
-  - queste reazioni usano le **Web Animations native** con `fill: 'none'`, quindi a fine effetto sull'elemento non resta nessun filtro;
-  - la **Crisi** è un alone rosso separato dietro lo sprite, animato solo in opacità e scala, senza filtri animati annidati;
   - il passaggio a KO (desaturazione) avviene con una transizione.
 - **Barre con scia:**
   - sul danno la barra scende subito e una scia rosa si svuota dopo 350 ms;

@@ -85,11 +85,12 @@ export function FloatingTextLayer({ anchors }: { anchors: ReadonlyMap<CombatantI
       {items.map((fx) => {
         const anchor = anchors.get(fx.targetId)
         if (!anchor) return null
+        const stacked = items.filter((o) => o.targetId === fx.targetId && o.id < fx.id).length
         return (
           <FloatingText
             key={fx.id}
             fx={fx}
-            anchor={{ x: anchor.x, y: anchor.y - fx.stack * STACK_GAP }}
+            anchor={{ x: anchor.x, y: anchor.y - stacked * STACK_GAP }}
             onDone={() => remove(fx.id)}
           />
         )
