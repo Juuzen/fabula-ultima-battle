@@ -28,6 +28,15 @@ Apri `http://localhost:5173/#/master` e premi **Apri schermo giocatori**.
 | `npm run format`    | Prettier                                        |
 | `npm test`          | Vitest                                          |
 
+## Hook di commit
+
+Dopo `npm install`, un hook di pre-commit ([husky](https://typicode.github.io/husky/) + [lint-staged](https://github.com/lint-staged/lint-staged)) lavora sui soli file in stage:
+
+- formatta automaticamente i file con Prettier;
+- esegue Oxlint sui file `.ts` e `.tsx`, corregge da solo quello che può e blocca il commit se restano errori.
+
+In casi eccezionali si può saltare con `git commit --no-verify`. La CI ripete comunque tutti i controlli.
+
 ## Stack
 
 Vite · React 19 · TypeScript (strict) · React Router (hash) · Zustand · Zod · Motion · Tailwind CSS v4 · Dexie (IndexedDB) · i18next · vite-plugin-pwa · Vitest
