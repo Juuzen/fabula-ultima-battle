@@ -18,7 +18,7 @@ const STYLE: Record<Fx['kind'], string> = {
   mpGain: 'text-cyan-200 text-5xl',
   crisis: 'text-amber-300 text-5xl tracking-widest uppercase',
   ko: 'text-red-500 text-6xl tracking-widest',
-  revive: 'text-emerald-200 text-5xl',
+  revive: 'text-yellow-200 text-5xl tracking-widest uppercase',
   status: 'text-5xl', // colour: the status badge's (see className below)
 }
 
@@ -37,7 +37,7 @@ function labelOf(fx: Fx, t: TFunction): string | null {
     case 'ko':
       return t('display.ko')
     case 'revive':
-      return null // the green glow on the sprite says it all
+      return `${t('display.revive')}!`
     case 'status':
       return fx.status ? `${t(`status.${fx.status}`)}!` : null
   }
@@ -91,16 +91,18 @@ const NUMBER_DROP = 76
  * Floating combat text over the sprites. In each lane (see `Lane`) the next effect starts when
  * the current one has faded out and removed itself from the queue, so "12" and "Crisi!" show
  * together, while "Crisi!" then "Avvelenato!" follow one another. Different combatants play in
- * parallel. Effects with no text (revive: the sprite glow) never hold up a lane.
+ * parallel. Effects with no text never hold up a lane and are dropped from the queue at once.
  */
 export function FloatingTextLayer({ anchors }: { anchors: ReadonlyMap<CombatantId, Anchor> }) {
   const { t } = useTranslation()
   const { items, remove } = useFx()
 
-  // Effects on combatants no longer on screen would never finish: drop them.
+  // Effects on combatants no longer on screen, or with no text to show, would never finish:
+  // drop them (the sprite has already seen them in the render that added them).
   useEffect(() => {
-    for (const fx of items) if (!anchors.has(fx.targetId)) remove(fx.id)
-  }, [items, anchors, remove])
+    for (const fx of items)
+      if (!anchors.has(fx.targetId) || labelOf(fx, t) === null) remove(fx.id)
+  }, [items, anchors, remove, t])
 
   // Head of each lane: its oldest effect that has a text.
   const current = new Map<string, { fx: Fx; label: string; lane: Lane }>()

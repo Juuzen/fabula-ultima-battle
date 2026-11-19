@@ -99,6 +99,7 @@
     "enemies": "Enemies",
     "crisis": "Crisis",
     "ko": "KO",
+    "revive": "Revived",
     "hp": "HP",
     "mp": "MP",
     "masterOffline": "Game Master dashboard not connected"

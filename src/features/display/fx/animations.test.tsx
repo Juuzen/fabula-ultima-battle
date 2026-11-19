@@ -110,7 +110,7 @@ describe('FloatingTextLayer', () => {
             { id: 1, kind: 'damage', targetId: 'orc', amount: 12 },
             { id: 2, kind: 'heal', targetId: 'elf', amount: 5 },
           ],
-          remove: vi.fn(),
+          remove: vi.fn<(id: number) => void>(),
         }}
       >
         <FloatingTextLayer anchors={new Map([...anchors, ['elf', { x: 900, y: 400 }]])} />
@@ -120,12 +120,28 @@ describe('FloatingTextLayer', () => {
     expect(screen.getByTestId('fx-heal')).toBeInTheDocument()
   })
 
-  it('does not let an effect without text (revive) hold up the line', () => {
-    renderQueue([
-      { id: 1, kind: 'revive', targetId: 'orc' },
-      { id: 2, kind: 'heal', targetId: 'orc', amount: 20 },
+  it('announces a revive next to the healed HP, then Crisis after it', () => {
+    const items: Fx[] = [
+      { id: 1, kind: 'heal', targetId: 'orc', amount: 5 },
+      { id: 2, kind: 'revive', targetId: 'orc' },
+      { id: 3, kind: 'crisis', targetId: 'orc' },
+    ]
+    const { rerender } = renderQueue(items)
+    expect(screen.getByTestId('fx-heal')).toHaveTextContent('+5')
+    expect(screen.getByTestId('fx-revive')).toHaveTextContent('Rianimato!')
+    expect(screen.queryByTestId('fx-crisis')).toBeNull()
+
+    rerender([items[0]!, items[2]!]) // "Rianimato!" ended
+    expect(screen.getByTestId('fx-crisis')).toBeInTheDocument()
+  })
+
+  it('drops effects with no text at once, without holding up the line', () => {
+    const { remove } = renderQueue([
+      { id: 1, kind: 'status', targetId: 'orc' },
+      { id: 2, kind: 'crisis', targetId: 'orc' },
     ])
-    expect(screen.getByTestId('fx-heal')).toBeInTheDocument()
+    expect(remove).toHaveBeenCalledWith(1)
+    expect(screen.getByTestId('fx-crisis')).toBeInTheDocument()
   })
 
   it('still plays (and ends) inside an AnimatePresence with initial={false}, like the scene', async () => {

@@ -1,5 +1,5 @@
 import { motion, useAnimate, useReducedMotion } from 'motion/react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { isInCrisis, isKnockedOut, type Combatant } from '@/domain'
 import { useAssetUrl } from '@/infra/assets/assetResolver'
@@ -26,20 +26,34 @@ const HEAL_GLOW = {
     'drop-shadow(0 0 0 rgba(90,255,170,0))',
   ],
 }
+const REVIVE_GLOW = {
+  filter: [
+    'drop-shadow(0 0 0 rgba(255,215,90,0))',
+    'drop-shadow(0 0 30px rgba(255,215,90,.95))',
+    'drop-shadow(0 0 0 rgba(255,215,90,0))',
+  ],
+}
 
-/** Shakes and flashes on damage, glows green on heal/revive. */
+/** Shakes and flashes on damage, glows green on heal and gold on revive. */
 function useHitReaction(combatantId: string) {
   const [scope, animate] = useAnimate<HTMLDivElement>()
   const hit = useLatestHit(combatantId)
   const reduceMotion = useReducedMotion()
   const hitId = hit?.id
   const hitKind = hit?.kind
+  // Fx ids only grow. When the latest hit leaves the queue, an older one still queued becomes
+  // "latest" again: it was already played, so only ids above this one may animate.
+  const lastHandled = useRef(0)
 
   useEffect(() => {
-    if (hitId === undefined || reduceMotion || !scope.current) return
+    if (hitId === undefined || hitId <= lastHandled.current) return
+    lastHandled.current = hitId
+    if (reduceMotion || !scope.current) return
     if (hitKind === 'damage') {
       void animate('[data-shake]', SHAKE, { duration: 0.45, ease: 'easeOut' })
       void animate('[data-flash]', FLASH, { duration: 0.35 })
+    } else if (hitKind === 'revive') {
+      void animate('[data-flash]', REVIVE_GLOW, { duration: 1.1 })
     } else {
       void animate('[data-flash]', HEAL_GLOW, { duration: 0.9 })
     }
