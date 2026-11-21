@@ -5,7 +5,7 @@ import type { CombatantId } from '@/domain'
 import { useChoreoStore } from '../choreography/choreoStore'
 import { EFFECT_TIMING } from '../choreography/timeline'
 import type { Anchor } from '../fx/FloatingTextLayer'
-import { BUILTIN_EFFECT_COMPONENTS } from './builtinEffects'
+import { BUILTIN_EFFECT_COMPONENTS } from './effectRegistry'
 import { EFFECT_BOX } from './effectBox'
 
 /**
