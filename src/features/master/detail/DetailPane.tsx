@@ -9,13 +9,15 @@ import { ResourceGauge, StateTag, StatusIcons } from '@/features/display'
 import { Button } from '@/shared/ui/Button'
 
 import { useActionDraft } from '../action/actionDraft'
+import { useEffectName } from '../action/effectName'
 import { ActionComposer } from './ActionComposer'
 
 function AbilityMeta({ ability }: { ability: Ability }) {
   const { t } = useTranslation()
+  const effectName = useEffectName()
   const parts = [
     ability.kind ? t(`master.action.kinds.${ability.kind}`) : t('master.action.kinds.none'),
-    ability.effect ? t(`effects.${ability.effect}`) : t('effects.none'),
+    effectName(ability.effect),
     ability.mpCostHint !== null && t('master.ability.mpHint', { n: ability.mpCostHint }),
     ability.amountHint !== null && t('master.ability.amountHint', { n: ability.amountHint }),
   ].filter(Boolean)

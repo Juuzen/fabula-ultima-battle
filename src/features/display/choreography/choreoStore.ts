@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import type { CombatantId, EffectId } from '@/domain'
+import type { CombatantId, EffectRef } from '@/domain'
 
 export type StageStep = 'advance' | 'cast' | 'effect' | 'retreat'
 
@@ -13,7 +13,7 @@ export type Stage = {
   actorId: CombatantId | null
   name: string
   /** null = no visual effect, only the impact. */
-  effect: EffectId | null
+  effect: EffectRef | null
   targetIds: CombatantId[]
 }
 

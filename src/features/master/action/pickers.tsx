@@ -1,15 +1,20 @@
 import { useId } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { useCustomEffects } from '@/app/library/assetHooks'
 import {
   ACTION_KINDS,
   BUILTIN_EFFECTS,
+  customEffectRef,
+  isBuiltinEffect,
   STATUS_IDS,
   type ActionKind,
-  type EffectId,
+  type EffectRef,
   type StatusId,
 } from '@/domain'
 import { StatusIcon } from '@/features/display'
+
+import { useEffectName } from './effectName'
 
 export const SELECT =
   'h-10 w-full rounded-md border border-slate-600 bg-slate-950 px-3 text-slate-100 focus:border-indigo-400 focus:outline-none disabled:opacity-40'
@@ -20,15 +25,25 @@ const LABEL = 'text-xs font-medium tracking-wide text-slate-400 uppercase'
 const NONE = ''
 
 type EffectSelectProps = {
-  value: EffectId | null
-  onChange: (effect: EffectId | null) => void
+  value: EffectRef | null
+  onChange: (effect: EffectRef | null) => void
   disabled?: boolean
   id?: string
 }
 
-/** Visual effect played on impact, or none (the hit lands without a drawing). */
+/**
+ * Visual effect played on impact, or none (the hit lands without a drawing). Custom effects
+ * made in the Video section are listed after the built-in ones.
+ */
 export function EffectSelect({ value, onChange, disabled, id }: EffectSelectProps) {
   const { t } = useTranslation()
+  const customEffects = useCustomEffects() ?? []
+  const effectName = useEffectName()
+  // An effect deleted meanwhile still shows as chosen, so the select never lies.
+  const missing =
+    value !== null &&
+    !isBuiltinEffect(value) &&
+    !customEffects.some((e) => customEffectRef(e.id) === value)
   const fallbackId = useId()
   const selectId = id ?? fallbackId
   return (
@@ -41,14 +56,26 @@ export function EffectSelect({ value, onChange, disabled, id }: EffectSelectProp
         className={SELECT}
         value={value ?? NONE}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value === NONE ? null : (e.target.value as EffectId))}
+        onChange={(e) => onChange(e.target.value === NONE ? null : (e.target.value as EffectRef))}
       >
         <option value={NONE}>{t('effects.none')}</option>
-        {BUILTIN_EFFECTS.map((effect) => (
-          <option key={effect} value={effect}>
-            {t(`effects.${effect}`)}
-          </option>
-        ))}
+        <optgroup label={t('effects.builtin')}>
+          {BUILTIN_EFFECTS.map((effect) => (
+            <option key={effect} value={effect}>
+              {t(`effects.${effect}`)}
+            </option>
+          ))}
+        </optgroup>
+        {customEffects.length > 0 && (
+          <optgroup label={t('effects.custom')}>
+            {customEffects.map((effect) => (
+              <option key={effect.id} value={customEffectRef(effect.id)}>
+                {effect.name}
+              </option>
+            ))}
+          </optgroup>
+        )}
+        {missing && <option value={value}>{effectName(value)}</option>}
       </select>
     </div>
   )

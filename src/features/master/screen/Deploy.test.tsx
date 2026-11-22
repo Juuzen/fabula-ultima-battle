@@ -29,6 +29,7 @@ const lyra = createUnit({
       id: 'fire',
       name: 'Palla di fuoco',
       effect: 'fire',
+      soundAssetId: null,
       kind: 'damage',
       statuses: ['shaken'],
       mpCostHint: 10,

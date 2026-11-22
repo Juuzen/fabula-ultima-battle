@@ -1,7 +1,7 @@
-import type { BattleEvent, BattleState } from '@/domain'
+import type { BattleEvent, BattleState, EffectRef } from '@/domain'
 
 import type { Stage } from './choreoStore'
-import { SEQUENCE, timingOf } from './timeline'
+import { SEQUENCE, timingOf, type EffectTiming } from './timeline'
 
 /** With more updates than this waiting, sequences are skipped to catch up with the Master. */
 export const MAX_BACKLOG = 3
@@ -13,6 +13,13 @@ type Options = {
   setStage: (stage: Stage | null) => void
   /** True when animations should be skipped (OS "reduce motion"). */
   reducedMotion?: () => boolean
+  /** Timing of an effect; custom effects need the library, so the caller can provide it. */
+  timing?: (effect: EffectRef | null) => EffectTiming
+  /**
+   * An update has landed (on impact for actions, at once otherwise), with all its events,
+   * the opening ACTION_PERFORMED included: the moment to play its sounds.
+   */
+  onLand?: (events: BattleEvent[]) => void
   wait?: (ms: number) => Promise<void>
 }
 
@@ -35,6 +42,8 @@ export function createSequencer({
   apply,
   setStage,
   reducedMotion = () => false,
+  timing = (effect) => timingOf(effect),
+  onLand = () => {},
   wait = defaultWait,
 }: Options): Sequencer {
   const queue: { state: BattleState; events: BattleEvent[] }[] = []
@@ -49,7 +58,7 @@ export function createSequencer({
   const play = async (state: BattleState, events: BattleEvent[]) => {
     const opening = events[0]
     if (opening?.type !== 'ACTION_PERFORMED') return
-    const { durationMs, impactAt } = timingOf(opening.effect)
+    const { durationMs, impactAt } = timing(opening.effect)
     const impactMs = Math.round(durationMs * impactAt)
     const withActor = opening.actorId !== null
     const base = {
@@ -75,6 +84,7 @@ export function createSequencer({
     setStage({ ...base, step: 'effect' })
     if (!(await pause(impactMs))) return
     apply(state, events.slice(1)) // the hit lands
+    onLand(events)
     if (!(await pause(durationMs - impactMs + SEQUENCE.hold))) return
     if (withActor) {
       setStage({ ...base, step: 'retreat' })
@@ -101,6 +111,7 @@ export function createSequencer({
         await play(state, events)
       } else {
         apply(state, isAction ? events.slice(1) : events)
+        onLand(events)
       }
     }
     running = false

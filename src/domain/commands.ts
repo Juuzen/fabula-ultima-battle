@@ -2,7 +2,9 @@ import { ActionSchema, type Action } from './action'
 import {
   BattleStateSchema,
   findCombatant,
+  MAX_VOLUME,
   PresentationSchema,
+  type AudioSettings,
   type BattleState,
   type EnemyPanel,
   type Presentation,
@@ -33,6 +35,8 @@ export type PresentationChanges = {
   revealAllEnemyStats?: boolean
   waitingBackgroundAssetId?: string | null
   enemyPanel?: Partial<EnemyPanel>
+  /** Track, volumes and mute; volumes are clamped to 0–100. */
+  audio?: Partial<AudioSettings>
 }
 
 /** Everything the Game Master can do to a battle. Serializable, so it can be logged or sent. */
@@ -48,6 +52,8 @@ export type BattleCommand =
       type: 'LOAD_SCENE'
       name: string
       backgroundAssetId: string | null
+      /** The scene's music, played from the start of the battle; null = silence. */
+      musicAssetId: string | null
       combatants: NewCombatant[]
     }
   | { type: 'UPDATE_COMBATANT'; id: CombatantId; changes: Partial<Pick<Combatant, EditableFields>> }
@@ -181,6 +187,18 @@ function mergePresentation(current: Presentation, changes: PresentationChanges):
         ? current.waitingBackgroundAssetId
         : changes.waitingBackgroundAssetId,
     enemyPanel: { ...current.enemyPanel, ...changes.enemyPanel },
+    audio: mergeAudio(current.audio, changes.audio),
+  }
+}
+
+const clampVolume = (v: number) => Math.min(Math.max(Math.round(v), 0), MAX_VOLUME)
+
+function mergeAudio(current: AudioSettings, changes: Partial<AudioSettings> = {}): AudioSettings {
+  return {
+    musicAssetId: changes.musicAssetId === undefined ? current.musicAssetId : changes.musicAssetId,
+    musicVolume: clampVolume(changes.musicVolume ?? current.musicVolume),
+    sfxVolume: clampVolume(changes.sfxVolume ?? current.sfxVolume),
+    muted: changes.muted ?? current.muted,
   }
 }
 
@@ -271,6 +289,7 @@ function performAction(state: BattleState, input: Action): CommandResult {
       actorId: actor?.id ?? null,
       name: action.name,
       effect: action.effect,
+      soundAssetId: action.soundAssetId,
       targetIds: action.targets.map((t) => t.id),
     },
   ]
@@ -306,6 +325,7 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
         presentation: mergePresentation(state.presentation, {
           revealAllEnemyStats: false,
           enemyPanel: { visible: false },
+          audio: { musicAssetId: command.musicAssetId },
         }),
       }
       const result = addCombatants(base, command.combatants)
@@ -447,9 +467,11 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
           phase: 'preparation',
           backgroundAssetId: null,
           combatants: [],
+          // The scene's music goes with it; volumes stay as the GM set them.
           presentation: mergePresentation(state.presentation, {
             revealAllEnemyStats: false,
             enemyPanel: { visible: false },
+            audio: { musicAssetId: null },
           }),
         },
         [{ type: 'BATTLE_ENDED', removedIds }],

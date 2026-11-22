@@ -1,23 +1,8 @@
 import { z } from 'zod'
 
 import { CombatantIdSchema } from './combatant'
+import { EffectRefSchema } from './effect'
 import { StatusIdSchema } from './status'
-
-/**
- * Visual effects that ship with the app. The Display draws them in code; from phase 7
- * each one can be replaced by a user-provided .webm video.
- */
-export const BUILTIN_EFFECTS = [
-  'slash',
-  'impact',
-  'fire',
-  'ice',
-  'thunder',
-  'light',
-  'shadow',
-] as const
-export const EffectIdSchema = z.enum(BUILTIN_EFFECTS)
-export type EffectId = z.infer<typeof EffectIdSchema>
 
 /** What an action does to a target's PV or PM. */
 export const ACTION_KINDS = ['damage', 'heal', 'mpDamage', 'mpRestore'] as const
@@ -57,8 +42,10 @@ export const ActionSchema = z
     actorId: CombatantIdSchema.nullable(),
     /** Shown as a banner on the player screen (e.g. "Palla di fuoco"); empty = no banner. */
     name: z.string().trim().max(60),
-    /** Visual effect on the targets; null = none. */
-    effect: EffectIdSchema.nullable(),
+    /** Visual effect on the targets (built-in or custom); null = none. */
+    effect: EffectRefSchema.nullable(),
+    /** Sound on impact (e.g. the ability's own); null = the effect's or the default sounds. */
+    soundAssetId: z.string().min(1).nullable(),
     /** MP spent by the actor (e.g. a spell's cost). Always 0 without an actor. */
     mpCost: z.int().min(0),
     targets: z.array(ActionTargetSchema).min(1),

@@ -1,6 +1,8 @@
 import { render } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 
+import { AudioLibraryPage } from './assets/AudioLibraryPage'
+import { VideoLibraryPage } from './assets/VideoLibraryPage'
 import { UnitLibraryPage } from './library/UnitLibraryPage'
 import { SceneLibraryPage } from './scenes/SceneLibraryPage'
 import { ScreenControlPage } from './screen/ScreenControlPage'
@@ -18,6 +20,8 @@ export function renderMaster(path = '/master/screen') {
           { path: 'party', element: <UnitLibraryPage kind="party" /> },
           { path: 'enemies', element: <UnitLibraryPage kind="enemy" /> },
           { path: 'scenes', element: <SceneLibraryPage /> },
+          { path: 'audio', element: <AudioLibraryPage /> },
+          { path: 'video', element: <VideoLibraryPage /> },
         ],
       },
     ],

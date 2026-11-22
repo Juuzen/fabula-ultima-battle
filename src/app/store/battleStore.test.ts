@@ -164,5 +164,17 @@ describe('battle store', () => {
       const [restored] = createBattleStore({ storage }).getState().battle.combatants
       expect(restored).toMatchObject({ id: 'hero', unitId: null })
     })
+
+    it('upgrades a v5 save with default music settings', () => {
+      const { audio: _dropped, ...v5Presentation } = createEmptyBattle().presentation
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({
+          state: { battle: { ...createEmptyBattle(), presentation: v5Presentation } },
+          version: 5,
+        }),
+      })
+      const { audio } = createBattleStore({ storage }).getState().battle.presentation
+      expect(audio).toEqual({ musicAssetId: null, musicVolume: 70, sfxVolume: 80, muted: false })
+    })
   })
 })

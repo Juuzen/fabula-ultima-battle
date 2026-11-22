@@ -102,3 +102,55 @@ export function Toggle({ label, checked, onChange, description, disabled }: Togg
     </div>
   )
 }
+
+type SliderProps = {
+  label: string
+  value: number
+  min: number
+  max: number
+  step?: number
+  onChange: (value: number) => void
+  /** How the value is shown next to the label (and read by screen readers). */
+  format?: (value: number) => string
+  disabled?: boolean
+  className?: string
+}
+
+/** Range input with its label and current value. */
+export function Slider({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  onChange,
+  format = String,
+  disabled,
+  className = '',
+}: SliderProps) {
+  const id = useId()
+  return (
+    <div className={`flex flex-col gap-1 ${className}`}>
+      <div className="flex items-baseline justify-between gap-3">
+        <label htmlFor={id} className="text-xs font-medium tracking-wide text-slate-400 uppercase">
+          {label}
+        </label>
+        <output htmlFor={id} className="text-sm text-slate-200 tabular-nums">
+          {format(value)}
+        </output>
+      </div>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        disabled={disabled}
+        aria-valuetext={format(value)}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="h-6 w-full cursor-pointer accent-indigo-500 disabled:opacity-40"
+      />
+    </div>
+  )
+}

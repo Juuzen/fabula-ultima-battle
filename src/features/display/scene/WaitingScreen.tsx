@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next'
 
-import { useAssetUrl } from '@/infra/assets/assetResolver'
+import { useAsset } from '@/infra/assets/assetResolver'
+
+import { BackgroundMedia } from './BackgroundMedia'
 
 type Props = {
-  /** Image chosen by the GM; null = built-in artwork. */
+  /** Image or looping video chosen by the GM; null = built-in artwork. */
   backgroundAssetId: string | null
   /** Small hint for the GM while the dashboard is not connected yet. */
   note?: string
@@ -12,12 +14,12 @@ type Props = {
 /** Shown to the players while the GM prepares the encounter. */
 export function WaitingScreen({ backgroundAssetId, note }: Props) {
   const { t } = useTranslation()
-  const url = useAssetUrl(backgroundAssetId)
+  const asset = useAsset(backgroundAssetId)
 
   return (
     <div className="absolute inset-0" data-testid="waiting-screen">
-      {url ? (
-        <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      {asset && asset.kind !== 'audio' ? (
+        <BackgroundMedia asset={asset} />
       ) : (
         <div className="absolute inset-0" data-testid="default-waiting-backdrop">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_115%,#3b2a63_0%,#16123a_45%,#06060f_100%)]" />

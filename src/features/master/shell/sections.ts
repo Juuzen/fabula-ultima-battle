@@ -2,7 +2,6 @@ import { Film, Map, MonitorPlay, Music, Skull, Users, type LucideIcon } from 'lu
 
 export type SectionId = 'screen' | 'party' | 'enemies' | 'scenes' | 'audio' | 'video'
 export type SectionGroup = 'live' | 'prep' | 'library'
-export type PlaceholderSectionId = 'audio' | 'video'
 
 export type Section = { id: SectionId; group: SectionGroup; icon: LucideIcon }
 

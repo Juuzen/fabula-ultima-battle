@@ -154,6 +154,7 @@ describe('DEPLOY and LOAD_SCENE', () => {
       type: 'LOAD_SCENE',
       name: ' Agguato al porto ',
       backgroundAssetId: 'bg-porto',
+      musicAssetId: 'battle-theme',
       combatants,
     })
     expect(state).toMatchObject({

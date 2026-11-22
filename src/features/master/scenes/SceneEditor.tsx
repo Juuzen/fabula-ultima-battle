@@ -1,4 +1,4 @@
-import { Image, Minus, Music, Plus, Trash2, X } from 'lucide-react'
+import { Minus, Plus, Trash2, X } from 'lucide-react'
 import { useId, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -15,11 +15,10 @@ import { Button } from '@/shared/ui/Button'
 import { TextField } from '@/shared/ui/fields'
 
 import { SELECT } from '../action/pickers'
+import { AssetPicker } from '../assets/AssetPicker'
 import { useAutosave } from '../library/useAutosave'
 import { SaveIndicator } from '../library/SaveIndicator'
 import { LoadSceneButton } from './LoadSceneButton'
-
-const LABEL = 'text-xs font-medium tracking-wide text-slate-400 uppercase'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   const id = useId()
@@ -195,8 +194,17 @@ export function SceneEditor({ scene, autoFocusName, onDeleted, onLoaded }: Props
     name: scene.name,
     partyUnitIds: scene.partyUnitIds,
     enemies: scene.enemies,
+    backgroundAssetId: scene.backgroundAssetId,
+    musicAssetId: scene.musicAssetId,
   }))
   const set = (changes: Partial<typeof draft>) => setDraft((d) => ({ ...d, ...changes }))
+  // A file deleted from the library is cleared here too.
+  const files = { bg: scene.backgroundAssetId, music: scene.musicAssetId }
+  const [seenFiles, setSeenFiles] = useState(files)
+  if (seenFiles.bg !== files.bg || seenFiles.music !== files.music) {
+    setSeenFiles(files)
+    set({ backgroundAssetId: files.bg, musicAssetId: files.music })
+  }
 
   const parsed = BattleSceneSchema.safeParse({ ...scene, ...draft, updatedAt: 0 })
   const status = useAutosave(parsed.success ? parsed.data : null, library.saveScene)
@@ -282,19 +290,19 @@ export function SceneEditor({ scene, autoFocusName, onDeleted, onLoaded }: Props
       </Section>
 
       <Section title={t('scenes.sections.ambience')}>
-        <div className="flex flex-wrap items-end gap-6">
-          {[
-            { label: t('scenes.ambience.background'), Icon: Image },
-            { label: t('scenes.ambience.music'), Icon: Music },
-          ].map(({ label, Icon }) => (
-            <div key={label} className="flex flex-col gap-1">
-              <span className={LABEL}>{label}</span>
-              <div className="flex h-20 w-36 items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-950/60 text-slate-400">
-                <Icon className="h-6 w-6" aria-hidden="true" />
-              </div>
-            </div>
-          ))}
-          <p className="max-w-xs pb-1 text-sm text-slate-400">{t('scenes.ambience.soon')}</p>
+        <div className="flex flex-wrap items-start gap-8">
+          <AssetPicker
+            role="background"
+            label={t('scenes.ambience.background')}
+            value={draft.backgroundAssetId}
+            onChange={(backgroundAssetId) => set({ backgroundAssetId })}
+          />
+          <AssetPicker
+            role="music"
+            label={t('scenes.ambience.music')}
+            value={draft.musicAssetId}
+            onChange={(musicAssetId) => set({ musicAssetId })}
+          />
         </div>
       </Section>
 

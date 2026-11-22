@@ -9,6 +9,9 @@ import { Button } from '@/shared/ui/Button'
 import { NumberField, Toggle } from '@/shared/ui/fields'
 import { Popover } from '@/shared/ui/Popover'
 
+import { AssetPicker } from '../assets/AssetPicker'
+import { LiveAudio, MuteButton } from './LiveAudio'
+
 /** Seconds field that commits on blur / Enter, so typing doesn't spam the player screen. */
 function AutoHideField({ seconds }: { seconds: number }) {
   const { t } = useTranslation()
@@ -100,6 +103,17 @@ function ScreenSettings() {
             dispatch({ type: 'SET_PRESENTATION', changes: { revealAllEnemyStats } })
           }
         />
+        <div className="border-t border-slate-800 pt-4">
+          <AssetPicker
+            role="background"
+            size="sm"
+            label={t('master.settings.waitingBackground')}
+            value={presentation.waitingBackgroundAssetId}
+            onChange={(waitingBackgroundAssetId) =>
+              dispatch({ type: 'SET_PRESENTATION', changes: { waitingBackgroundAssetId } })
+            }
+          />
+        </div>
       </div>
     </Popover>
   )
@@ -126,7 +140,7 @@ function EnemyWindowToggle() {
   )
 }
 
-/** The cockpit's own bar: the scene's name, the enemy window and the screen settings. */
+/** The cockpit's own bar: the scene's name, the enemy window, audio and the screen settings. */
 export function ScreenToolbar() {
   const { t } = useTranslation()
   const name = useBattleStore((s) => s.battle.name)
@@ -136,6 +150,8 @@ export function ScreenToolbar() {
         {name || t('master.screen.untitled')}
       </h1>
       <EnemyWindowToggle />
+      <LiveAudio />
+      <MuteButton />
       <ScreenSettings />
     </div>
   )

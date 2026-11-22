@@ -1,4 +1,4 @@
-import { Image, Plus, Swords, Trash2 } from 'lucide-react'
+import { Plus, Swords, Trash2 } from 'lucide-react'
 import { useCallback, useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useShallow } from 'zustand/shallow'
@@ -10,6 +10,7 @@ import { parseWholeNumber } from '@/shared/lib/numbers'
 import { Button } from '@/shared/ui/Button'
 import { NumberField, TextField, Toggle } from '@/shared/ui/fields'
 
+import { AssetPicker } from '../assets/AssetPicker'
 import { AbilityEditor } from './AbilityEditor'
 import { fromDraft, newAbilityDraft, toDraft, type DraftField, type UnitDraft } from './unitDraft'
 import { SaveIndicator } from './SaveIndicator'
@@ -26,17 +27,6 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       </h3>
       {children}
     </section>
-  )
-}
-
-function ArtSlot({ label }: { label: string }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <span className={LABEL}>{label}</span>
-      <div className="flex h-28 w-28 items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-950/60 text-slate-400">
-        <Image className="h-7 w-7" aria-hidden="true" />
-      </div>
-    </div>
   )
 }
 
@@ -148,6 +138,13 @@ export function UnitEditor({ unit, autoFocusName, onDeleted }: Props) {
   if (seen.hp !== unit.hp || seen.mp !== unit.mp) {
     setSeen({ hp: unit.hp, mp: unit.mp })
     setDraft((d) => ({ ...d, hp: String(unit.hp), mp: String(unit.mp) }))
+  }
+  // So can the art and sounds, when a file is deleted from the library.
+  const files = { sprite: unit.spriteAssetId, portrait: unit.portraitAssetId }
+  const [seenFiles, setSeenFiles] = useState(files)
+  if (seenFiles.sprite !== files.sprite || seenFiles.portrait !== files.portrait) {
+    setSeenFiles(files)
+    setDraft((d) => ({ ...d, spriteAssetId: files.sprite, portraitAssetId: files.portrait }))
   }
 
   // On the field the current PV/PM are not edited here: only kept within the new maximums.
@@ -268,18 +265,25 @@ export function UnitEditor({ unit, autoFocusName, onDeleted }: Props) {
         </Section>
 
         <Section title={t('library.sections.look')}>
-          <div className="flex flex-wrap items-end gap-6">
-            <ArtSlot label={t('library.art.sprite')} />
-            <ArtSlot label={t('library.art.portrait')} />
-            <div className="flex flex-col gap-3 pb-1">
-              <Toggle
-                label={t('library.fields.flip')}
-                checked={draft.flipSprite}
-                onChange={(flipSprite) => set({ flipSprite })}
-              />
-              <p className="max-w-xs text-sm text-slate-400">{t('library.art.soon')}</p>
-            </div>
+          <div className="flex flex-wrap items-start gap-8">
+            <AssetPicker
+              role="art"
+              label={t('library.art.sprite')}
+              value={draft.spriteAssetId}
+              onChange={(spriteAssetId) => set({ spriteAssetId })}
+            />
+            <AssetPicker
+              role="art"
+              label={t('library.art.portrait')}
+              value={draft.portraitAssetId}
+              onChange={(portraitAssetId) => set({ portraitAssetId })}
+            />
           </div>
+          <Toggle
+            label={t('library.fields.flip')}
+            checked={draft.flipSprite}
+            onChange={(flipSprite) => set({ flipSprite })}
+          />
         </Section>
 
         <Section title={t('library.sections.notes')}>

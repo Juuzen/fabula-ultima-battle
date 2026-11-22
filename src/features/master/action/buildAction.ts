@@ -16,6 +16,7 @@ type Draft = {
   selectedId: CombatantId | ''
   name: string
   effect: Action['effect']
+  soundAssetId: string | null
   mpCost: string
   targets: Record<CombatantId, TargetDraft>
 }
@@ -54,6 +55,7 @@ export function buildAction(draft: Draft, all: readonly Combatant[]): BuiltActio
       actorId: actor?.id ?? null,
       name: draft.name.trim(),
       effect: draft.effect,
+      soundAssetId: draft.soundAssetId,
       mpCost,
       targets,
     },

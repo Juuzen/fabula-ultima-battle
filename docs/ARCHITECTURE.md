@@ -84,8 +84,8 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
   - `manual`: la finestra segue il flag `visible` impostato dal GM;
   - `auto`: compare quando cambia qualcosa che i giocatori possono vedere sui nemici e sparisce dopo `autoHideSeconds`. Ogni nuova modifica fa ripartire il conto alla rovescia, e il GM può comunque forzarla con `visible`.
 
-- **Sfondo:** se non è impostato, si usa un fondale al tramonto con una griglia prospettica.
-- **Asset:** `useAssetUrl(id)` legge da `AssetResolverContext`. Per ora non risolve nulla; nella fase 7 diventerà IndexedDB.
+- **Sfondo:** un'immagine o un video in loop (muto); se non è impostato, o il file non c'è più, si usa un fondale al tramonto con una griglia prospettica.
+- **Asset:** `useAsset(id)` / `useAssetUrl(id)` leggono da `AssetSourceContext` (vedi la fase 7).
 - **`useDisplayStore`:** contiene la battaglia mostrata, che non è lo stato autorevole; la alimenta la sincronizzazione.
 - **Anteprima:** `#/display?demo=1` carica un incontro di esempio che copre tutti gli stati visivi.
 - **Font:** Cinzel e Inter sono inclusi nel pacchetto (`@fontsource`), quindi funzionano anche offline.
@@ -192,13 +192,50 @@ Il passo corrente si trova in `useChoreoStore`.
 - L'attaccante avanza di 90 px verso il centro e ha un bagliore di carica.
 - `EffectLayer` disegna l'effetto su ogni bersaglio, in SVG animato con Motion, con un proprio `AnimatePresence`: quello del cambio schermata con `initial={false}` altrimenti farebbe partire gli effetti dall'ultimo fotogramma.
 - `ActionBanner` mostra il nome in alto. Durante l'azione la fascia nemici si sposta e poi ritorna.
-- Nella fase 7 ogni effetto potrà usare un `.webm` caricato dall'utente al posto del disegno integrato.
+- Un effetto personalizzato (fase 7) mostra il suo video al posto del disegno integrato.
 
 **Master: il compositore** (`master/action`, `master/detail`).
 
 - La selezione e la bozza vivono in `useActionDraft`, fuori dallo stato della battaglia: niente sincronizzazione, niente salvataggio. `buildAction` (puro) trasforma la bozza in un'`Action` o dice cosa manca (bersagli, valori non validi, PM insufficienti).
 - Un'abilità precompila nome, effetto, tipo e status su tutti i bersagli; costo PM e valore restano promemoria, il numero vero lo scrive il GM.
 - Dopo "Agisci" si torna alle abilità dello stesso attore, o a un'azione del GM vuota.
+
+## Libreria asset e audio (fase 7)
+
+**Dove stanno i file.** Tutto è nel database `fu-battle-library` (Dexie, versione 2), accanto a schede e scene:
+
+- `assets`: i metadati di ogni file (`AssetMeta`: nome, tipo, scaffale, MIME, dimensione, pixel, durata);
+- `assetBlobs`: i byte, come `ArrayBuffer` + MIME, separati dai metadati così gli elenchi non li caricano (e l'`ArrayBuffer` si clona in modo affidabile in ogni browser e nei test);
+- `effects`: gli effetti personalizzati (`CustomEffect`);
+- `settings`: i suoni di sistema e degli effetti (`SoundSettings`, chiave `sounds`).
+
+Il Display legge lo stesso database (stessa origine): i file **non passano mai** dal canale di sincronizzazione, che porta solo gli id. Al primo caricamento si chiede al browser l'archiviazione persistente (`navigator.storage.persist()`), così non svuota la libreria quando ha poco spazio.
+
+**Scaffali.** Ogni file ha un ruolo che decide dove viene offerto: `art` (sprite e ritratti, immagini), `background` (immagini o video), `effect` (video), `music`, `sfx` (audio). `addAsset` ricava il tipo dal MIME e rifiuta i file che non c'entrano (`AssetRejectedError`: `unsupported` o `wrongShelf`). Un file caricato da una scheda o da una scena va nello scaffale comune ed è riutilizzabile ovunque.
+
+**Eliminare un file** toglie ogni riferimento: sprite/ritratti e suoni delle abilità nelle schede, sfondo/musica delle scene, suoni degli effetti e di sistema. Gli effetti personalizzati fatti con quel video vengono eliminati, e le abilità che li usavano tornano a "nessun effetto". Prima di confermare la plancia dice in quanti punti il file è usato. Gli editor aperti seguono queste modifiche esterne, così un salvataggio automatico non rimette un id cancellato.
+
+**Dagli id agli URL** (`infra/assets/assetResolver.ts`). Un `AssetSource` è un piccolo store esterno (`peek`, `load`, `subscribe`) letto da `useAsset(id)` con `useSyncExternalStore`. `createBlobAssetSource` carica il Blob una volta sola e tiene un object URL per file per tutta la vita della finestra (i file non cambiano mai). L'app lo fornisce in `App`; i test usano `AssetResolverProvider` con un resolver sincrono. Senza fonte non si risolve nulla e si vedono i segnaposto.
+
+**Effetti personalizzati.** `EffectRef` è un effetto integrato (`EffectId`) o `custom:<id>`; lo usano `Action`, `Ability` e l'evento `ACTION_PERFORMED`. Un effetto personalizzato è un video con nome, durata (presa dal file), punto d'impatto (5–95%), scala rispetto al riquadro di 400 px e suono facoltativo. Il sequencer riceve la funzione `timing`: per un effetto personalizzato usa `durationMs × impactAt` della versione più recente (`useLibraryFeed`, alimentato da una live query); uno eliminato nel frattempo si comporta come "nessun effetto". `EffectLayer` mostra il video centrato sul bersaglio.
+
+**Suoni.** `soundCues(events, settings, customEffects)` è puro e decide cosa suona quando un aggiornamento "atterra" (all'impatto per le azioni, subito per il resto; il sequencer lo segnala con `onLand`):
+
+1. il suono dell'azione (preso dall'abilità), altrimenti quello dell'effetto (integrato: dalle impostazioni; personalizzato: il suo);
+2. altrimenti il suono di sistema: colpo per danni PV o PM (non il costo in PM dell'attore), cura per PV o PM recuperati;
+3. in più il suono del KO, e quello di inizio battaglia su `BATTLE_STARTED`.
+
+**Musica e volumi** sono nello stato autorevole (`presentation.audio`: brano, volume musica e effetti 0–100, muto), quindi viaggiano con la sincronizzazione e restano salvati (persistenza v6). `LOAD_SCENE` porta la musica della scena; `END_BATTLE` la toglie e lascia i volumi. Il Display suona il brano solo a battaglia iniziata.
+
+**Motore audio** (`infra/audio/audioEngine.ts`, Web Audio): un gain per la musica, uno per gli effetti, uno principale per il muto. La musica arriva in streaming da un `<audio>` in loop; ogni cambio di brano è una dissolvenza incrociata di 1,5 s. Gli effetti sonori vengono decodificati una volta e risuonati dalla memoria. Il clic "Premi per iniziare" sblocca l'audio (politica di autoplay); prima di allora gli effetti sonori vengono ignorati, così non si accumulano.
+
+**Plancia.**
+
+- `AssetPicker` (carica, scegli dalla libreria, togli; trascina un file sopra per caricarlo; ▶ per ascoltare l'audio sulle casse del GM) sostituisce i segnaposto: sprite e ritratto nelle schede, suono delle abilità, sfondo e musica delle scene, sfondo dell'attesa in ⚙ Impostazioni schermo.
+- **Video:** scaffali Sfondi, Video degli effetti, Immagini delle schede; editor degli effetti personalizzati con anteprima in loop e la linea del tempo con il punto d'impatto.
+- **Audio:** scaffali Musiche ed Effetti sonori; suoni di sistema; suoni degli effetti integrati.
+- **Barra di Controllo schermo:** popover Audio (brano dal vivo e i due volumi) e il pulsante Silenzia.
+- `EffectSelect` elenca gli effetti personalizzati dopo quelli integrati; `useEffectName` dà il nome di qualsiasi effetto.
 
 ## Roadmap
 
@@ -211,5 +248,5 @@ Il passo corrente si trova in `useChoreoStore`.
 | 4    | Ponte BroadcastChannel: snapshot, riconnessione, presenza dello schermo, fase di preparazione                                                                                    | ✅    |
 | 5    | Animazioni base: barre fluide, shake, testo dei danni, dissolvenze di inizio e fine battaglia                                                                                    | ✅    |
 | 6    | Sequenza d'azione: avanzata, carica, effetti integrati o nessuno, impatto (stato visivo ritardato), ritorno; plancia master/detail con compositore per bersaglio e azione del GM | ✅    |
-| 7    | Libreria asset (IndexedDB) e audio con crossfade; scelta di sprite, ritratti, sfondo di battaglia e **sfondo della schermata di attesa**                                         |       |
+| 7    | Libreria asset (IndexedDB) e audio con crossfade; scelta di sprite, ritratti, sfondo di battaglia e **sfondo della schermata di attesa**                                         | ✅    |
 | 8    | Rifinitura: preset incontri da importare ed esportare, banner di vittoria                                                                                                        |       |
