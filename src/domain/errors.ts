@@ -5,6 +5,9 @@ export type DomainErrorCode =
   | 'INVALID_COMBATANT'
   | 'INVALID_BATTLE'
   | 'INVALID_PRESENTATION'
+  | 'INVALID_ACTION'
+  | 'NOT_ENOUGH_MP'
+  | 'UNIT_ALREADY_DEPLOYED'
 
 export type DomainError = { code: DomainErrorCode; message: string }
 

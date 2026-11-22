@@ -42,6 +42,11 @@
   .waiting-pulse {
     animation: waiting-pulse 3s ease-in-out infinite;
   }
+
+  /* Battle-in-progress dot on the Master sidebar. */
+  .live-blink {
+    animation: live-blink 1.2s steps(1, end) infinite;
+  }
 }
 
 @keyframes waiting-pulse {
@@ -51,6 +56,16 @@
   }
   50% {
     opacity: 0.55;
+  }
+}
+
+@keyframes live-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
   }
 }
 
@@ -76,7 +91,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .slot-crisis,
-  .waiting-pulse {
+  .waiting-pulse,
+  .live-blink {
     animation: none;
   }
   .sprite-crisis {

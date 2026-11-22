@@ -1,3 +1,4 @@
+import { ActionSchema, type Action } from './action'
 import {
   BattleStateSchema,
   findCombatant,
@@ -19,9 +20,14 @@ import {
 import { domainError, type DomainError } from './errors'
 import type { BattleEvent } from './events'
 import type { StatusId } from './status'
+import { renamedCopy } from './unit'
 
 type EditableFields =
   'name' | 'maxHp' | 'maxMp' | 'hp' | 'mp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
+
+/** What a combatant takes from its library sheet while on the field. */
+export type SheetFields =
+  'name' | 'maxHp' | 'maxMp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
 
 export type PresentationChanges = {
   revealAllEnemyStats?: boolean
@@ -32,7 +38,30 @@ export type PresentationChanges = {
 /** Everything the Game Master can do to a battle. Serializable, so it can be logged or sent. */
 export type BattleCommand =
   | { type: 'ADD_COMBATANT'; combatant: NewCombatant }
+  /** Adds several combatants at once (e.g. "Goblin ×3" from the bestiary): one undo step. */
+  | { type: 'DEPLOY'; combatants: NewCombatant[] }
+  /**
+   * Replaces the field with a prepared scene: both sides, name and background. The battle
+   * goes back to preparation, so the enemies stay hidden until START_BATTLE.
+   */
+  | {
+      type: 'LOAD_SCENE'
+      name: string
+      backgroundAssetId: string | null
+      combatants: NewCombatant[]
+    }
   | { type: 'UPDATE_COMBATANT'; id: CombatantId; changes: Partial<Pick<Combatant, EditableFields>> }
+  /**
+   * A library sheet changed: every combatant deployed from it follows (name, maximums, art).
+   * Current PV/PM stay, clamped to the new maximums. Enemy copies keep their number.
+   */
+  | {
+      type: 'SYNC_UNIT'
+      unitId: string
+      /** The sheet's name before the change, to rename "Goblin 2" into "Orco 2". */
+      previousName: string
+      sheet: Pick<Combatant, SheetFields>
+    }
   | { type: 'REMOVE_COMBATANT'; id: CombatantId }
   /** Moves a combatant to `toIndex` among the combatants of its own side. */
   | { type: 'MOVE_COMBATANT'; id: CombatantId; toIndex: number }
@@ -50,7 +79,9 @@ export type BattleCommand =
   | { type: 'LOAD_BATTLE'; state: BattleState }
   /** Reveals the prepared enemies to the players. */
   | { type: 'START_BATTLE' }
-  /** Ends the encounter: enemies leave the field, the party stays, back to preparation. */
+  /** A choreographed action (attack, spell…) on one or more targets: one undo step. */
+  | { type: 'PERFORM_ACTION'; action: Action }
+  /** Ends the scene: everyone leaves the field, back to an empty battle in preparation. */
   | { type: 'END_BATTLE' }
 
 export type CommandResult =
@@ -154,23 +185,132 @@ function mergePresentation(current: Presentation, changes: PresentationChanges):
 }
 
 /**
+ * Appends new combatants after validating them. Ids must be unique, and a party sheet can be
+ * on the field only once (enemy sheets can be deployed in any number of copies).
+ */
+function addCombatants(state: BattleState, incoming: NewCombatant[]): CommandResult {
+  const ids = new Set(state.combatants.map((c) => c.id))
+  const partyUnits = new Set(
+    state.combatants.flatMap((c) => (c.side === 'ally' && c.unitId ? [c.unitId] : [])),
+  )
+  const added: Combatant[] = []
+  for (const input of incoming) {
+    if (ids.has(input.id)) {
+      return fail(domainError('DUPLICATE_ID', `Id "${input.id}" already in use`))
+    }
+    const parsed = CombatantSchema.safeParse(createCombatant(input))
+    if (!parsed.success) return fail(domainError('INVALID_COMBATANT', parsed.error.message))
+    const combatant = parsed.data
+    if (combatant.side === 'ally' && combatant.unitId) {
+      if (partyUnits.has(combatant.unitId)) {
+        return fail(
+          domainError(
+            'UNIT_ALREADY_DEPLOYED',
+            `Sheet "${combatant.unitId}" is already on the field`,
+          ),
+        )
+      }
+      partyUnits.add(combatant.unitId)
+    }
+    ids.add(combatant.id)
+    added.push(combatant)
+  }
+  return ok(
+    { ...state, combatants: [...state.combatants, ...added] },
+    added.map((combatant) => ({ type: 'COMBATANT_ADDED', combatant })),
+  )
+}
+
+const KIND_COMMAND = {
+  damage: 'DAMAGE',
+  heal: 'HEAL',
+  mpDamage: 'SPEND_MP',
+  mpRestore: 'RESTORE_MP',
+} as const
+
+/**
+ * Applies an action as a chain of basic commands (MP cost, then each target's own outcome
+ * and statuses), all or nothing. The chain's events follow ACTION_PERFORMED, which opens the
+ * sequence on the Display (only while the battle is in progress: see the projection).
+ */
+function performAction(state: BattleState, input: Action): CommandResult {
+  const parsed = ActionSchema.safeParse(input)
+  if (!parsed.success) return fail(domainError('INVALID_ACTION', parsed.error.message))
+  const action = parsed.data
+
+  const actor = action.actorId === null ? null : findCombatant(state, action.actorId)
+  if (action.actorId !== null && !actor) return notFound(action.actorId)
+  for (const target of action.targets) {
+    if (!findCombatant(state, target.id)) return notFound(target.id)
+  }
+  if (actor && action.mpCost > actor.mp) {
+    return fail(domainError('NOT_ENOUGH_MP', `${actor.name} has ${actor.mp} MP`))
+  }
+
+  const steps: BattleCommand[] = []
+  if (actor && action.mpCost > 0) {
+    steps.push({ type: 'SPEND_MP', id: actor.id, amount: action.mpCost })
+  }
+  for (const target of action.targets) {
+    if (target.change) {
+      const { kind, amount } = target.change
+      steps.push({ type: KIND_COMMAND[kind], id: target.id, amount })
+    }
+    for (const status of target.addStatuses) {
+      steps.push({ type: 'SET_STATUS', id: target.id, status, active: true })
+    }
+    for (const status of target.removeStatuses) {
+      steps.push({ type: 'SET_STATUS', id: target.id, status, active: false })
+    }
+  }
+
+  let current = state
+  const events: BattleEvent[] = [
+    {
+      type: 'ACTION_PERFORMED',
+      actorId: actor?.id ?? null,
+      name: action.name,
+      effect: action.effect,
+      targetIds: action.targets.map((t) => t.id),
+    },
+  ]
+  for (const step of steps) {
+    const result = applyCommand(current, step)
+    if (!result.ok) return result
+    current = result.state
+    events.push(...result.events)
+  }
+  return ok(current, events)
+}
+
+/**
  * Pure reducer: applies a command and returns the new state plus the events it produced.
  * Never mutates its input. Invalid commands return `{ ok: false }` and leave state untouched.
  */
 export function applyCommand(state: BattleState, command: BattleCommand): CommandResult {
   switch (command.type) {
-    case 'ADD_COMBATANT': {
-      if (findCombatant(state, command.combatant.id)) {
-        return fail(domainError('DUPLICATE_ID', `Id "${command.combatant.id}" already in use`))
+    case 'ADD_COMBATANT':
+      return addCombatants(state, [command.combatant])
+
+    case 'DEPLOY':
+      if (command.combatants.length === 0) return ok(state, [])
+      return addCombatants(state, command.combatants)
+
+    case 'LOAD_SCENE': {
+      const base: BattleState = {
+        ...state,
+        name: command.name.trim(),
+        phase: 'preparation',
+        backgroundAssetId: command.backgroundAssetId,
+        combatants: [],
+        presentation: mergePresentation(state.presentation, {
+          revealAllEnemyStats: false,
+          enemyPanel: { visible: false },
+        }),
       }
-      const parsed = CombatantSchema.safeParse(createCombatant(command.combatant))
-      if (!parsed.success) {
-        return fail(domainError('INVALID_COMBATANT', parsed.error.message))
-      }
-      const combatant = parsed.data
-      return ok({ ...state, combatants: [...state.combatants, combatant] }, [
-        { type: 'COMBATANT_ADDED', combatant },
-      ])
+      const result = addCombatants(base, command.combatants)
+      if (!result.ok) return result
+      return ok(result.state, [{ type: 'BATTLE_LOADED', state: result.state }])
     }
 
     case 'UPDATE_COMBATANT': {
@@ -189,6 +329,26 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
         { type: 'COMBATANT_UPDATED', combatant: next },
         ...thresholdEvents(current, next),
       ])
+    }
+
+    case 'SYNC_UNIT': {
+      let next = state
+      const events: BattleEvent[] = []
+      for (const current of state.combatants) {
+        if (current.unitId !== command.unitId) continue
+        const changes = {
+          ...command.sheet,
+          name: renamedCopy(current.name, command.previousName, command.sheet.name),
+        }
+        // Saving a sheet without touching what the field uses changes nothing here.
+        const keys = Object.keys(changes) as (keyof typeof changes)[]
+        if (keys.every((k) => current[k] === changes[k])) continue
+        const result = applyCommand(next, { type: 'UPDATE_COMBATANT', id: current.id, changes })
+        if (!result.ok) return result
+        next = result.state
+        events.push(...result.events)
+      }
+      return ok(next, events)
     }
 
     case 'REMOVE_COMBATANT': {
@@ -271,23 +431,28 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
       return ok(parsed.data, [{ type: 'BATTLE_LOADED', state: parsed.data }])
     }
 
+    case 'PERFORM_ACTION':
+      return performAction(state, command.action)
+
     case 'START_BATTLE':
       if (state.phase === 'active') return ok(state, [])
       return ok({ ...state, phase: 'active' }, [{ type: 'BATTLE_STARTED' }])
 
     case 'END_BATTLE': {
-      const removedEnemyIds = state.combatants.filter((c) => c.side === 'enemy').map((c) => c.id)
+      const removedIds = state.combatants.map((c) => c.id)
       return ok(
         {
           ...state,
+          name: '',
           phase: 'preparation',
-          combatants: state.combatants.filter((c) => c.side !== 'enemy'),
+          backgroundAssetId: null,
+          combatants: [],
           presentation: mergePresentation(state.presentation, {
             revealAllEnemyStats: false,
             enemyPanel: { visible: false },
           }),
         },
-        [{ type: 'BATTLE_ENDED', removedEnemyIds }],
+        [{ type: 'BATTLE_ENDED', removedIds }],
       )
     }
   }

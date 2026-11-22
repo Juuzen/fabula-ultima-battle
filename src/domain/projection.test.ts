@@ -64,7 +64,7 @@ describe('projectEventsForPlayers', () => {
       { type: 'BATTLE_STARTED' },
     ])
     expect(step(battle('active'), { type: 'END_BATTLE' })).toEqual([
-      { type: 'BATTLE_ENDED', removedEnemyIds: ['orc'] },
+      { type: 'BATTLE_ENDED', removedIds: ['hero', 'orc'] },
     ])
   })
 })

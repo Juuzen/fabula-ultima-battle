@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { isInCrisis, isKnockedOut, type Combatant } from '@/domain'
 import { useAssetUrl } from '@/infra/assets/assetResolver'
 
+import { useChoreoStore, type StageStep } from '../choreography/choreoStore'
 import { useLatestHit } from '../fx/fxContext'
 import { StatusIcons } from '../hud/StatusIcons'
 import type { Slot } from './formation'
@@ -62,12 +63,24 @@ function useHitReaction(combatantId: string) {
   return scope
 }
 
+/** How far the actor steps towards the centre of the field when acting, in stage px. */
+export const STEP_FORWARD = 90
+
+/** This combatant's step in the action being played (null when it is not the actor). */
+function useActingStep(combatantId: string): StageStep | null {
+  return useChoreoStore((s) => (s.stage?.actorId === combatantId ? s.stage.step : null))
+}
+
 /** One combatant on the battlefield, anchored by its feet at `slot`. */
 export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
   const url = useAssetUrl(combatant.spriteAssetId)
   const ko = isKnockedOut(combatant)
   const crisis = isInCrisis(combatant)
   const scope = useHitReaction(combatant.id)
+  const acting = useActingStep(combatant.id)
+  const forward = acting !== null && acting !== 'retreat'
+  // Towards the centre: enemies (left) move right, the party (right) moves left.
+  const stepX = forward ? (combatant.side === 'enemy' ? STEP_FORWARD : -STEP_FORWARD) : 0
 
   const stateClass = ko ? 'sprite-ko' : crisis ? 'sprite-crisis' : ''
   const left = slot.x - SPRITE_BOX.width / 2
@@ -80,6 +93,7 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
       ref={scope}
       data-testid={`sprite-${combatant.id}`}
       data-state={ko ? 'ko' : crisis ? 'crisis' : 'ok'}
+      data-acting={acting ?? undefined}
       className="absolute"
       style={{
         width: SPRITE_BOX.width,
@@ -102,26 +116,44 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
       {/* Ground shadow */}
       <div className="absolute -bottom-3 left-1/2 h-6 w-36 -translate-x-1/2 rounded-[50%] bg-black/45 blur-sm" />
 
-      <div data-shake className="relative h-full w-full">
-        <div data-flash className="h-full w-full">
-          <div
-            className={`sprite-state h-full w-full ${stateClass}`}
-            // Mirroring applies to real artwork only: the placeholder is symmetric and has text.
-            style={url && combatant.flipSprite ? { transform: 'scaleX(-1)' } : undefined}
-          >
-            {url ? (
-              <img
-                src={url}
-                alt=""
-                draggable={false}
-                className="h-full w-full object-contain object-bottom [image-rendering:pixelated]"
-              />
-            ) : (
-              <PlaceholderSprite name={combatant.name} side={combatant.side} />
-            )}
+      {/* Step forward / back when this combatant acts (see the Display's sequencer). */}
+      <motion.div
+        className="relative h-full w-full"
+        animate={{ x: stepX }}
+        transition={{ duration: 0.28, ease: 'easeInOut' }}
+      >
+        {/* Wind-up glow while casting. */}
+        {acting === 'cast' && (
+          <motion.div
+            data-testid="cast-glow"
+            aria-hidden="true"
+            className="pointer-events-none absolute -inset-4 rounded-full bg-[radial-gradient(circle,rgba(255,250,210,.75)_0%,rgba(255,220,120,.25)_45%,transparent_70%)]"
+            initial={{ opacity: 0, scale: 0.7 }}
+            animate={{ opacity: [0, 1, 0.8], scale: [0.7, 1.1, 1] }}
+            transition={{ duration: 0.24 }}
+          />
+        )}
+        <div data-shake className="relative h-full w-full">
+          <div data-flash className="h-full w-full">
+            <div
+              className={`sprite-state h-full w-full ${stateClass}`}
+              // Mirroring applies to real artwork only: the placeholder is symmetric and has text.
+              style={url && combatant.flipSprite ? { transform: 'scaleX(-1)' } : undefined}
+            >
+              {url ? (
+                <img
+                  src={url}
+                  alt=""
+                  draggable={false}
+                  className="h-full w-full object-contain object-bottom [image-rendering:pixelated]"
+                />
+              ) : (
+                <PlaceholderSprite name={combatant.name} side={combatant.side} />
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Enemies show statuses on their nameplate (see NameplateLayer). */}
       {combatant.side === 'ally' && !ko && (

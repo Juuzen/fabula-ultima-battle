@@ -1,0 +1,895 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-20T00:21:45.726Z",
+  "title": "Design System: Fabula Ultima Battle",
+  "extensions": {
+    "colorMeta": {
+      "cartridge-blue": {
+        "role": "primary",
+        "displayName": "Blu Cartuccia",
+        "tonalRamp": [
+          "#070b2b",
+          "#0c1446",
+          "#16226a",
+          "#1f2f85",
+          "#2a3f9e",
+          "#4a5fc0",
+          "#8494dd",
+          "#c7cff5"
+        ]
+      },
+      "cartridge-blue-mid": {
+        "role": "primary",
+        "displayName": "Blu Cartuccia (medio)",
+        "tonalRamp": [
+          "#070b2b",
+          "#0c1446",
+          "#16226a",
+          "#1f2f85",
+          "#2a3f9e",
+          "#4a5fc0",
+          "#8494dd",
+          "#c7cff5"
+        ]
+      },
+      "cartridge-blue-deep": {
+        "role": "primary",
+        "displayName": "Blu Cartuccia (profondo)",
+        "tonalRamp": [
+          "#070b2b",
+          "#0c1446",
+          "#16226a",
+          "#1f2f85",
+          "#2a3f9e",
+          "#4a5fc0",
+          "#8494dd",
+          "#c7cff5"
+        ]
+      },
+      "frame-white": {
+        "role": "primary",
+        "displayName": "Bianco Cornice",
+        "tonalRamp": [
+          "#1b2050",
+          "#3a4188",
+          "#6870b8",
+          "#9aa2d8",
+          "#c3c9ef",
+          "#dde1fa",
+          "#eef1ff",
+          "#f8f9ff"
+        ]
+      },
+      "hp-healthy": {
+        "role": "secondary",
+        "displayName": "Verde Vita",
+        "tonalRamp": [
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10b981",
+          "#34d399",
+          "#6ee7b7",
+          "#a7f3d0"
+        ]
+      },
+      "hp-healthy-glint": {
+        "role": "secondary",
+        "displayName": "Verde Vita (riflesso)",
+        "tonalRamp": [
+          "#365314",
+          "#3f6212",
+          "#4d7c0f",
+          "#65a30d",
+          "#84cc16",
+          "#a3e635",
+          "#bef264",
+          "#d9f99d"
+        ]
+      },
+      "crisis-amber": {
+        "role": "tertiary",
+        "displayName": "Ambra Crisi",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fbbf24",
+          "#fcd34d",
+          "#fde68a"
+        ]
+      },
+      "crisis-amber-glint": {
+        "role": "tertiary",
+        "displayName": "Ambra Crisi (riflesso)",
+        "tonalRamp": [
+          "#713f12",
+          "#854d0e",
+          "#a16207",
+          "#ca8a04",
+          "#eab308",
+          "#facc15",
+          "#fde047",
+          "#fef08a"
+        ]
+      },
+      "crisis-amber-tag": {
+        "role": "tertiary",
+        "displayName": "Ambra Crisi (tag)",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fbbf24",
+          "#fcd34d",
+          "#fde68a"
+        ]
+      },
+      "crisis-amber-text": {
+        "role": "tertiary",
+        "displayName": "Ambra Crisi (testo)",
+        "tonalRamp": [
+          "#78350f",
+          "#92400e",
+          "#b45309",
+          "#d97706",
+          "#f59e0b",
+          "#fbbf24",
+          "#fcd34d",
+          "#fde68a"
+        ]
+      },
+      "ko-red": {
+        "role": "tertiary",
+        "displayName": "Rosso KO",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fca5a5",
+          "#fecaca"
+        ]
+      },
+      "ko-red-bright": {
+        "role": "tertiary",
+        "displayName": "Rosso KO (vivo)",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fca5a5",
+          "#fecaca"
+        ]
+      },
+      "ko-red-tag": {
+        "role": "tertiary",
+        "displayName": "Rosso KO (tag)",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fca5a5",
+          "#fecaca"
+        ]
+      },
+      "ko-red-text": {
+        "role": "tertiary",
+        "displayName": "Rosso KO (testo)",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fca5a5",
+          "#fecaca"
+        ]
+      },
+      "mp-sky": {
+        "role": "secondary",
+        "displayName": "Azzurro Mana",
+        "tonalRamp": [
+          "#0c4a6e",
+          "#075985",
+          "#0369a1",
+          "#0284c7",
+          "#0ea5e9",
+          "#38bdf8",
+          "#7dd3fc",
+          "#bae6fd"
+        ]
+      },
+      "mp-sky-glint": {
+        "role": "secondary",
+        "displayName": "Azzurro Mana (riflesso)",
+        "tonalRamp": [
+          "#164e63",
+          "#155e75",
+          "#0e7490",
+          "#0891b2",
+          "#06b6d4",
+          "#22d3ee",
+          "#67e8f9",
+          "#a5f3fc"
+        ]
+      },
+      "trail-damage": {
+        "role": "tertiary",
+        "displayName": "Scia del Colpo",
+        "tonalRamp": [
+          "#881337",
+          "#9f1239",
+          "#be123c",
+          "#e11d48",
+          "#f43f5e",
+          "#fb7185",
+          "#fda4af",
+          "#ffe4e6"
+        ]
+      },
+      "trail-heal": {
+        "role": "secondary",
+        "displayName": "Scia di Cura",
+        "tonalRamp": [
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10b981",
+          "#34d399",
+          "#6ee7b7",
+          "#a7f3d0"
+        ]
+      },
+      "status-slow": {
+        "role": "tertiary",
+        "displayName": "Lento",
+        "tonalRamp": [
+          "#0c4a6e",
+          "#075985",
+          "#0369a1",
+          "#0284c7",
+          "#0ea5e9",
+          "#38bdf8",
+          "#7dd3fc",
+          "#bae6fd"
+        ]
+      },
+      "status-dazed": {
+        "role": "tertiary",
+        "displayName": "Confuso",
+        "tonalRamp": [
+          "#4c1d95",
+          "#5b21b6",
+          "#6d28d9",
+          "#7c3aed",
+          "#8b5cf6",
+          "#a78bfa",
+          "#c4b5fd",
+          "#ddd6fe"
+        ]
+      },
+      "status-weak": {
+        "role": "tertiary",
+        "displayName": "Debole",
+        "tonalRamp": [
+          "#1c1917",
+          "#292524",
+          "#44403c",
+          "#57534e",
+          "#78716c",
+          "#a8a29e",
+          "#d6d3d1",
+          "#e7e5e4"
+        ]
+      },
+      "status-shaken": {
+        "role": "tertiary",
+        "displayName": "Scosso",
+        "tonalRamp": [
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#4f46e5",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "status-enraged": {
+        "role": "tertiary",
+        "displayName": "Furente",
+        "tonalRamp": [
+          "#7f1d1d",
+          "#991b1b",
+          "#b91c1c",
+          "#dc2626",
+          "#ef4444",
+          "#f87171",
+          "#fca5a5",
+          "#fecaca"
+        ]
+      },
+      "status-poisoned": {
+        "role": "tertiary",
+        "displayName": "Avvelenato",
+        "tonalRamp": [
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10b981",
+          "#34d399",
+          "#6ee7b7",
+          "#a7f3d0"
+        ]
+      },
+      "text-outline": {
+        "role": "neutral",
+        "displayName": "Contorno Testo",
+        "tonalRamp": [
+          "#05050f",
+          "#0a0a19",
+          "#16163a",
+          "#25255a",
+          "#3a3a7a",
+          "#6262a0",
+          "#9a9ac8",
+          "#d4d4ec"
+        ]
+      },
+      "dusk-sky-top": {
+        "role": "neutral",
+        "displayName": "Crepuscolo (cielo alto)",
+        "tonalRamp": [
+          "#0d0a24",
+          "#1a1440",
+          "#2a1f52",
+          "#3b2a63",
+          "#6a4570",
+          "#9a5f66",
+          "#c27a5a",
+          "#e8b394"
+        ]
+      },
+      "dusk-sky-mid": {
+        "role": "neutral",
+        "displayName": "Crepuscolo (cielo)",
+        "tonalRamp": [
+          "#0d0a24",
+          "#1a1440",
+          "#2a1f52",
+          "#3b2a63",
+          "#6a4570",
+          "#9a5f66",
+          "#c27a5a",
+          "#e8b394"
+        ]
+      },
+      "dusk-horizon": {
+        "role": "neutral",
+        "displayName": "Crepuscolo (orizzonte)",
+        "tonalRamp": [
+          "#0d0a24",
+          "#1a1440",
+          "#2a1f52",
+          "#3b2a63",
+          "#6a4570",
+          "#9a5f66",
+          "#c27a5a",
+          "#e8b394"
+        ]
+      },
+      "dusk-ground": {
+        "role": "neutral",
+        "displayName": "Crepuscolo (terreno)",
+        "tonalRamp": [
+          "#121210",
+          "#1c1c16",
+          "#26261d",
+          "#3d3a2c",
+          "#57533f",
+          "#767158",
+          "#9c977b",
+          "#c7c3ab"
+        ]
+      },
+      "ally-placeholder": {
+        "role": "neutral",
+        "displayName": "Segnaposto Alleato",
+        "tonalRamp": [
+          "#0b1430",
+          "#101a3d",
+          "#1d3466",
+          "#2b4c8f",
+          "#4d74c4",
+          "#7a9bd8",
+          "#a9c8ff",
+          "#cfe0ff"
+        ]
+      },
+      "enemy-placeholder": {
+        "role": "neutral",
+        "displayName": "Segnaposto Nemico",
+        "tonalRamp": [
+          "#1a070b",
+          "#2a0c12",
+          "#521824",
+          "#7a2433",
+          "#a83a4c",
+          "#d06a78",
+          "#ffb3a8",
+          "#ffd0c8"
+        ]
+      },
+      "console-black": {
+        "role": "neutral",
+        "displayName": "Nero Console",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      },
+      "console-panel": {
+        "role": "neutral",
+        "displayName": "Ardesia Pannello",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      },
+      "console-line": {
+        "role": "neutral",
+        "displayName": "Linea Console",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      },
+      "console-hover": {
+        "role": "neutral",
+        "displayName": "Ardesia Hover",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      },
+      "console-stroke": {
+        "role": "neutral",
+        "displayName": "Bordo Campo",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      },
+      "console-muted": {
+        "role": "neutral",
+        "displayName": "Grigio Silenzio",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      },
+      "console-ink": {
+        "role": "neutral",
+        "displayName": "Inchiostro Console",
+        "tonalRamp": [
+          "#020617",
+          "#0f172a",
+          "#1e293b",
+          "#334155",
+          "#475569",
+          "#64748b",
+          "#94a3b8",
+          "#e2e8f0"
+        ]
+      },
+      "command-indigo": {
+        "role": "primary",
+        "displayName": "Indaco Comando",
+        "tonalRamp": [
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#4f46e5",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "command-indigo-hover": {
+        "role": "primary",
+        "displayName": "Indaco Comando (hover)",
+        "tonalRamp": [
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#4f46e5",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "command-indigo-focus": {
+        "role": "primary",
+        "displayName": "Indaco Comando (focus)",
+        "tonalRamp": [
+          "#312e81",
+          "#3730a3",
+          "#4338ca",
+          "#4f46e5",
+          "#6366f1",
+          "#818cf8",
+          "#a5b4fc",
+          "#c7d2fe"
+        ]
+      },
+      "action-danger": {
+        "role": "tertiary",
+        "displayName": "Rosa Danno",
+        "tonalRamp": [
+          "#881337",
+          "#9f1239",
+          "#be123c",
+          "#e11d48",
+          "#f43f5e",
+          "#fb7185",
+          "#fda4af",
+          "#ffe4e6"
+        ]
+      },
+      "action-success": {
+        "role": "secondary",
+        "displayName": "Smeraldo Cura",
+        "tonalRamp": [
+          "#064e3b",
+          "#065f46",
+          "#047857",
+          "#059669",
+          "#10b981",
+          "#34d399",
+          "#6ee7b7",
+          "#a7f3d0"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Nome dell'abilità nel banner d'azione."
+      },
+      "display-waiting": {
+        "displayName": "Display Waiting",
+        "purpose": "Scritta della schermata di attesa."
+      },
+      "combat-number": {
+        "displayName": "Combat Number",
+        "purpose": "Testo fluttuante di danno, cura e stati (48–72px)."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Nome del membro del party; titolo della plancia."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Nomi nemici, titoli dei Panel, nomi nelle card del Master."
+      },
+      "gauge-value": {
+        "displayName": "Gauge Value",
+        "purpose": "Valori PV/PM del party, cifre tabellari."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Controlli e testo operativo del Master."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Etichette maiuscole dei campi."
+      },
+      "tag": {
+        "displayName": "Tag",
+        "purpose": "Etichette KO e Crisi."
+      }
+    },
+    "shadows": [
+      {
+        "name": "jrpg-frame",
+        "value": "inset 0 0 0 2px #0c1446, inset 0 0 0 4px rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.55)",
+        "purpose": "Cornice della finestra JRPG, insieme a border 3px #eef1ff."
+      },
+      {
+        "name": "text-emboss",
+        "value": "0 2px 0 rgba(0,0,0,.6)",
+        "purpose": "text-shadow del testo nelle finestre e nelle targhette."
+      },
+      {
+        "name": "crisis-slot-glow",
+        "value": "0 0 22px rgba(251,191,36,.75)",
+        "purpose": "Picco della pulsazione Crisi sulla cornice dello slot."
+      },
+      {
+        "name": "crisis-sprite-glow",
+        "value": "drop-shadow(0 0 14px rgba(255,60,40,.9)) brightness(1.08)",
+        "purpose": "Picco della pulsazione Crisi sullo sprite (filter)."
+      },
+      {
+        "name": "badge-drop",
+        "value": "drop-shadow(0 2px 2px rgba(0,0,0,.6))",
+        "purpose": "Badge di status (filter)."
+      },
+      {
+        "name": "text-outline",
+        "value": "-webkit-text-stroke: 6px rgba(10,10,25,.9); paint-order: stroke fill",
+        "purpose": "Contorno del testo fluttuante."
+      }
+    ],
+    "motion": [
+      {
+        "name": "seq-advance",
+        "value": "280ms",
+        "purpose": "L'attore avanza verso il centro."
+      },
+      {
+        "name": "seq-cast",
+        "value": "240ms",
+        "purpose": "Carica prima dell'effetto."
+      },
+      {
+        "name": "seq-effect",
+        "value": "600–1100ms, impatto al 35–55%",
+        "purpose": "Effetto integrato (taglio, impatto, fuoco, ghiaccio, tuono, luce, ombra)."
+      },
+      {
+        "name": "seq-hold",
+        "value": "380ms",
+        "purpose": "Pausa dopo l'effetto."
+      },
+      {
+        "name": "seq-retreat",
+        "value": "280ms",
+        "purpose": "L'attore torna al suo posto."
+      },
+      {
+        "name": "gauge-drop",
+        "value": "barra 200ms ease-out; scia 650ms ease-in-out dopo 350ms",
+        "purpose": "Barra al danno."
+      },
+      {
+        "name": "gauge-fill",
+        "value": "scia 250ms ease-out; barra 550ms ease-out dopo 300ms",
+        "purpose": "Barra alla cura."
+      },
+      {
+        "name": "ko-fade",
+        "value": "filter/opacity 700ms ease",
+        "purpose": "Passaggio a KO dello sprite."
+      },
+      {
+        "name": "crisis-pulse",
+        "value": "1.4s ease-in-out infinite",
+        "purpose": "Bagliore Crisi su slot e sprite."
+      },
+      {
+        "name": "banner-enter",
+        "value": "220ms ease-out",
+        "purpose": "Ingresso del banner d'azione."
+      },
+      {
+        "name": "enemy-window",
+        "value": "300ms ease-out, translateY -32px",
+        "purpose": "Comparsa e uscita della finestra nemici."
+      },
+      {
+        "name": "floating-text",
+        "value": "1.4s, opacità 0 → 1 → 1 → 0 a 0 / 0.15 / 0.7 / 1",
+        "purpose": "Testo fluttuante, fermo sul posto."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "stage",
+        "value": "1920×1080 logico, scalato uniformemente"
+      },
+      {
+        "name": "master-xl",
+        "value": "1280px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Finestra JRPG",
+      "kind": "card",
+      "refersTo": "jrpg-window",
+      "description": "Contenitore firma del Display: party, finestra nemici, banner d'azione.",
+      "html": "<div class=\"ds-jrpg-window\"><div class=\"ds-jrpg-title\">Lama Lunare</div></div>",
+      "css": ".ds-jrpg-window { background: linear-gradient(180deg, #2a3f9e 0%, #16226a 55%, #0c1446 100%); border: 3px solid #eef1ff; box-shadow: inset 0 0 0 2px #0c1446, inset 0 0 0 4px rgba(255,255,255,.18), 0 10px 30px rgba(0,0,0,.55); border-radius: 12px; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.6); padding: 12px 56px; display: inline-block; } .ds-jrpg-title { font: 700 36px/1.1 Cinzel, Georgia, serif; letter-spacing: .05em; white-space: nowrap; }"
+    },
+    {
+      "name": "Gauge PV (scia JRPG)",
+      "kind": "custom",
+      "refersTo": "gauge-hp",
+      "description": "Barra PV con valore tabellare; il colore segue lo stato sano / Crisi / KO.",
+      "html": "<div class=\"ds-gauge\"><div class=\"ds-gauge-row\"><span class=\"ds-gauge-label\">PV</span><span class=\"ds-gauge-val\">48<span class=\"ds-gauge-max\"> / 62</span></span></div><div class=\"ds-gauge-track\"><div class=\"ds-gauge-trail\"></div><div class=\"ds-gauge-fill\"></div></div></div><div class=\"ds-gauge ds-gauge--crisis\"><div class=\"ds-gauge-row\"><span class=\"ds-gauge-label\">PV</span><span class=\"ds-gauge-val\">21<span class=\"ds-gauge-max\"> / 62</span></span></div><div class=\"ds-gauge-track\"><div class=\"ds-gauge-fill\"></div></div></div>",
+      "css": ".ds-gauge { width: 280px; padding: 10px 12px; background: #020617; font-family: 'Inter Variable', system-ui, sans-serif; color: #fff; margin-bottom: 4px; } .ds-gauge-row { display: flex; justify-content: space-between; align-items: baseline; } .ds-gauge-label { font-weight: 700; font-size: 18px; letter-spacing: .025em; color: #e2e8f0; } .ds-gauge-val { font-weight: 600; font-size: 24px; font-variant-numeric: tabular-nums; } .ds-gauge-max { font-size: 16px; color: #cbd5e1; } .ds-gauge-track { position: relative; height: 10px; border-radius: 9999px; background: rgba(0,0,0,.6); box-shadow: 0 0 0 1px rgba(255,255,255,.3); overflow: hidden; } .ds-gauge-trail, .ds-gauge-fill { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 9999px; } .ds-gauge-trail { width: 92%; background: rgba(255,228,230,.9); } .ds-gauge-fill { width: 77%; background: linear-gradient(90deg, #10b981, #bef264); transition: width .2s ease-out; } .ds-gauge--crisis .ds-gauge-val { color: #fcd34d; } .ds-gauge--crisis .ds-gauge-fill { width: 34%; background: linear-gradient(90deg, #f59e0b, #fde047); }"
+    },
+    {
+      "name": "Tag KO / Crisi",
+      "kind": "chip",
+      "refersTo": "state-tag-crisis",
+      "description": "Etichetta testuale di stato, sempre accanto al nome.",
+      "html": "<span class=\"ds-tag ds-tag--crisis\">Crisi</span> <span class=\"ds-tag ds-tag--ko\">KO</span>",
+      "css": ".ds-tag { display: inline-block; padding: 2px 8px; border-radius: 2px; font: 700 14px/1.43 'Inter Variable', system-ui, sans-serif; letter-spacing: .1em; text-transform: uppercase; } .ds-tag--crisis { background: #fbbf24; color: #451a03; animation: ds-pulse 2s cubic-bezier(.4,0,.6,1) infinite; } .ds-tag--ko { background: #dc2626; color: #fff; } @keyframes ds-pulse { 50% { opacity: .5; } } @media (prefers-reduced-motion: reduce) { .ds-tag--crisis { animation: none; } }"
+    },
+    {
+      "name": "Badge di status",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Cerchio per gli status semplici, rombo per quelli maggiori.",
+      "html": "<span class=\"ds-status\" role=\"img\" aria-label=\"Avvelenato\"><span class=\"ds-status-shape ds-status--poisoned\"></span><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"11.9\" r=\"2\"/><path d=\"M6.7 3.4c-.9 2.5 0 5.2 2.2 6.7C6.5 9 3.7 9.6 2 11.6\"/><path d=\"m8.9 10.1 1.4.8\"/><path d=\"M17.3 3.4c.9 2.5 0 5.2-2.2 6.7 2.4-1.2 5.2-.6 6.9 1.5\"/><path d=\"m15.1 10.1-1.4.8\"/><path d=\"M16.7 20.8c-2.6-.4-4.6-2.6-4.7-5.3-.2 2.6-2.1 4.8-4.7 5.2\"/><path d=\"M12 13.9v1.6\"/><path d=\"M13.5 5.4c-1-.2-2-.2-3 0\"/><path d=\"M17 16.4c.7-.7 1.2-1.6 1.5-2.5\"/><path d=\"M5.5 13.9c.3.9.8 1.8 1.5 2.5\"/></svg></span> <span class=\"ds-status\" role=\"img\" aria-label=\"Furente\"><span class=\"ds-status-shape ds-status--major ds-status--enraged\"></span><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#fff\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z\"/></svg></span>",
+      "css": ".ds-status { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; filter: drop-shadow(0 2px 2px rgba(0,0,0,.6)); } .ds-status svg { position: relative; } .ds-status-shape { position: absolute; inset: 0; border-radius: 9999px; box-shadow: 0 0 0 2px rgba(255,255,255,.8); } .ds-status--major { inset: 12%; border-radius: 3px; transform: rotate(45deg); } .ds-status--poisoned { background: #059669; } .ds-status--enraged { background: #dc2626; }"
+    },
+    {
+      "name": "Testo fluttuante",
+      "kind": "custom",
+      "refersTo": "combat-number",
+      "description": "Numeri di danno e cura sopra lo sprite, con contorno scuro di 6px.",
+      "html": "<div class=\"ds-float-stage\"><span class=\"ds-float\">27</span><span class=\"ds-float ds-float--heal\">+12</span></div>",
+      "css": ".ds-float-stage { display: flex; gap: 32px; padding: 16px 24px; background: linear-gradient(180deg, #3b2a63, #c27a5a); } .ds-float { font: 900 72px/1 Cinzel, Georgia, serif; color: #fff; -webkit-text-stroke: 6px rgba(10,10,25,.9); paint-order: stroke fill; } .ds-float--heal { color: #6ee7b7; }"
+    },
+    {
+      "name": "Pulsante primario",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Azione principale del Master (apri schermo giocatori).",
+      "html": "<button class=\"ds-btn-primary\">Apri schermo</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 6px; font: 500 14px 'Inter Variable', system-ui, sans-serif; border: none; cursor: pointer; transition: background-color .15s; background: #4f46e5; color: #fff; } .ds-btn-primary:hover { background: #6366f1; } .ds-btn-primary:focus-visible { outline: 2px solid #818cf8; outline-offset: 2px; } .ds-btn-primary:active { background: #4338ca; }"
+    },
+    {
+      "name": "Pulsante secondario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Default dei controlli del Master (annulla, PM).",
+      "html": "<button class=\"ds-btn-secondary\">Annulla</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 6px; font: 500 14px 'Inter Variable', system-ui, sans-serif; border: none; cursor: pointer; transition: background-color .15s; background: #1e293b; color: #f1f5f9; box-shadow: inset 0 0 0 1px #475569; } .ds-btn-secondary:hover { background: #334155; } .ds-btn-secondary:focus-visible { outline: 2px solid #94a3b8; outline-offset: 2px; } .ds-btn-secondary:disabled { opacity: .4; cursor: not-allowed; }"
+    },
+    {
+      "name": "Pulsante Danno",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Applica danno; equivale a Invio nel campo importo.",
+      "html": "<button class=\"ds-btn-danger\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"14.5 17.5 3 6 3 3 6 3 17.5 14.5\"/><line x1=\"13\" x2=\"19\" y1=\"19\" y2=\"13\"/><line x1=\"16\" x2=\"20\" y1=\"16\" y2=\"20\"/><line x1=\"19\" x2=\"21\" y1=\"21\" y2=\"19\"/></svg>Danno</button>",
+      "css": ".ds-btn-danger { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 6px; font: 500 14px 'Inter Variable', system-ui, sans-serif; border: none; cursor: pointer; transition: background-color .15s; background: #be123c; color: #fff; } .ds-btn-danger:hover { background: #e11d48; } .ds-btn-danger:focus-visible { outline: 2px solid #fb7185; outline-offset: 2px; }"
+    },
+    {
+      "name": "Campo numerico",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Importo per danno, cura e PM.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Importo</span><input class=\"ds-input\" type=\"number\" value=\"12\"></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 4px; width: 120px; } .ds-field-label { font: 500 12px 'Inter Variable', system-ui, sans-serif; letter-spacing: .025em; text-transform: uppercase; color: #94a3b8; } .ds-input { height: 40px; padding: 0 12px; border-radius: 6px; border: 1px solid #475569; background: #020617; color: #f1f5f9; font: 400 16px 'Inter Variable', system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-input:focus { outline: none; border-color: #818cf8; }"
+    },
+    {
+      "name": "Panel del Master",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Sezione titolata della plancia.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel-title\">Azione</h2><p class=\"ds-panel-body\">Scegli chi agisce e su chi.</p></section>",
+      "css": ".ds-panel { width: 320px; padding: 16px; border-radius: 12px; border: 1px solid #1e293b; background: rgba(15,23,42,.8); } .ds-panel-title { margin: 0 0 12px; font: 600 18px Cinzel, Georgia, serif; letter-spacing: .025em; color: #f1f5f9; } .ds-panel-body { margin: 0; font: 400 14px 'Inter Variable', system-ui, sans-serif; color: #94a3b8; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Cartuccia Ritrovata",
+    "overview": "Il sistema è un JRPG anni '90-2000 tirato fuori dal cassetto e rimasterizzato in HD. Il tono è classico e luminoso: blu saturo, cornici bianche nette, numeri enormi e colore usato come segnale, non come decorazione. Lo schermo dei giocatori è il gioco: uno stage logico fisso a 1920×1080, letterboxato sul nero, che deve leggersi da una TV dall'altra parte del tavolo come da una finestra compressa su Discord. Ogni elemento è dimensionato per quella distanza: nomi in Cinzel a 24px, valori PV a 24px tabellari, testo fluttuante a 72px con contorno scuro di 6px.\n\nLa plancia del Master è oggi il retroscena: una console slate scura con accenti indaco, densa e operativa, dove il GM applica danni e stati in pochi secondi. Condivide già con il Display il carattere Cinzel per titoli e nomi e le stesse icone di status. La direzione confermata è avvicinarla al Display: nelle prossime iterazioni il Master prende in prestito cornici, gauge e gerarchia JRPG, senza perdere la rapidità d'uso (vedi Do's and Don'ts).\n\nI componenti sono netti e giocosi: premere un pulsante deve dare la sensazione di premere A sul pad. Le transizioni sono brevi (200–300ms), le barre hanno la scia classica che si svuota dopo il colpo, la Crisi pulsa e il KO sfuma in grigio. La profondità viene dalle cornici; il bagliore è riservato agli stati.",
+    "keyCharacteristics": [
+      "Finestra JRPG blu a doppio bordo bianco come contenitore firma.",
+      "Semantica cromatica fissa: verde sano, ambra Crisi, rosso KO, azzurro PM.",
+      "Cinzel per tutto ciò che è nome o evento, Inter per numeri, etichette e controlli.",
+      "Stato sempre doppio: colore più testo o forma, mai solo colore.",
+      "Movimento rapido e coreografato, con fallback statico per \"riduci movimento\"."
+    ],
+    "rules": [
+      {
+        "name": "La Regola del Semaforo",
+        "body": "Verde, ambra e rosso appartengono a PV, Crisi e KO. Non si usano per nient'altro sullo schermo dei giocatori, così il colore di una barra si legge da tre metri senza leggere il numero.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regola dell'Unico Comando",
+        "body": "Sul Master l'indaco segna solo l'azione primaria, il focus e gli interruttori attivi. Rosso e verde dei pulsanti significano danno e cura, come sul Display.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regola del Nome Inciso",
+        "body": "Ciò che ha un nome nel mondo di gioco (personaggi, nemici, abilità, eventi) va in Cinzel. Ciò che si conta o si regola va in Inter.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regola dei Numeri in Fila",
+        "body": "Ogni valore numerico usa cifre tabellari, così un PV che scende da 100 a 99 non fa ballare la riga.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regola della Cornice",
+        "body": "Una superficie del Display che contiene informazione di gioco porta la cornice JRPG o un ring bianco al 20–35%. Niente ombre morbide senza bordo.",
+        "section": "elevation"
+      },
+      {
+        "name": "La Regola del Bagliore Guadagnato",
+        "body": "Un glow appare solo come risposta a uno stato o a un evento e sparisce con esso. Nessun elemento brilla a riposo.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usare la finestra JRPG (gradiente Blu Cartuccia, bordo Bianco Cornice da 3px, doppio filetto interno) per ogni contenitore di informazione di gioco sul Display.",
+      "Do accoppiare ogni stato a un segnale non cromatico: tag testuale per KO e Crisi, cerchio o rombo per gli status, barrato per i nemici abbattuti.",
+      "Do dimensionare il Display in pixel di stage 1920×1080 e verificare la leggibilità a distanza: nomi ≥ 18px, valori PV del party a 24px, testo fluttuante ≥ 48px.",
+      "Do dare al testo sopra la scena un contorno o un rilievo scuro (6px di stroke per il testo fluttuante, `0 2px 0` per il testo nelle finestre).",
+      "Do usare la terminologia italiana del manuale (PV, PM, Crisi, KO e i nomi degli status) in tutte le etichette.",
+      "Do portare gradualmente sul Master gli elementi del Display: cornici JRPG sulle sezioni chiave, gauge con la stessa semantica, Cinzel per i nomi. Va fatto senza aumentare i clic e senza togliere densità.",
+      "Do fornire un'alternativa statica a ogni animazione sotto `prefers-reduced-motion`."
+    ],
+    "donts": [
+      "Don't usare verde, ambra o rosso sul Display per significati diversi da PV, Crisi e KO.",
+      "Don't introdurre loghi, illustrazioni o grafica ufficiale di Fabula Ultima: il progetto è fan-made e gli asset restano placeholder finché il GM non li carica.",
+      "Don't aggiungere glow o pulsazioni a elementi a riposo: il bagliore segnala solo stati ed eventi.",
+      "Don't rendere responsive la composizione del Display: si scala lo stage intero, non si riorganizzano i pannelli.",
+      "Don't usare cifre proporzionali per PV, PM o importi.",
+      "Don't aggiungere al Master un secondo colore d'accento accanto all'indaco."
+    ]
+  }
+}

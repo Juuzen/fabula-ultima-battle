@@ -1,7 +1,7 @@
 import { useId, type InputHTMLAttributes, type Ref } from 'react'
 
 const INPUT =
-  'h-10 w-full rounded-md border border-slate-600 bg-slate-950 px-3 text-slate-100 placeholder:text-slate-500 focus:border-indigo-400 focus:outline-none'
+  'h-10 w-full rounded-md border border-slate-600 bg-slate-950 px-3 text-slate-100 placeholder:text-slate-400 focus:border-indigo-400 focus:outline-none'
 
 type TextFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   label: string

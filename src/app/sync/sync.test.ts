@@ -61,7 +61,7 @@ describe('Master ↔ Display sync', () => {
     stopMaster()
   })
 
-  it('pushes every change with its events, and undo too', () => {
+  it('pushes every change with its events', () => {
     const hub = createMemoryHub()
     const store = makeStore()
     startMasterSync({ store, transport: hub.connect() })
@@ -70,10 +70,6 @@ describe('Master ↔ Display sync', () => {
     store.getState().dispatch({ type: 'DAMAGE', id: 'orc', amount: 20 })
     expect(screen.last()?.state.combatants[1]?.hp).toBe(10)
     expect(screen.last()?.events.map((e) => e.type)).toEqual(['DAMAGED', 'CRISIS_ENTERED'])
-
-    store.getState().undo()
-    expect(screen.last()?.state.combatants[1]?.hp).toBe(30)
-    expect(screen.last()?.events).toEqual([])
   })
 
   describe('preparation phase', () => {

@@ -8,15 +8,23 @@
     "openDisplay": "Apri schermo giocatori",
     "openDisplayHint": "Sposta la finestra sul secondo schermo e premi F11 per lo schermo intero.",
     "popupBlocked": "Il browser ha bloccato la finestra. Consenti i popup per questo sito.",
-    "undo": "Annulla ultima azione",
-    "undoShortcut": "Ctrl+Z",
-    "battleName": "Nome battaglia",
-    "battleNamePlaceholder": "Es. Agguato al porto",
-    "preview": "Anteprima schermo giocatori",
+    "preview": {
+      "title": "Schermo giocatori",
+      "toggle": "Anteprima",
+      "toggleHint": "Mostra o nascondi l'anteprima dello schermo giocatori",
+      "move": "Sposta l'anteprima",
+      "moveHint": "Trascina, o usa le frecce (Maiusc per passi più lunghi)",
+      "resize": "Ridimensiona l'anteprima",
+      "resizeHint": "Trascina, o usa le frecce",
+      "minimize": "Riduci",
+      "expand": "Espandi",
+      "close": "Chiudi anteprima",
+      "waiting": "In attesa"
+    },
     "party": "Party",
     "enemies": "Nemici",
-    "emptyParty": "Nessun personaggio nel party.",
-    "emptyEnemies": "Nessun nemico in campo.",
+    "emptyParty": "Nessun personaggio in campo: usa Schiera.",
+    "emptyEnemies": "Nessun nemico in campo: usa Schiera.",
     "add": {
       "title": "Aggiungi",
       "name": "Nome",
@@ -27,52 +35,36 @@
       "placeholderEnemy": "Es. Goblin"
     },
     "combatant": {
-      "amount": "Valore",
-      "damage": "Danno",
-      "heal": "Cura",
-      "spendMp": "− PM",
-      "restoreMp": "+ PM",
-      "edit": "Modifica",
-      "remove": "Rimuovi",
+      "remove": "Rimuovi dalla battaglia…",
       "moveUp": "Sposta su",
       "moveDown": "Sposta giù",
-      "statuses": "Status",
-      "reveal": "PV/PM visibili",
-      "revealHint": "Mostra PV e PM di questo nemico ai giocatori",
-      "revealedByAll": "Visibili a tutti"
-    },
-    "edit": {
-      "title": "Modifica {{name}}",
-      "name": "Nome",
-      "maxHp": "PV max",
-      "maxMp": "PM max",
-      "hp": "PV attuali",
-      "mp": "PM attuali",
-      "flip": "Specchia sprite",
-      "save": "Salva",
-      "cancel": "Annulla"
+      "more": "Altre azioni di {{name}}",
+      "count": "Combattenti in campo:",
+      "revealStats": "Mostra PV/PM ai giocatori",
+      "hideStats": "Nascondi PV/PM ai giocatori",
+      "removeConfirm": "Rimuovere {{name}} dalla battaglia?",
+      "removeConfirmed": "Rimuovi",
+      "keep": "Annulla"
     },
     "enemyPanel": {
       "title": "Finestra nemici",
       "mode": "Modalità",
       "manual": "Manuale",
       "auto": "Automatica",
-      "show": "Mostra",
-      "hide": "Nascondi",
+      "show": "Mostra finestra nemici",
+      "hide": "Nascondi finestra nemici",
       "visibleNow": "Visibile ora",
       "autoHide": "Nascondi dopo (secondi)",
       "autoHint": "Compare da sola quando cambia qualcosa sui nemici e sparisce dopo i secondi indicati.",
       "manualHint": "Resta come la imposti tu.",
-      "revealAll": "Mostra PV/PM di tutti i nemici"
+      "revealAll": "Mostra PV/PM di tutti i nemici",
+      "toggleHint": "Mostra o nascondi la finestra nemici sullo schermo dei giocatori"
     },
     "battle": {
-      "title": "Battaglia",
       "end": "Termina battaglia",
-      "endConfirm": "Conferma: rimuovi tutti i nemici",
+      "endConfirm": "Conferma: termina la scena",
       "endCancel": "Annulla",
-      "endHint": "I nemici escono dal campo, il party resta com'è.",
-      "phasePreparation": "In preparazione",
-      "phaseActive": "In corso",
+      "endHint": "Tutti escono dal campo; PV e PM del party tornano sulle schede.",
       "start": "Inizia battaglia",
       "startHint": "I nemici compaiono sullo schermo dei giocatori.",
       "prepHint": "I nemici che aggiungi restano nascosti ai giocatori finché non inizi la battaglia."
@@ -84,12 +76,128 @@
       "INVALID_AMOUNT": "Inserisci un numero intero positivo.",
       "INVALID_COMBATANT": "Dati del combattente non validi: controlla nome e valori.",
       "INVALID_BATTLE": "Battaglia non valida.",
-      "INVALID_PRESENTATION": "Impostazione non valida."
+      "INVALID_PRESENTATION": "Impostazione non valida.",
+      "INVALID_ACTION": "Azione non valida: controlla bersagli e valori.",
+      "NOT_ENOUGH_MP": "PM insufficienti per questa azione.",
+      "UNIT_ALREADY_DEPLOYED": "Questo personaggio è già in campo."
     },
     "connected": "Schermo giocatori collegato",
     "notConnected": "Schermo giocatori non collegato",
     "enemiesHidden": "Nascosti ai giocatori",
-    "previewPreparation": "In preparazione: i giocatori vedono la schermata di attesa."
+    "action": {
+      "name": "Nome azione",
+      "namePlaceholder": "Es. Palla di fuoco",
+      "effect": "Effetto",
+      "kind": "Tipo",
+      "kinds": {
+        "damage": "Danno PV",
+        "heal": "Cura PV",
+        "mpDamage": "Danno PM",
+        "mpRestore": "Recupero PM",
+        "none": "Solo status"
+      },
+      "targets": "Bersagli",
+      "amount": "Valore per {{name}}",
+      "mpCost": "Costo PM",
+      "mpAvailable": "disponibili: {{mp}}",
+      "statuses": "Status all'impatto",
+      "perform": "Agisci",
+      "notEnoughMp": "PM insufficienti ({{mp}} disponibili).",
+      "free": "Azione libera",
+      "hintMp": "promemoria: {{n}}",
+      "acting": "{{name}} agisce",
+      "targetsCount_one": "{{count}} bersaglio",
+      "targetsCount_other": "{{count}} bersagli",
+      "pickTargets": "Scegli i bersagli qui sotto.",
+      "gmTitle": "Azione del GM",
+      "gmHint": "Nessuno agisce: sei tu a cambiare le cose (trappole, pozioni, correzioni).",
+      "nameOptional": "Nome (facoltativo)",
+      "gmNamePlaceholder": "Es. Trappola, Pozione",
+      "back": "Abilità",
+      "backHint": "Torna alle abilità (Esc)",
+      "actingHint": "{{name}} agisce",
+      "preparing": "Battaglia non iniziata: i valori cambiano, ma i giocatori non vedono la sequenza.",
+      "emptyTarget": "Ogni bersaglio ha bisogno di un valore o di uno status.",
+      "badNumber": "Usa numeri interi, 0 o più."
+    },
+    "nav": {
+      "label": "Sezioni della plancia",
+      "groups": {
+        "live": "Dal vivo",
+        "prep": "Preparazione",
+        "library": "Libreria"
+      },
+      "screen": "Controllo schermo",
+      "party": "Party",
+      "enemies": "Nemici",
+      "scenes": "Scene di battaglia",
+      "audio": "Audio",
+      "video": "Video",
+      "shortcut": "Alt+{{n}}",
+      "live": "In corso"
+    },
+    "placeholder": {
+      "soon": "In arrivo",
+      "audio": "La libreria di musiche ed effetti sonori. La riproduzione dal vivo resterà in Controllo schermo.",
+      "video": "La libreria di sfondi ed effetti video. La riproduzione dal vivo resterà in Controllo schermo.",
+      "back": "Torna a Controllo schermo"
+    },
+    "strip": {
+      "label": "Comandi della battaglia",
+      "reopen": "Riapri schermo",
+      "shortcuts": "Scorciatoie",
+      "shortcutsHint": "Scorciatoie da tastiera (?)",
+      "shortcutsTitle": "Scorciatoie da tastiera",
+      "keys": {
+        "enter": "Invio"
+      },
+      "shortcutGroups": {
+        "action": "Nel dettaglio",
+        "everywhere": "Ovunque"
+      },
+      "shortcutList": {
+        "perform": "Agisci (da un campo dell'azione)",
+        "exitAction": "Torna indietro o deseleziona",
+        "sections": "Vai alla sezione 1…6 della barra laterale",
+        "help": "Mostra o nascondi questo elenco",
+        "fullscreen": "Schermo intero, nella finestra del Display"
+      }
+    },
+    "ability": {
+      "title": "Abilità",
+      "none": "Nessuna abilità salvata sulla scheda.",
+      "freeHint": "Nome, effetto e bersagli a tua scelta.",
+      "mpHint": "~{{n}} PM",
+      "amountHint": "~{{n}}"
+    },
+    "target": {
+      "toggle": "Bersaglio: {{name}}",
+      "kind": "Tipo per {{name}}",
+      "noChange": "nessun valore",
+      "addStatus": "Aggiungi {{status}}",
+      "removeStatus": "Togli {{status}}",
+      "statuses": "Status per {{name}}",
+      "nobody": "Nessuno in campo: schiera qualcuno a sinistra."
+    },
+    "field": {
+      "title": "Campo",
+      "selectHint": "Seleziona {{name}} per vedere cosa può fare",
+      "deselectHint": "Deseleziona {{name}}",
+      "revealed": "PV/PM visibili ai giocatori",
+      "targeted": "Bersaglio dell'azione"
+    },
+    "detail": {
+      "title": "Dettaglio",
+      "deselect": "Deseleziona",
+      "deselectHint": "Torna all'azione del GM (Esc)",
+      "notes": "Note del GM"
+    },
+    "settings": {
+      "title": "Impostazioni schermo"
+    },
+    "screen": {
+      "untitled": "Battaglia senza nome"
+    }
   },
   "display": {
     "waiting": "In attesa della battaglia…",
@@ -117,5 +225,181 @@
     "shaken": "Scosso",
     "enraged": "Furente",
     "poisoned": "Avvelenato"
+  },
+  "effects": {
+    "none": "Nessun effetto",
+    "slash": "Taglio",
+    "impact": "Impatto",
+    "fire": "Fuoco",
+    "ice": "Ghiaccio",
+    "thunder": "Fulmine",
+    "light": "Luce",
+    "shadow": "Ombra"
+  },
+  "library": {
+    "create": {
+      "party": "Nuovo personaggio",
+      "enemy": "Nuovo nemico"
+    },
+    "listLabel": {
+      "party": "Schede del party",
+      "enemy": "Schede dei nemici"
+    },
+    "search": "Cerca per nome",
+    "allTags": "Tutte le categorie",
+    "noTag": "Senza categoria",
+    "empty": {
+      "party": "Nessun personaggio. Prepara qui le schede del gruppo prima della sessione.",
+      "enemy": "Il bestiario è vuoto. Crea qui i nemici da schierare negli scontri."
+    },
+    "noMatch": "Nessuna scheda corrisponde alla ricerca.",
+    "select": "Scegli una scheda dall'elenco, o creane una nuova.",
+    "abilitiesCount_one": "{{count}} abilità",
+    "abilitiesCount_other": "{{count}} abilità",
+    "fields": {
+      "name": "Nome",
+      "tag": "Categoria",
+      "tagPlaceholder": "Es. Bestia, Elite, Boss",
+      "maxHp": "PV max",
+      "maxMp": "PM max",
+      "hp": "PV attuali",
+      "mp": "PM attuali",
+      "notes": "Note del GM",
+      "notesHint": "Visibili solo a te: debolezze, tattiche, promemoria di regole.",
+      "flip": "Specchia sprite"
+    },
+    "sections": {
+      "stats": "Statistiche",
+      "look": "Aspetto",
+      "abilities": "Abilità",
+      "notes": "Note"
+    },
+    "currentHint": "I PV e PM attuali tornano qui quando il personaggio esce dal campo.",
+    "art": {
+      "sprite": "Sprite",
+      "portrait": "Ritratto",
+      "soon": "Le immagini si caricano con la libreria asset (in arrivo)."
+    },
+    "ability": {
+      "add": "Aggiungi abilità",
+      "none": "Nessuna abilità: in battaglia userai l'azione libera.",
+      "name": "Nome abilità",
+      "newName": "Nuova abilità",
+      "remove": "Rimuovi abilità",
+      "mpCostHint": "Costo PM",
+      "amountHint": "Valore",
+      "hintNote": "Costo PM e valore sono promemoria: compaiono come suggerimento, il numero vero lo scrivi tu in battaglia.",
+      "label": "Abilità {{n}}"
+    },
+    "save": {
+      "saving": "Salvataggio…",
+      "saved": "Salvato",
+      "invalid": "Non salvato: controlla i campi segnati."
+    },
+    "errors": {
+      "name": "Serve un nome.",
+      "maxHp": "PV max deve essere almeno 1.",
+      "number": "Numero intero, 0 o più.",
+      "hpOverMax": "Non può superare il massimo.",
+      "abilityName": "Ogni abilità ha bisogno di un nome."
+    },
+    "delete": {
+      "action": "Elimina scheda",
+      "confirm": "Conferma: elimina {{name}}",
+      "cancel": "Annulla",
+      "hint": "Viene tolta anche dalle scene che la usano."
+    },
+    "rest": {
+      "action": "Riposo",
+      "hint": "Riporta PV e PM di tutto il party al massimo.",
+      "done": "Party a riposo: PV e PM al massimo."
+    },
+    "onField": "In campo: PV e PM attuali si cambiano dalla plancia.",
+    "deleteOnField": "In campo: toglila dalla battaglia prima di eliminarla.",
+    "syncHint": "Le modifiche valgono subito anche per chi è in campo."
+  },
+  "scenes": {
+    "create": "Nuova scena",
+    "newName": "Nuova scena",
+    "listLabel": "Scene di battaglia",
+    "empty": "Nessuna scena. Prepara qui gli scontri: chi del party partecipa, quali nemici, sfondo e musica.",
+    "noMatch": "Nessuna scena corrisponde alla ricerca.",
+    "fields": {
+      "name": "Nome della battaglia",
+      "namePlaceholder": "Es. Agguato al porto"
+    },
+    "sections": {
+      "party": "Party",
+      "enemies": "Nemici",
+      "ambience": "Ambientazione"
+    },
+    "party": {
+      "none": "Nessuna scheda nel Party: creale nella pagina Party.",
+      "hint": "Chi del gruppo entra in campo con questa scena."
+    },
+    "enemies": {
+      "none": "Nessun nemico in questa scena.",
+      "add": "Aggiungi nemico",
+      "choose": "Scegli dal bestiario…",
+      "noBestiary": "Il bestiario è vuoto: crea i nemici nella pagina Nemici.",
+      "count": "Quantità di {{name}}",
+      "less": "Uno in meno: {{name}}",
+      "more": "Uno in più: {{name}}",
+      "remove": "Togli {{name}}",
+      "missing": "Scheda eliminata"
+    },
+    "ambience": {
+      "background": "Sfondo",
+      "music": "Musica",
+      "soon": "Sfondi e musiche si scelgono con la libreria asset (in arrivo)."
+    },
+    "summary": "{{party}} PG · {{enemies}} nemici",
+    "load": "Carica in Controllo schermo",
+    "loadHint": "Sostituisce chi è in campo; la battaglia resta in preparazione finché non premi Inizia.",
+    "confirmReplace": "Conferma: sostituisci il campo",
+    "loaded": "Scena caricata: {{name}}",
+    "missingUnits_one": "{{count}} scheda di questa scena non esiste più ed è stata saltata.",
+    "missingUnits_other": "{{count}} schede di questa scena non esistono più e sono state saltate.",
+    "errors": {
+      "name": "Serve un nome."
+    },
+    "deleteAction": "Elimina scena"
+  },
+  "deploy": {
+    "title": "Schiera",
+    "tabs": {
+      "scene": "Scena",
+      "party": "Party",
+      "enemies": "Nemici",
+      "quick": "Al volo"
+    },
+    "scene": {
+      "none": "Nessuna scena preparata.",
+      "load": "Carica"
+    },
+    "party": {
+      "none": "Nessuna scheda nel Party.",
+      "deploy": "Schiera",
+      "onField": "In campo",
+      "all": "Schiera tutto il party"
+    },
+    "enemies": {
+      "none": "Il bestiario è vuoto.",
+      "deploy": "Schiera ×{{count}}"
+    },
+    "quick": {
+      "hint": "Per chi non ha una scheda: un PNG improvvisato, un rinforzo inatteso.",
+      "side": "Lato"
+    },
+    "goTo": {
+      "scenes": "Vai a Scene di battaglia",
+      "party": "Vai a Party",
+      "enemies": "Vai a Nemici"
+    },
+    "sceneLoaded": "Scena caricata: {{name}}. Premi Inizia battaglia quando sei pronto.",
+    "dismiss": "Chiudi avviso",
+    "hint": "Aggiungi combattenti al campo",
+    "closeSetup": "Fatto",
+    "emptyHint": "Il campo è vuoto: carica una scena o schiera party e nemici."
   }
 }

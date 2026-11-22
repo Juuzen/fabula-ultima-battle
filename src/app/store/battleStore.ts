@@ -16,23 +16,15 @@ import { createEventBus, type EventBus } from '@/shared/lib/eventBus'
 import { migratePersistedBattle } from './migrations'
 
 export const BATTLE_STORAGE_KEY = 'fu-battle.battle'
-export const BATTLE_STORAGE_VERSION = 4
-const DEFAULT_HISTORY_LIMIT = 50
+export const BATTLE_STORAGE_VERSION = 5
 
-/** Published after every state change; the sync layer (phase 4) will forward it to the Display. */
-export type BattleChange = {
-  cause: 'command' | 'undo'
-  state: BattleState
-  events: BattleEvent[]
-}
+/** Published after every state change; the sync layer forwards it to the Display. */
+export type BattleChange = { state: BattleState; events: BattleEvent[] }
 
 export type BattleStoreState = {
   battle: BattleState
-  /** Undo stack (most recent last). Kept in memory only. */
-  past: BattleState[]
   lastError: DomainError | null
   dispatch: (command: BattleCommand) => CommandResult
-  undo: () => void
   clearError: () => void
 }
 
@@ -41,7 +33,6 @@ export type BattleStore = StoreApi<BattleStoreState> & { changes: EventBus<Battl
 export type BattleStoreOptions = {
   /** Where to persist the battle. `null` disables persistence (e.g. tests). */
   storage?: StateStorage | null
-  historyLimit?: number
 }
 
 type PersistedBattle = { battle: BattleState }
@@ -59,7 +50,6 @@ function mergePersisted(persisted: unknown, current: BattleStoreState): BattleSt
 }
 
 export function createBattleStore(options: BattleStoreOptions = {}): BattleStore {
-  const { historyLimit = DEFAULT_HISTORY_LIMIT } = options
   const storage = options.storage === undefined ? localStorage : options.storage
   const changes = createEventBus<BattleChange>()
 
@@ -68,34 +58,21 @@ export function createBattleStore(options: BattleStoreOptions = {}): BattleStore
     get: StoreApi<BattleStoreState>['getState'],
   ): BattleStoreState => ({
     battle: createEmptyBattle(),
-    past: [],
     lastError: null,
 
     dispatch(command) {
-      const { battle, past } = get()
+      const { battle } = get()
       const result = applyCommand(battle, command)
       if (!result.ok) {
         set({ lastError: result.error })
         return result
       }
-      // No-op commands (e.g. setting an already active status) don't pollute history.
+      // No-op commands (e.g. setting an already active status) change nothing.
       if (result.state === battle) return result
 
-      set({
-        battle: result.state,
-        past: [...past, battle].slice(-historyLimit),
-        lastError: null,
-      })
-      changes.emit({ cause: 'command', state: result.state, events: result.events })
+      set({ battle: result.state, lastError: null })
+      changes.emit({ state: result.state, events: result.events })
       return result
-    },
-
-    undo() {
-      const { past } = get()
-      const previous = past.at(-1)
-      if (!previous) return
-      set({ battle: previous, past: past.slice(0, -1), lastError: null })
-      changes.emit({ cause: 'undo', state: previous, events: [] })
     },
 
     clearError() {
