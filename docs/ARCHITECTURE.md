@@ -53,7 +53,7 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 
 - `dispatch(command)` applica il comando e pubblica un `BattleChange` sul bus `battleStore.changes`, a cui si collega la sincronizzazione. I comandi senza effetto non pubblicano nulla.
 - Non c'è annullamento: le operazioni distruttive chiedono conferma (rimuovere un combattente, terminare la battaglia, sostituire il campo con una scena) e ogni valore si corregge con un'azione del GM.
-- Lo stato della battaglia viene salvato in `localStorage` (`fu-battle.battle`) ed è versionato: ora è alla v4, e `migrations.ts` aggiorna i salvataggi delle versioni precedenti (v2: PM e ritratti; v3: fase della battaglia; v4: sfondo della schermata di attesa). Al ricaricamento viene validato con Zod; se è corrotto viene scartato.
+- Lo stato della battaglia viene salvato in `localStorage` (`fu-battle.battle`) ed è versionato: ora è alla v6, e `migrations.ts` aggiorna i salvataggi delle versioni precedenti (v2: PM e ritratti; v3: fase della battaglia; v4: sfondo della schermata di attesa; v5: scheda di provenienza dei combattenti; v6: musica, volumi e muto). Al ricaricamento viene validato con Zod; se è corrotto viene scartato.
 - Gli hook per React sono `useBattleStore`, `useBattleActions`, `useCombatants(side)` e `useCombatant(id)`.
 
 ## Display statico (fase 2)
