@@ -56,6 +56,13 @@ export function EditCombatantForm({ combatant, onDone }: Props) {
     <form
       onSubmit={submit}
       aria-label={t('master.edit.title', { name: combatant.name })}
+      onKeyDown={(e) => {
+        // Esc cancels, like the Cancel button.
+        if (e.key === 'Escape') {
+          e.preventDefault()
+          onDone()
+        }
+      }}
       className="flex flex-col gap-3"
     >
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">

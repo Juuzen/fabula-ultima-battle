@@ -10,13 +10,11 @@
     "popupBlocked": "The browser blocked the window. Allow pop-ups for this site.",
     "undo": "Undo last action",
     "undoShortcut": "Ctrl+Z",
-    "battleName": "Battle name",
-    "battleNamePlaceholder": "E.g. Ambush at the docks",
     "preview": "Player screen preview",
     "party": "Party",
     "enemies": "Enemies",
-    "emptyParty": "No characters in the party.",
-    "emptyEnemies": "No enemies on the field.",
+    "emptyParty": "No characters on the field: use Deploy.",
+    "emptyEnemies": "No enemies on the field: use Deploy.",
     "add": {
       "title": "Add",
       "name": "Name",
@@ -36,11 +34,19 @@
       "remove": "Remove",
       "moveUp": "Move up",
       "moveDown": "Move down",
-      "statuses": "Statuses",
+      "statuses": "Statuses of {{name}}",
       "reveal": "HP/MP visible",
       "revealHint": "Show this enemy's HP and MP to the players",
       "revealedByAll": "Visible for all",
-      "act": "Act"
+      "act": "Act",
+      "more": "More actions for {{name}}",
+      "statusesNone": "No statuses",
+      "count": "Combatants on the field:",
+      "target": "Target",
+      "targetOf": "Target: {{name}}",
+      "acting": "Acting",
+      "actHint": "Make {{name}} act",
+      "actDisabled": "Start the battle to perform actions"
     },
     "edit": {
       "title": "Edit {{name}}",
@@ -67,13 +73,10 @@
       "revealAll": "Show HP/MP of all enemies"
     },
     "battle": {
-      "title": "Battle",
       "end": "End battle",
-      "endConfirm": "Confirm: remove all enemies",
+      "endConfirm": "Confirm: end the scene",
       "endCancel": "Cancel",
-      "endHint": "Enemies leave the field, the party stays as it is.",
-      "phasePreparation": "Preparing",
-      "phaseActive": "In progress",
+      "endHint": "Everyone leaves the field; party HP and MP go back to their sheets.",
       "start": "Start battle",
       "startHint": "Enemies appear on the player screen.",
       "prepHint": "Enemies you add stay hidden from the players until you start the battle."
@@ -88,7 +91,8 @@
       "INVALID_PRESENTATION": "Invalid setting.",
       "INVALID_ACTION": "Invalid action: check targets and values.",
       "BATTLE_NOT_ACTIVE": "Actions can only be performed once the battle has started.",
-      "NOT_ENOUGH_MP": "Not enough MP for this action."
+      "NOT_ENOUGH_MP": "Not enough MP for this action.",
+      "UNIT_ALREADY_DEPLOYED": "This character is already on the field."
     },
     "connected": "Player screen connected",
     "notConnected": "Player screen not connected",
@@ -115,7 +119,93 @@
       "perform": "Perform",
       "notActive": "Start the battle to perform actions with the animated sequence.",
       "chooseTargets": "Choose at least one target and enter an amount.",
-      "notEnoughMp": "Not enough MP ({{mp}} available)."
+      "notEnoughMp": "Not enough MP ({{mp}} available).",
+      "ability": "Ability",
+      "free": "Free action",
+      "hintMp": "reminder: {{n}}",
+      "acting": "{{name}} acts",
+      "exit": "Exit",
+      "exitHint": "Leave the action (Esc)",
+      "targetsCount_one": "{{count}} target",
+      "targetsCount_other": "{{count}} targets",
+      "pickTargets": "Pick targets on the cards and type the amounts.",
+      "bar": "Action being composed"
+    },
+    "nav": {
+      "label": "Board sections",
+      "groups": {
+        "live": "Live",
+        "prep": "Preparation",
+        "library": "Library"
+      },
+      "screen": "Screen Control",
+      "party": "Party",
+      "enemies": "Enemies",
+      "scenes": "Battle scenes",
+      "audio": "Audio",
+      "video": "Video",
+      "shortcut": "Alt+{{n}}",
+      "live": "Live"
+    },
+    "placeholder": {
+      "soon": "Coming soon",
+      "audio": "The library of music and sound effects. Live playback will stay in Screen Control.",
+      "video": "The library of video backgrounds and effects. Live playback will stay in Screen Control.",
+      "back": "Back to Screen Control"
+    },
+    "strip": {
+      "label": "Battle commands",
+      "reopen": "Reopen screen",
+      "undo": "Undo",
+      "nothingToUndo": "Nothing to undo",
+      "shortcuts": "Shortcuts",
+      "shortcutsHint": "Keyboard shortcuts (?)",
+      "shortcutsTitle": "Keyboard shortcuts",
+      "keys": { "enter": "Enter", "shift": "Shift" },
+      "shortcutGroups": {
+        "card": "On a card",
+        "action": "In action mode",
+        "everywhere": "Anywhere"
+      },
+      "shortcutList": {
+        "damage": "Damage by the typed amount",
+        "heal": "Heal by the typed amount",
+        "perform": "Run the action (from a target's amount)",
+        "exitAction": "Leave action mode",
+        "undo": "Undo the last action (amount fields too)",
+        "sections": "Go to sidebar section 1…6",
+        "help": "Show or hide this list",
+        "fullscreen": "Fullscreen, in the Display window"
+      }
+    },
+    "undoLabels": {
+      "add": "Added {{name}}",
+      "update": "Edited {{name}}",
+      "remove": "Removed {{name}}",
+      "move": "Moved {{name}}",
+      "damage": "Damage {{amount}} → {{name}}",
+      "heal": "Heal {{amount}} → {{name}}",
+      "setHp": "HP {{value}} → {{name}}",
+      "spendMp": "−{{amount}} MP → {{name}}",
+      "restoreMp": "+{{amount}} MP → {{name}}",
+      "setMp": "MP {{value}} → {{name}}",
+      "statusOn": "{{status}} → {{name}}",
+      "statusOff": "Removed {{status}} from {{name}}",
+      "revealOn": "HP/MP shown: {{name}}",
+      "revealOff": "HP/MP hidden: {{name}}",
+      "presentation": "Enemy window",
+      "background": "Background",
+      "rename": "Battle name",
+      "load": "Battle loaded",
+      "start": "Battle start",
+      "end": "Battle end",
+      "action": "{{action}} by {{actor}}",
+      "targets_one": "{{count}} target",
+      "targets_other": "{{count}} targets",
+      "someone": "?",
+      "deploy": "Deployed {{count}} combatants",
+      "deployOne": "Deployed {{name}}",
+      "scene": "Scene: {{name}}"
     }
   },
   "display": {
@@ -153,5 +243,168 @@
     "thunder": "Thunder",
     "light": "Light",
     "shadow": "Shadow"
+  },
+  "library": {
+    "create": {
+      "party": "New character",
+      "enemy": "New enemy"
+    },
+    "listLabel": {
+      "party": "Party sheets",
+      "enemy": "Enemy sheets"
+    },
+    "search": "Search by name",
+    "allTags": "All categories",
+    "noTag": "No category",
+    "empty": {
+      "party": "No characters yet. Prepare the group's sheets here before the session.",
+      "enemy": "The bestiary is empty. Create the enemies to deploy in encounters here."
+    },
+    "noMatch": "No sheet matches the search.",
+    "select": "Pick a sheet from the list, or create a new one.",
+    "locked": "Battle in progress: sheets can be edited once the fight is over. For quick fixes use Edit on the card or a free action.",
+    "abilitiesCount_one": "{{count}} ability",
+    "abilitiesCount_other": "{{count}} abilities",
+    "fields": {
+      "name": "Name",
+      "tag": "Category",
+      "tagPlaceholder": "E.g. Beast, Elite, Boss",
+      "maxHp": "Max HP",
+      "maxMp": "Max MP",
+      "hp": "Current HP",
+      "mp": "Current MP",
+      "notes": "GM notes",
+      "notesHint": "Only you see these: weaknesses, tactics, rule reminders.",
+      "flip": "Mirror sprite"
+    },
+    "sections": {
+      "stats": "Stats",
+      "look": "Look",
+      "abilities": "Abilities",
+      "notes": "Notes"
+    },
+    "currentHint": "Current HP and MP come back here when the character leaves the field.",
+    "art": {
+      "sprite": "Sprite",
+      "portrait": "Portrait",
+      "soon": "Images will load from the asset library (coming soon)."
+    },
+    "ability": {
+      "add": "Add ability",
+      "none": "No abilities: in battle you will use a free action.",
+      "name": "Ability name",
+      "newName": "New ability",
+      "remove": "Remove ability",
+      "mpCostHint": "MP cost",
+      "amountHint": "Amount",
+      "hintNote": "MP cost and amount are reminders: they show as hints, you type the real number in battle.",
+      "label": "Ability {{n}}"
+    },
+    "save": {
+      "saving": "Saving…",
+      "saved": "Saved",
+      "invalid": "Not saved: check the marked fields."
+    },
+    "errors": {
+      "name": "A name is required.",
+      "maxHp": "Max HP must be at least 1.",
+      "number": "Whole number, 0 or more.",
+      "hpOverMax": "Cannot exceed the maximum.",
+      "abilityName": "Every ability needs a name."
+    },
+    "delete": {
+      "action": "Delete sheet",
+      "confirm": "Confirm: delete {{name}}",
+      "cancel": "Cancel",
+      "hint": "It is also removed from the scenes that use it."
+    },
+    "rest": {
+      "action": "Rest",
+      "hint": "Restores the whole party to full HP and MP.",
+      "done": "Party rested: HP and MP at full."
+    }
+  },
+  "scenes": {
+    "create": "New scene",
+    "newName": "New scene",
+    "listLabel": "Battle scenes",
+    "empty": "No scenes yet. Prepare encounters here: which party members join, which enemies, background and music.",
+    "noMatch": "No scene matches the search.",
+    "fields": {
+      "name": "Battle name",
+      "namePlaceholder": "E.g. Ambush at the docks"
+    },
+    "sections": {
+      "party": "Party",
+      "enemies": "Enemies",
+      "ambience": "Setting"
+    },
+    "party": {
+      "none": "No Party sheets yet: create them on the Party page.",
+      "hint": "Which group members enter the field with this scene."
+    },
+    "enemies": {
+      "none": "No enemies in this scene.",
+      "add": "Add enemy",
+      "choose": "Pick from the bestiary…",
+      "noBestiary": "The bestiary is empty: create enemies on the Enemies page.",
+      "count": "Quantity of {{name}}",
+      "less": "One fewer: {{name}}",
+      "more": "One more: {{name}}",
+      "remove": "Remove {{name}}",
+      "missing": "Deleted sheet"
+    },
+    "ambience": {
+      "background": "Background",
+      "music": "Music",
+      "soon": "Backgrounds and music are picked from the asset library (coming soon)."
+    },
+    "summary": "{{party}} PCs · {{enemies}} enemies",
+    "load": "Load into Screen Control",
+    "loadHint": "Replaces who is on the field; the battle stays in preparation until you press Start.",
+    "confirmReplace": "Confirm: replace the field",
+    "loaded": "Scene loaded: {{name}}",
+    "missingUnits_one": "{{count}} sheet of this scene no longer exists and was skipped.",
+    "missingUnits_other": "{{count}} sheets of this scene no longer exist and were skipped.",
+    "errors": {
+      "name": "A name is required."
+    },
+    "deleteAction": "Delete scene"
+  },
+  "deploy": {
+    "title": "Deploy",
+    "open": "Open Deploy",
+    "close": "Close Deploy",
+    "tabs": {
+      "scene": "Scene",
+      "party": "Party",
+      "enemies": "Enemies",
+      "quick": "On the fly"
+    },
+    "scene": {
+      "none": "No prepared scenes.",
+      "load": "Load"
+    },
+    "party": {
+      "none": "No Party sheets.",
+      "deploy": "Deploy",
+      "onField": "On the field",
+      "all": "Deploy the whole party"
+    },
+    "enemies": {
+      "none": "The bestiary is empty.",
+      "deploy": "Deploy ×{{count}}"
+    },
+    "quick": {
+      "hint": "For anyone without a sheet: an improvised NPC, an unexpected reinforcement.",
+      "side": "Side"
+    },
+    "goTo": {
+      "scenes": "Go to Battle scenes",
+      "party": "Go to Party",
+      "enemies": "Go to Enemies"
+    },
+    "sceneLoaded": "Scene loaded: {{name}}. Press Start battle when you are ready.",
+    "dismiss": "Dismiss notice"
   }
 }

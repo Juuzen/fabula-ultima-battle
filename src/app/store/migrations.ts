@@ -52,5 +52,18 @@ export function migratePersistedBattle(persisted: unknown, fromVersion: number):
     }
   }
 
+  if (fromVersion < 5 && data?.battle) {
+    // v5: combatants remember the library sheet they came from (none for older saves).
+    const battle = data.battle
+    const combatants = Array.isArray(battle.combatants) ? battle.combatants : []
+    data = {
+      ...data,
+      battle: {
+        ...battle,
+        combatants: combatants.map((c: Record<string, unknown>) => ({ unitId: null, ...c })),
+      },
+    }
+  }
+
   return data
 }

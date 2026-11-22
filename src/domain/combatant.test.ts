@@ -52,6 +52,7 @@ describe('createCombatant', () => {
       id: 'a',
       name: 'Aria',
       side: 'ally',
+      unitId: null,
       maxHp: 50,
       hp: 50,
       maxMp: 0,

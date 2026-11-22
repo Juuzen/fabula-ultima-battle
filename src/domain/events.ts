@@ -41,6 +41,6 @@ export type BattleEvent =
       kind: ActionKind
       targetIds: CombatantId[]
     }
-  | { type: 'BATTLE_ENDED'; removedEnemyIds: CombatantId[] }
+  | { type: 'BATTLE_ENDED'; removedIds: CombatantId[] }
 
 export type BattleEventType = BattleEvent['type']

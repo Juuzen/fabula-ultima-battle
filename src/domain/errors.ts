@@ -8,6 +8,7 @@ export type DomainErrorCode =
   | 'INVALID_ACTION'
   | 'BATTLE_NOT_ACTIVE'
   | 'NOT_ENOUGH_MP'
+  | 'UNIT_ALREADY_DEPLOYED'
 
 export type DomainError = { code: DomainErrorCode; message: string }
 

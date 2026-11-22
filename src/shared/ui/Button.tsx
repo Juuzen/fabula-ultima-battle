@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react'
+import type { ButtonHTMLAttributes, Ref } from 'react'
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'success' | 'ghost'
 type Size = 'sm' | 'md'
@@ -17,7 +17,11 @@ const SIZES: Record<Size, string> = {
   md: 'h-10 px-4 text-sm',
 }
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: Size }
+type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: Variant
+  size?: Size
+  ref?: Ref<HTMLButtonElement>
+}
 
 export function Button({
   variant = 'secondary',

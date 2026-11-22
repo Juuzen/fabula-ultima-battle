@@ -3,7 +3,7 @@ import { useShallow } from 'zustand/shallow'
 
 import { combatantsOnSide, findCombatant, type Combatant, type Side } from '@/domain'
 
-import { createBattleStore, type BattleStoreState } from './battleStore'
+import { createBattleStore, type BattleStoreState, type HistoryEntry } from './battleStore'
 
 export * from './battleStore'
 
@@ -34,4 +34,9 @@ export function useCombatant(id: string): Combatant | undefined {
 
 export function useCanUndo(): boolean {
   return useBattleStore((s) => s.past.length > 0)
+}
+
+/** The step `undo()` would revert, or undefined when history is empty. */
+export function useLastHistoryEntry(): HistoryEntry | undefined {
+  return useBattleStore((s) => s.past.at(-1))
 }

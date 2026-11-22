@@ -28,3 +28,8 @@ export const STATUS_TIER: Record<StatusId, StatusTier> = {
 export function sortStatuses(statuses: readonly StatusId[]): StatusId[] {
   return STATUS_IDS.filter((s) => statuses.includes(s))
 }
+
+/** Adds or removes a status, keeping insertion order. */
+export function toggleStatusIn(list: readonly StatusId[], status: StatusId): StatusId[] {
+  return list.includes(status) ? list.filter((s) => s !== status) : [...list, status]
+}

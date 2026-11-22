@@ -16,7 +16,7 @@ import { createEventBus, type EventBus } from '@/shared/lib/eventBus'
 import { migratePersistedBattle } from './migrations'
 
 export const BATTLE_STORAGE_KEY = 'fu-battle.battle'
-export const BATTLE_STORAGE_VERSION = 4
+export const BATTLE_STORAGE_VERSION = 5
 const DEFAULT_HISTORY_LIMIT = 50
 
 /** Published after every state change; the sync layer (phase 4) will forward it to the Display. */
@@ -26,10 +26,13 @@ export type BattleChange = {
   events: BattleEvent[]
 }
 
+/** One undo step: the state before `command` ran, so undo restores it and the UI can name it. */
+export type HistoryEntry = { battle: BattleState; command: BattleCommand }
+
 export type BattleStoreState = {
   battle: BattleState
   /** Undo stack (most recent last). Kept in memory only. */
-  past: BattleState[]
+  past: HistoryEntry[]
   lastError: DomainError | null
   dispatch: (command: BattleCommand) => CommandResult
   undo: () => void
@@ -83,7 +86,7 @@ export function createBattleStore(options: BattleStoreOptions = {}): BattleStore
 
       set({
         battle: result.state,
-        past: [...past, battle].slice(-historyLimit),
+        past: [...past, { battle, command }].slice(-historyLimit),
         lastError: null,
       })
       changes.emit({ cause: 'command', state: result.state, events: result.events })
@@ -92,7 +95,7 @@ export function createBattleStore(options: BattleStoreOptions = {}): BattleStore
 
     undo() {
       const { past } = get()
-      const previous = past.at(-1)
+      const previous = past.at(-1)?.battle
       if (!previous) return
       set({ battle: previous, past: past.slice(0, -1), lastError: null })
       changes.emit({ cause: 'undo', state: previous, events: [] })

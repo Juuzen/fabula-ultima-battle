@@ -16,6 +16,8 @@ export const CombatantSchema = z
     id: CombatantIdSchema,
     name: z.string().trim().min(1),
     side: SideSchema,
+    /** Library sheet this combatant came from; null = added on the fly. */
+    unitId: z.string().min(1).nullable(),
     maxHp: z.int().min(1),
     hp: z.int().min(0),
     /** Mind Points. `maxMp: 0` means the combatant has no MP gauge. */
@@ -48,6 +50,7 @@ export type NewCombatant = Pick<Combatant, 'id' | 'name' | 'side' | 'maxHp'> &
 export function createCombatant(input: NewCombatant): Combatant {
   const maxMp = input.maxMp ?? 0
   return {
+    unitId: null,
     hp: input.maxHp,
     maxMp,
     mp: maxMp,

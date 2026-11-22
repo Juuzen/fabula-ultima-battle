@@ -75,6 +75,16 @@ describe('battle store', () => {
     expect(changes).toHaveLength(4)
   })
 
+  it('records the command with the state it undoes', () => {
+    const store = createBattleStore({ storage: null })
+    store.getState().dispatch(addHero)
+    const damage = { type: 'DAMAGE', id: 'hero', amount: 10 } as const
+    store.getState().dispatch(damage)
+    const last = store.getState().past.at(-1)
+    expect(last?.command).toEqual(damage)
+    expect(last?.battle.combatants[0]?.hp).toBe(40)
+  })
+
   it('does not record no-op commands in history', () => {
     const store = createBattleStore({ storage: null })
     store.getState().dispatch(addHero)
@@ -176,6 +186,19 @@ describe('battle store', () => {
       })
       const presentation = createBattleStore({ storage }).getState().battle.presentation
       expect(presentation.waitingBackgroundAssetId).toBeNull()
+    })
+
+    it('upgrades a v4 save: combatants come from no library sheet', () => {
+      const hero = createCombatant({ id: 'hero', name: 'Hero', side: 'ally', maxHp: 40 })
+      const { unitId: _dropped, ...v4Hero } = hero
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({
+          state: { battle: { ...createEmptyBattle(), combatants: [v4Hero] } },
+          version: 4,
+        }),
+      })
+      const [restored] = createBattleStore({ storage }).getState().battle.combatants
+      expect(restored).toMatchObject({ id: 'hero', unitId: null })
     })
   })
 })

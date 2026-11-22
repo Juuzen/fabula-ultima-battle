@@ -33,6 +33,18 @@ export type PresentationChanges = {
 /** Everything the Game Master can do to a battle. Serializable, so it can be logged or sent. */
 export type BattleCommand =
   | { type: 'ADD_COMBATANT'; combatant: NewCombatant }
+  /** Adds several combatants at once (e.g. "Goblin ×3" from the bestiary): one undo step. */
+  | { type: 'DEPLOY'; combatants: NewCombatant[] }
+  /**
+   * Replaces the field with a prepared scene: both sides, name and background. The battle
+   * goes back to preparation, so the enemies stay hidden until START_BATTLE.
+   */
+  | {
+      type: 'LOAD_SCENE'
+      name: string
+      backgroundAssetId: string | null
+      combatants: NewCombatant[]
+    }
   | { type: 'UPDATE_COMBATANT'; id: CombatantId; changes: Partial<Pick<Combatant, EditableFields>> }
   | { type: 'REMOVE_COMBATANT'; id: CombatantId }
   /** Moves a combatant to `toIndex` among the combatants of its own side. */
@@ -53,7 +65,7 @@ export type BattleCommand =
   | { type: 'START_BATTLE' }
   /** A choreographed action (attack, spell…) on one or more targets: one undo step. */
   | { type: 'PERFORM_ACTION'; action: Action }
-  /** Ends the encounter: enemies leave the field, the party stays, back to preparation. */
+  /** Ends the scene: everyone leaves the field, back to an empty battle in preparation. */
   | { type: 'END_BATTLE' }
 
 export type CommandResult =
@@ -157,6 +169,43 @@ function mergePresentation(current: Presentation, changes: PresentationChanges):
 }
 
 /**
+ * Appends new combatants after validating them. Ids must be unique, and a party sheet can be
+ * on the field only once (enemy sheets can be deployed in any number of copies).
+ */
+function addCombatants(state: BattleState, incoming: NewCombatant[]): CommandResult {
+  const ids = new Set(state.combatants.map((c) => c.id))
+  const partyUnits = new Set(
+    state.combatants.flatMap((c) => (c.side === 'ally' && c.unitId ? [c.unitId] : [])),
+  )
+  const added: Combatant[] = []
+  for (const input of incoming) {
+    if (ids.has(input.id)) {
+      return fail(domainError('DUPLICATE_ID', `Id "${input.id}" already in use`))
+    }
+    const parsed = CombatantSchema.safeParse(createCombatant(input))
+    if (!parsed.success) return fail(domainError('INVALID_COMBATANT', parsed.error.message))
+    const combatant = parsed.data
+    if (combatant.side === 'ally' && combatant.unitId) {
+      if (partyUnits.has(combatant.unitId)) {
+        return fail(
+          domainError(
+            'UNIT_ALREADY_DEPLOYED',
+            `Sheet "${combatant.unitId}" is already on the field`,
+          ),
+        )
+      }
+      partyUnits.add(combatant.unitId)
+    }
+    ids.add(combatant.id)
+    added.push(combatant)
+  }
+  return ok(
+    { ...state, combatants: [...state.combatants, ...added] },
+    added.map((combatant) => ({ type: 'COMBATANT_ADDED', combatant })),
+  )
+}
+
+/**
  * Applies an action as a chain of basic commands (MP cost, then each target's outcome and
  * statuses), all or nothing. The chain's events follow ACTION_PERFORMED, which opens the
  * sequence on the Display.
@@ -214,18 +263,28 @@ function performAction(state: BattleState, input: Action): CommandResult {
  */
 export function applyCommand(state: BattleState, command: BattleCommand): CommandResult {
   switch (command.type) {
-    case 'ADD_COMBATANT': {
-      if (findCombatant(state, command.combatant.id)) {
-        return fail(domainError('DUPLICATE_ID', `Id "${command.combatant.id}" already in use`))
+    case 'ADD_COMBATANT':
+      return addCombatants(state, [command.combatant])
+
+    case 'DEPLOY':
+      if (command.combatants.length === 0) return ok(state, [])
+      return addCombatants(state, command.combatants)
+
+    case 'LOAD_SCENE': {
+      const base: BattleState = {
+        ...state,
+        name: command.name.trim(),
+        phase: 'preparation',
+        backgroundAssetId: command.backgroundAssetId,
+        combatants: [],
+        presentation: mergePresentation(state.presentation, {
+          revealAllEnemyStats: false,
+          enemyPanel: { visible: false },
+        }),
       }
-      const parsed = CombatantSchema.safeParse(createCombatant(command.combatant))
-      if (!parsed.success) {
-        return fail(domainError('INVALID_COMBATANT', parsed.error.message))
-      }
-      const combatant = parsed.data
-      return ok({ ...state, combatants: [...state.combatants, combatant] }, [
-        { type: 'COMBATANT_ADDED', combatant },
-      ])
+      const result = addCombatants(base, command.combatants)
+      if (!result.ok) return result
+      return ok(result.state, [{ type: 'BATTLE_LOADED', state: result.state }])
     }
 
     case 'UPDATE_COMBATANT': {
@@ -334,18 +393,20 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
       return ok({ ...state, phase: 'active' }, [{ type: 'BATTLE_STARTED' }])
 
     case 'END_BATTLE': {
-      const removedEnemyIds = state.combatants.filter((c) => c.side === 'enemy').map((c) => c.id)
+      const removedIds = state.combatants.map((c) => c.id)
       return ok(
         {
           ...state,
+          name: '',
           phase: 'preparation',
-          combatants: state.combatants.filter((c) => c.side !== 'enemy'),
+          backgroundAssetId: null,
+          combatants: [],
           presentation: mergePresentation(state.presentation, {
             revealAllEnemyStats: false,
             enemyPanel: { visible: false },
           }),
         },
-        [{ type: 'BATTLE_ENDED', removedEnemyIds }],
+        [{ type: 'BATTLE_ENDED', removedIds }],
       )
     }
   }

@@ -289,15 +289,17 @@ describe('applyCommand', () => {
     })
   })
 
-  it('END_BATTLE removes enemies, keeps the party and resets enemy visibility', () => {
+  it('END_BATTLE empties the field, clears the scene and resets enemy visibility', () => {
     const prepared = run(battleWith(), {
       type: 'SET_PRESENTATION',
       changes: { revealAllEnemyStats: true, enemyPanel: { visible: true } },
     }).state
     const { state, events } = run(prepared, { type: 'END_BATTLE' })
-    expect(state.combatants.map((c) => c.id)).toEqual(['hero', 'mage'])
+    expect(state.combatants).toEqual([])
+    expect(state.name).toBe('')
+    expect(state.backgroundAssetId).toBeNull()
     expect(state.presentation.revealAllEnemyStats).toBe(false)
     expect(state.presentation.enemyPanel.visible).toBe(false)
-    expect(events).toEqual([{ type: 'BATTLE_ENDED', removedEnemyIds: ['gob1', 'gob2'] }])
+    expect(events).toEqual([{ type: 'BATTLE_ENDED', removedIds: ['hero', 'mage', 'gob1', 'gob2'] }])
   })
 })
