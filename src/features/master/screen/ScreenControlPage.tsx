@@ -3,11 +3,9 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router'
 
-import { ActionBar } from '../action/ActionBar'
-import { EnemyPanelControls } from '../controls/EnemyPanelControls'
-import { DisplayPreview } from '../preview/DisplayPreview'
-import { RosterSection } from '../roster/RosterSection'
-import { DeployPanel } from './DeployPanel'
+import { DetailPane } from '../detail/DetailPane'
+import { FieldPane } from '../field/FieldPane'
+import { ScreenToolbar } from './ScreenToolbar'
 
 type LoadedSceneState = { loadedScene?: string; missing?: number } | null
 
@@ -42,23 +40,19 @@ function SceneLoadedNotice() {
   )
 }
 
-/** Live cockpit: both sides, the player-screen preview and the controls for the running fight. */
+/**
+ * Live cockpit, master/detail: the field on the left (who is there, how they stand), the
+ * detail on the right (what the selected combatant can do, or the GM's own action).
+ * In two-column mode the page fits the viewport and each pane scrolls on its own.
+ */
 export function ScreenControlPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 @5xl:h-[calc(100dvh-7rem)]">
       <SceneLoadedNotice />
-      <div className="grid items-start gap-6 @5xl:grid-cols-[minmax(0,1fr)_minmax(420px,36%)]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <DeployPanel />
-          <RosterSection side="ally" />
-          <RosterSection side="enemy" />
-          <ActionBar />
-        </div>
-        {/* Sticky in two-column mode, with its own scroll: it is taller than the viewport. */}
-        <aside className="flex flex-col gap-6 @5xl:sticky @5xl:top-22 @5xl:max-h-[calc(100vh-7rem)] @5xl:overflow-y-auto @5xl:pr-1">
-          <DisplayPreview />
-          <EnemyPanelControls />
-        </aside>
+      <ScreenToolbar />
+      <div className="grid min-h-0 flex-1 items-stretch gap-4 @5xl:grid-cols-[minmax(20rem,26rem)_minmax(0,1fr)]">
+        <FieldPane />
+        <DetailPane />
       </div>
     </div>
   )

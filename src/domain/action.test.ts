@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 
-import type { Action } from './action'
+import type { Action, ActionTarget } from './action'
 import { createEmptyBattle, type BattleState } from './battle'
 import { createCombatant } from './combatant'
 import { applyCommand } from './commands'
+import { projectEventsForPlayers } from './projection'
 
 function battle(phase: BattleState['phase'] = 'active'): BattleState {
   return {
@@ -17,17 +18,25 @@ function battle(phase: BattleState['phase'] = 'active'): BattleState {
   }
 }
 
+const hit = (
+  id: string,
+  amount: number,
+  kind: NonNullable<ActionTarget['change']>['kind'] = 'damage',
+  extra: Partial<ActionTarget> = {},
+): ActionTarget => ({
+  id,
+  change: { kind, amount },
+  addStatuses: [],
+  removeStatuses: [],
+  ...extra,
+})
+
 const action = (overrides: Partial<Action> = {}): Action => ({
   actorId: 'mage',
   name: 'Palla di fuoco',
   effect: 'fire',
-  kind: 'damage',
   mpCost: 10,
-  statuses: [],
-  targets: [
-    { id: 'gob', amount: 12 },
-    { id: 'wolf', amount: 8 },
-  ],
+  targets: [hit('gob', 12), hit('wolf', 8)],
   ...overrides,
 })
 
@@ -57,47 +66,79 @@ describe('PERFORM_ACTION', () => {
       actorId: 'mage',
       name: 'Palla di fuoco',
       effect: 'fire',
-      kind: 'damage',
       targetIds: ['gob', 'wolf'],
     })
   })
 
-  it('heals instead of damaging', () => {
+  it('gives each target its own kind of outcome', () => {
     const hurt = applyCommand(battle(), { type: 'SET_HP', id: 'gob', hp: 5 })
     if (!hurt.ok) throw new Error()
+    const drained = applyCommand(hurt.state, { type: 'SET_MP', id: 'wolf', mp: 2 })
+    if (!drained.ok) throw new Error()
     const { state } = perform(
-      hurt.state,
-      action({ kind: 'heal', mpCost: 0, effect: 'light', targets: [{ id: 'gob', amount: 10 }] }),
+      drained.state,
+      action({
+        mpCost: 0,
+        targets: [hit('gob', 10, 'heal'), hit('wolf', 4, 'mpRestore'), hit('mage', 3, 'mpDamage')],
+      }),
     )
     expect(of(state, 'gob').hp).toBe(15)
+    expect(of(state, 'wolf')).toMatchObject({ hp: 50, mp: 6 })
+    expect(of(state, 'mage').mp).toBe(37)
   })
 
-  it('damages MP instead of HP', () => {
+  it('adds and removes statuses per target, with or without a PV/PM change', () => {
+    const poisoned = applyCommand(battle(), {
+      type: 'SET_STATUS',
+      id: 'wolf',
+      status: 'poisoned',
+      active: true,
+    })
+    if (!poisoned.ok) throw new Error()
+    const { state, events } = perform(
+      poisoned.state,
+      action({
+        targets: [
+          hit('gob', 2, 'damage', { addStatuses: ['slow', 'weak'] }),
+          { id: 'wolf', change: null, addStatuses: [], removeStatuses: ['poisoned'] },
+        ],
+      }),
+    )
+    expect(of(state, 'gob').statuses).toEqual(['slow', 'weak'])
+    expect(of(state, 'wolf')).toMatchObject({ hp: 50, statuses: [] })
+    expect(events.filter((e) => e.type === 'STATUS_CHANGED')).toEqual([
+      { type: 'STATUS_CHANGED', id: 'gob', status: 'slow', active: true },
+      { type: 'STATUS_CHANGED', id: 'gob', status: 'weak', active: true },
+      { type: 'STATUS_CHANGED', id: 'wolf', status: 'poisoned', active: false },
+    ])
+  })
+
+  it('can be the GM acting: no actor, no MP spent', () => {
     const { state, events } = perform(
       battle(),
-      action({ kind: 'mpDamage', mpCost: 0, targets: [{ id: 'wolf', amount: 4 }] }),
+      action({ actorId: null, name: 'Trappola', effect: null, mpCost: 0 }),
     )
-    expect(of(state, 'wolf')).toMatchObject({ hp: 50, mp: 6 })
-    expect(events.at(-1)).toEqual({ type: 'MP_SPENT', id: 'wolf', amount: 4, mp: 6 })
+    expect(of(state, 'mage').mp).toBe(40)
+    expect(of(state, 'gob').hp).toBe(8)
+    expect(events[0]).toEqual({
+      type: 'ACTION_PERFORMED',
+      actorId: null,
+      name: 'Trappola',
+      effect: null,
+      targetIds: ['gob', 'wolf'],
+    })
   })
 
-  it('applies statuses to every target on impact', () => {
-    const { state, events } = perform(battle(), action({ statuses: ['poisoned', 'slow'] }))
-    expect(of(state, 'gob').statuses).toEqual(['poisoned', 'slow'])
-    expect(of(state, 'wolf').statuses).toEqual(['poisoned', 'slow'])
-    expect(events.filter((e) => e.type === 'STATUS_CHANGED')).toHaveLength(4)
+  it('works during preparation, but the players get no sequence', () => {
+    const { state, events } = perform(battle('preparation'), action())
+    expect(of(state, 'gob').hp).toBe(8)
+    expect(projectEventsForPlayers(events, state)).toEqual([])
   })
 
   it('is all or nothing: one unknown target leaves the state untouched', () => {
-    const before = battle()
-    const result = applyCommand(before, {
+    const result = applyCommand(battle(), {
       type: 'PERFORM_ACTION',
-      action: action({
-        targets: [
-          { id: 'gob', amount: 5 },
-          { id: 'ghost', amount: 5 },
-        ],
-      }),
+      action: action({ targets: [hit('gob', 5), hit('ghost', 5)] }),
     })
     expect(result).toMatchObject({ ok: false, error: { code: 'COMBATANT_NOT_FOUND' } })
   })
@@ -110,27 +151,20 @@ describe('PERFORM_ACTION', () => {
     expect(result).toMatchObject({ ok: false, error: { code: 'NOT_ENOUGH_MP' } })
   })
 
-  it('needs a battle in progress (no leaks during preparation)', () => {
-    const result = applyCommand(battle('preparation'), {
-      type: 'PERFORM_ACTION',
-      action: action(),
-    })
-    expect(result).toMatchObject({ ok: false, error: { code: 'BATTLE_NOT_ACTIVE' } })
-  })
-
   it.each([
     ['no targets', { targets: [] }],
-    [
-      'duplicate targets',
-      {
-        targets: [
-          { id: 'gob', amount: 1 },
-          { id: 'gob', amount: 2 },
-        ],
-      },
-    ],
-    ['negative amount', { targets: [{ id: 'gob', amount: -1 }] }],
+    ['duplicate targets', { targets: [hit('gob', 1), hit('gob', 2)] }],
+    ['negative amount', { targets: [hit('gob', -1)] }],
     ['unknown effect', { effect: 'meteor' as Action['effect'] }],
+    [
+      'a target with no effect',
+      { targets: [{ id: 'gob', change: null, addStatuses: [], removeStatuses: [] }] },
+    ],
+    [
+      'a status both added and removed',
+      { targets: [hit('gob', 1, 'damage', { addStatuses: ['slow'], removeStatuses: ['slow'] })] },
+    ],
+    ['MP spent by nobody', { actorId: null, mpCost: 3 }],
   ])('rejects invalid actions: %s', (_, overrides) => {
     const result = applyCommand(battle(), {
       type: 'PERFORM_ACTION',
@@ -140,10 +174,7 @@ describe('PERFORM_ACTION', () => {
   })
 
   it('lets the actor target itself (e.g. a self-heal)', () => {
-    const { state } = perform(
-      battle(),
-      action({ kind: 'heal', mpCost: 5, targets: [{ id: 'mage', amount: 3 }] }),
-    )
+    const { state } = perform(battle(), action({ mpCost: 5, targets: [hit('mage', 3, 'heal')] }))
     expect(of(state, 'mage')).toMatchObject({ mp: 35, hp: 30 })
   })
 })

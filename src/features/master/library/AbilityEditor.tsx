@@ -63,7 +63,7 @@ export function AbilityEditor({ ability, index, invalid, onChange, onRemove }: P
       </div>
 
       <div className="flex flex-wrap items-end justify-between gap-4">
-        <KindPicker value={ability.kind} onChange={(kind) => set({ kind })} />
+        <KindPicker value={ability.kind} onChange={(kind) => set({ kind })} allowNone />
         <StatusPicker
           value={ability.statuses}
           onToggle={(status) => set({ statuses: toggleStatusIn(ability.statuses, status) })}

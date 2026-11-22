@@ -300,7 +300,7 @@ Un blu da cartuccia saturo e una semantica di gioco ad alto contrasto sullo sche
 
 Il Display vive in uno **stage logico fisso di 1920×1080** scalato uniformemente alla finestra (`min(vw/1920, vh/1080)`) e centrato su nero. Tutte le misure del Display sono in pixel di stage, mai responsive: la composizione è una sola. Il pannello del party è centrato in basso e cresce in larghezza con il numero di alleati, la finestra nemici è una fascia centrata in alto (max 1840px, card da 290px che vanno a capo) e si ritira quando parte il banner d'azione. Gli strati seguono z-index espliciti: testo fluttuante 1300, finestra nemici 1500, banner 1600.
 
-Il Master è una pagina scrollabile a ritmo 4px (Tailwind): header sticky con padding 24px × 12px, contenuto con padding 24px e gap 24px tra le sezioni. Da 1280px (xl) diventa a due colonne: roster a sinistra, colonna di controllo larga almeno 420px (36%) a destra, sticky con scroll proprio. Sotto i 1280px le colonne si impilano.
+Il Master segue un ritmo di 4px (Tailwind): header sticky con padding 24px × 12px, contenuto con padding 24px. Controllo schermo è un **master/detail**: sopra la barra della pagina (nome della scena, finestra nemici, impostazioni), sotto due riquadri, il **Campo** (20–26rem) e il **Dettaglio** (il resto). Da 1280px la pagina occupa l'altezza della finestra e ogni riquadro scorre per conto suo; sotto si impilano. Nel Dettaglio largo i bersagli di party e nemici stanno su due colonne. L'anteprima dello schermo giocatori è una finestra flottante sopra tutto, che il GM sposta dove vuole.
 
 Le finestre JRPG usano 28px × 20px di padding interno; quando contengono slot o card scendono a 12px su tutti i lati.
 
@@ -374,7 +374,15 @@ Fondo Nero Console, bordo da 1px slate-600, 6px di raggio, altezza 40px; al focu
 
 ### Panel e card (Master)
 
-Panel: fondo Ardesia all'80%, bordo da 1px Linea Console, 12px di raggio, padding 16px, titolo in Title. Card combattente: fondo Nero Console al 60%, 8px di raggio, padding 12px, bordo che diventa rosso scuro in KO; mini-gauge da 6px larghe 144px per PV e PM.
+Panel: fondo Ardesia all'80%, bordo da 1px Linea Console, 12px di raggio, padding 16px, titolo in Title.
+
+**Card del Campo:** compatta come la card nemica del Display. Fondo Nero Console al 70%, 8px di raggio, ring bianco al 15% (al 35% in hover); ambra in Crisi, rosso al 50% in KO (nome barrato), **indaco a 2px quando è selezionata**. Nome in Cinzel 16px, tag Crisi/KO, status a 20px, gauge PV/PM in linea. Il ritratto o lo sprite (o il segnaposto) occupa il lato destro al 45% (30% il segnaposto), sfumato verso il nome. Nessun pulsante d'azione: solo il menu "⋯".
+
+**Compositore:** righe-bersaglio con checkbox, nome in Cinzel e PV/PM a destra; spuntate prendono il ring indaco e si aprono sull'esito (tipo, valore, sei status: un piccolo badge bianco + o − dice se lo status verrà aggiunto o tolto). Piè di pagina fisso con il riepilogo e "Agisci" (Primary).
+
+**Anteprima flottante:** finestra JRPG senza padding, barra del titolo da 34px con maniglia, riduci e chiudi; maniglia di ridimensionamento nell'angolo in basso a destra.
+
+**Popover:** fondo slate-900, bordo slate-700, 12px di raggio, padding 16px, la stessa ombra dei menu. Si apre sotto il pulsante che lo comanda.
 
 ### Interruttore
 

@@ -46,15 +46,15 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 - Si è in **Crisi** quando `0 < hp ≤ floor(maxHp / 2)`. A 0 PV il combattente è **KO** e non conta come in Crisi.
 - Gli status (`slow`, `dazed`, `weak`, `shaken`, `enraged`, `poisoned`) sono solo marcatori visivi.
 - `applyCommand(state, command)` è un riduttore puro che restituisce `{ ok, state, events }` oppure `{ ok: false, error }`. Non modifica mai l'input.
-- I comandi disponibili sono `ADD_COMBATANT`, `UPDATE_COMBATANT`, `REMOVE_COMBATANT`, `MOVE_COMBATANT`, `DAMAGE`, `HEAL`, `SET_HP`, `SPEND_MP`, `RESTORE_MP`, `SET_MP`, `SET_STATUS`, `SET_REVEAL_STATS`, `SET_PRESENTATION`, `SET_BACKGROUND`, `RENAME_BATTLE`, `LOAD_BATTLE` e `END_BATTLE`. `END_BATTLE` toglie i nemici, lascia il party com'è e nasconde di nuovo le informazioni sui nemici.
+- I comandi disponibili sono `ADD_COMBATANT`, `UPDATE_COMBATANT`, `REMOVE_COMBATANT`, `MOVE_COMBATANT`, `DAMAGE`, `HEAL`, `SET_HP`, `SPEND_MP`, `RESTORE_MP`, `SET_MP`, `SET_STATUS`, `SET_REVEAL_STATS`, `SET_PRESENTATION`, `SET_BACKGROUND`, `RENAME_BATTLE`, `LOAD_BATTLE`, `PERFORM_ACTION`, `SYNC_UNIT` e `END_BATTLE`. `SYNC_UNIT` porta sui combattenti schierati da una scheda le modifiche fatte in libreria (nome, PV/PM massimi, aspetto), tenendo il numero delle copie ("Goblin 2" → "Orco 2") e limitando PV/PM attuali ai nuovi massimi. `END_BATTLE` toglie i nemici, lascia il party com'è e nasconde di nuovo le informazioni sui nemici.
 - Gli eventi (`DAMAGED`, `HEALED`, `CRISIS_ENTERED`, `KNOCKED_OUT`, `REVIVED`…) descrivono cosa è successo. Riportano l'importo effettivamente applicato, cioè senza l'eccesso di danno o di cura. Il Display li userà per la coreografia.
 
 **Store (`src/app/store`).** Usa Zustand (vanilla), un'istanza sola e solo nel Master.
 
-- `dispatch(command)` applica il comando, salva lo stato precedente nella cronologia di annullamento (al massimo 50 passi, solo in memoria) e pubblica un `BattleChange` sul bus `battleStore.changes`. Dalla fase 4 il livello di sincronizzazione si collega lì.
-- Con `undo()` si torna indietro di un passo. I comandi senza effetto non finiscono nella cronologia.
+- `dispatch(command)` applica il comando e pubblica un `BattleChange` sul bus `battleStore.changes`, a cui si collega la sincronizzazione. I comandi senza effetto non pubblicano nulla.
+- Non c'è annullamento: le operazioni distruttive chiedono conferma (rimuovere un combattente, terminare la battaglia, sostituire il campo con una scena) e ogni valore si corregge con un'azione del GM.
 - Lo stato della battaglia viene salvato in `localStorage` (`fu-battle.battle`) ed è versionato: ora è alla v4, e `migrations.ts` aggiorna i salvataggi delle versioni precedenti (v2: PM e ritratti; v3: fase della battaglia; v4: sfondo della schermata di attesa). Al ricaricamento viene validato con Zod; se è corrotto viene scartato.
-- Gli hook per React sono `useBattleStore`, `useBattleActions`, `useCombatants(side)`, `useCombatant(id)` e `useCanUndo`.
+- Gli hook per React sono `useBattleStore`, `useBattleActions`, `useCombatants(side)` e `useCombatant(id)`.
 
 ## Display statico (fase 2)
 
@@ -92,22 +92,20 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 
 ## Plancia del Master (fase 3)
 
-- **Layout:** a sinistra le sezioni Party e Nemici; a destra l'anteprima dal vivo dello schermo dei giocatori, i controlli della finestra nemici e quelli della battaglia. L'header resta fisso in alto con "Annulla ultima azione", "Apri schermo giocatori" e la lingua.
-- **Scheda combattente:**
-  - riordino ▲▼ all'interno del proprio lato;
-  - nome con il tag Crisi/KO;
-  - lettura di PV e PM, con le colonne allineate tra le schede;
-  - campo **Valore** con i pulsanti Danno, Cura, −PM e +PM. Invio applica il danno, Maiusc+Invio la cura, e il valore resta nel campo per riapplicarlo;
-  - interruttori degli status con le stesse icone del Display;
-  - per i nemici, l'interruttore "PV/PM visibili", che si disattiva quando è attivo "mostra tutti";
-  - modifica in linea: nome, PV e PM attuali e massimi, specchiatura dello sprite. Il salvataggio è un unico `UPDATE_COMBATANT`, quindi si annulla con un passo solo;
-  - rimozione.
-- **Aggiunta:** nome, PV max e PM max (opzionale, 0 se vuoto). Dopo l'aggiunta il nome si svuota ma le statistiche restano, così è veloce inserire nemici uguali.
-- **Finestra nemici:** modalità Manuale o Automatica, pulsante Mostra/Nascondi, secondi di auto-nascondi (registrati quando si esce dal campo; i valori fuori da 1–120 vengono annullati) e "Mostra PV/PM di tutti i nemici".
-- **Battaglia:** il nome viene registrato quando si esce dal campo. C'è un indicatore della fase (In preparazione / In corso). "Inizia battaglia" è disattivato se non ci sono nemici; "Termina battaglia" chiede una conferma in due passi. In preparazione la sezione Nemici mostra l'etichetta "Nascosti ai giocatori".
-- **Annulla:** con il pulsante o con Ctrl/Cmd+Z, tranne mentre si scrive in un campo. I campi di testo registrano il valore solo all'uscita, per non riempire la cronologia a ogni tasto.
+**Controllo schermo** è una plancia master/detail (`master/screen`, `master/field`, `master/detail`). Da 1280 px la pagina occupa l'altezza della finestra e i due riquadri scorrono ciascuno per conto suo; sotto, si impilano.
+
+- **Barra della pagina:** nome della scena, "Mostra/Nascondi finestra nemici" (un comando dal vivo, sempre a portata) e ⚙ **Impostazioni schermo**, un popover con modalità della finestra nemici (Manuale/Automatica), secondi di auto-nascondi (registrati all'uscita dal campo; fuori da 1–120 vengono rifiutati) e "Mostra PV/PM di tutti i nemici".
+- **Campo (a sinistra):** party e nemici come card compatte, lette come quelle del Display: nome in Cinzel, Crisi/KO, status, barre PV/PM in linea, ritratto o sprite (o il segnaposto) come sfondo semitrasparente. Sulle card **non ci sono azioni**: il clic seleziona il combattente. Il menu "⋯" contiene solo Sposta su/giù, "Mostra/Nascondi PV/PM ai giocatori" (nemici) e "Rimuovi dalla battaglia…", con conferma.
+- **Schiera:** dal pulsante "Schiera" in testa al campo si apre un popover con le schede Scena, Party, Nemici (×N) e Al volo. A campo vuoto le stesse schede stanno direttamente sotto la lista e ci restano durante l'allestimento, finché il GM preme "Fatto" o inizia la battaglia.
+- **Dettaglio (a destra):**
+  - nessuno selezionato: **Azione del GM**, senza attore (trappole, pozioni, correzioni);
+  - combattente selezionato: intestazione con PV/PM, status e note del GM della scheda; elenco delle abilità salvate (tipo, effetto, promemoria) più "Azione libera";
+  - scelta un'abilità, il **compositore**: nome, effetto (anche "Nessun effetto"), costo PM se l'attore ha PM, e la lista dei bersagli. Ogni bersaglio spuntato ha il suo esito: tipo (Danno PV, Cura PV, Danno PM, Recupero PM), valore facoltativo e status da aggiungere o togliere (un clic su un'icona aggiunge lo status, o lo toglie se il bersaglio lo ha già). "Agisci" esegue `PERFORM_ACTION`; Invio in un campo fa lo stesso; Esc torna indietro di un livello.
+- **Anteprima flottante** (`master/preview`): lo schermo dei giocatori in una finestra sopra la plancia, in tutte le sezioni. Si trascina dalla barra del titolo (o con le frecce), si ridimensiona dall'angolo in 16:9, si riduce alla sola barra. Aperta/chiusa, posizione e dimensione restano nel browser (`fu-battle.preview-window`); il pulsante "Anteprima" della barra in alto la mostra o la nasconde.
+- **Battaglia:** "Inizia battaglia" è disattivato se non ci sono nemici; "Termina battaglia" chiede una conferma in due passi. In preparazione i nemici mostrano l'etichetta "Nascosti ai giocatori".
+- **Libreria in battaglia:** le schede Party e Nemici restano modificabili anche a battaglia in corso. Ogni salvataggio manda `SYNC_UNIT`, così chi è in campo da quella scheda si aggiorna subito. Per un personaggio in campo i PV/PM attuali sono in sola lettura nella scheda (si cambiano dalla plancia e tornano sulla scheda quando esce); una scheda in campo non si può eliminare.
 - **Errori di dominio:** compaiono in un banner localizzato in base al codice, che si può chiudere.
-- **Componenti UI condivisi** (`src/shared/ui`): `Button`, `TextField`, `NumberField`, `Toggle` (`role="switch"`) e `Panel`.
+- **Componenti UI condivisi** (`src/shared/ui`): `Button`, `TextField`, `NumberField`, `Toggle` (`role="switch"`), `Panel`, `Menu` e `Popover`.
 - **Code splitting:** Master e Display sono caricati separatamente (`lazy` di React Router), e il service worker li mette entrambi in cache per l'uso offline.
 
 ## Animazioni base (fase 5)
@@ -165,21 +163,23 @@ type SyncMessage =
 
 **Dominio.** `PERFORM_ACTION` riceve un'`Action` (`src/domain/action.ts`), validata con Zod:
 
-- `actorId`;
-- `name`, che diventa il banner sullo schermo dei giocatori;
-- `effect`, uno degli effetti integrati: `slash`, `impact`, `fire`, `ice`, `thunder`, `light`, `shadow`;
-- `kind`: `damage`, `heal` o `mpDamage`;
+- `actorId`, oppure `null` quando agisce il GM (allora `mpCost` è 0);
+- `name`, che diventa il banner sullo schermo dei giocatori (vuoto = niente banner);
+- `effect`, uno degli effetti integrati (`slash`, `impact`, `fire`, `ice`, `thunder`, `light`, `shadow`) oppure `null`: nessun effetto grafico, solo l'impatto;
 - `mpCost`, pagato dall'attaccante;
-- `statuses`, applicati a tutti i bersagli all'impatto;
-- `targets`: uno o più bersagli, ognuno con il proprio `amount`.
+- `targets`: uno o più bersagli, ognuno con il **proprio esito**: `change` (`damage`, `heal`, `mpDamage` o `mpRestore`, con l'importo; `null` = nessuna variazione), `addStatuses` e `removeStatuses`. Ogni bersaglio deve avere almeno un effetto.
 
-L'azione è applicata come catena di comandi base: tutto o niente, con un solo passo di annullamento. Si può eseguire solo a battaglia in corso (`BATTLE_NOT_ACTIVE`) e con PM sufficienti (`NOT_ENOUGH_MP`). Gli eventi si aprono con `ACTION_PERFORMED` (attaccante, nome, effetto, tipo, bersagli), seguito dagli esiti: PM spesi, danni o cure, soglie, status.
+L'azione è applicata come catena di comandi base, tutto o niente, con PM sufficienti (`NOT_ENOUGH_MP`). Si può eseguire anche in preparazione: lo stato cambia, ma la proiezione non manda la sequenza ai giocatori. Gli eventi si aprono con `ACTION_PERFORMED` (attaccante o null, nome, effetto o null, bersagli), seguito dagli esiti: PM spesi, danni o cure, soglie, status aggiunti o tolti.
+
+Le abilità salvate (`Ability` sulla scheda) hanno `effect` e `kind` facoltativi: `kind: null` è un'abilità di soli status.
 
 **Display: il regista** (`choreography/sequencer.ts`, indipendente da React). Ogni aggiornamento del Master passa da una coda:
 
 - gli aggiornamenti normali vengono applicati subito;
 - quelli che si aprono con `ACTION_PERFORMED` vengono recitati come sequenza: `advance` (280 ms) → `cast` (240 ms) → `effect` → `retreat` (280 ms);
-- il nuovo stato viene applicato **solo all'impatto**, cioè al punto dell'effetto indicato da `EFFECT_TIMING[effect].impactAt`. È in quel momento che barre, targhette, numeri, scossa e Crisi si aggiornano;
+- senza effetto grafico l'attore avanza e carica lo stesso, poi l'impatto arriva dopo un colpo breve (`NO_EFFECT_TIMING`, 300 ms);
+- senza attore (azione del GM) nessuno si muove: solo banner ed eventuale effetto sui bersagli, poi l'impatto. Se mancano anche nome ed effetto l'aggiornamento viene applicato subito;
+- il nuovo stato viene applicato **solo all'impatto**, cioè al punto dell'effetto indicato da `impactAt`. È in quel momento che barre, targhette, numeri, scossa e Crisi si aggiornano;
 - l'ordine di arrivo è sempre rispettato;
 - con 3 o più aggiornamenti in attesa, le sequenze vengono saltate per tornare in pari;
 - con "riduci movimento" le azioni vengono applicate subito;
@@ -194,24 +194,22 @@ Il passo corrente si trova in `useChoreoStore`.
 - `ActionBanner` mostra il nome in alto. Durante l'azione la fascia nemici si sposta e poi ritorna.
 - Nella fase 7 ogni effetto potrà usare un `.webm` caricato dall'utente al posto del disegno integrato.
 
-**Master: il pannello "Azione"** (`master/action`).
+**Master: il compositore** (`master/action`, `master/detail`).
 
-- Campi: chi agisce, nome, effetto, tipo (Danno PV / Cura PV / Danno PM), costo PM (solo se l'attaccante ha PM), bersagli con i rispettivi valori, status all'impatto.
-- La bozza vive in `useActionDraft`, fuori dallo stato della battaglia: niente annullamento, niente sincronizzazione, niente salvataggio.
-- Dopo "Esegui" i valori si svuotano e il resto rimane, così è facile ripetere un'azione simile.
-- Il pulsante "Agisci" su una scheda sceglie quell'attaccante e porta in vista il pannello.
-- Le azioni rapide Danno/Cura restano istantanee, senza sequenza.
+- La selezione e la bozza vivono in `useActionDraft`, fuori dallo stato della battaglia: niente sincronizzazione, niente salvataggio. `buildAction` (puro) trasforma la bozza in un'`Action` o dice cosa manca (bersagli, valori non validi, PM insufficienti).
+- Un'abilità precompila nome, effetto, tipo e status su tutti i bersagli; costo PM e valore restano promemoria, il numero vero lo scrive il GM.
+- Dopo "Agisci" si torna alle abilità dello stesso attore, o a un'azione del GM vuota.
 
 ## Roadmap
 
-| Fase | Contenuto                                                                                                                                | Stato |
-| ---- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| 0    | Impalcatura: Vite, TS strict, lint, CI, PWA, routing, i18n                                                                               | ✅    |
-| 1    | Dominio (combattenti, PV, Crisi, status visivi) + store + persistenza                                                                    |       |
-| 2    | Display statico: sfondo, sprite, barre PV                                                                                                |       |
-| 3    | Master: roster, modifica PV/PM e status, controlli della finestra nemici (manuale/auto, secondi), rivelazione PV/PM, fine battaglia      | ✅    |
-| 4    | Ponte BroadcastChannel: snapshot, riconnessione, presenza dello schermo, fase di preparazione                                            | ✅    |
-| 5    | Animazioni base: barre fluide, shake, testo dei danni, dissolvenze di inizio e fine battaglia                                            | ✅    |
-| 6    | Sequenza d'azione: avanzata, carica, effetti integrati, impatto (stato visivo ritardato), ritorno; pannello Azione multi-bersaglio       | ✅    |
-| 7    | Libreria asset (IndexedDB) e audio con crossfade; scelta di sprite, ritratti, sfondo di battaglia e **sfondo della schermata di attesa** |       |
-| 8    | Rifinitura: preset incontri da importare ed esportare, banner di vittoria                                                                |       |
+| Fase | Contenuto                                                                                                                                                                        | Stato |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| 0    | Impalcatura: Vite, TS strict, lint, CI, PWA, routing, i18n                                                                                                                       | ✅    |
+| 1    | Dominio (combattenti, PV, Crisi, status visivi) + store + persistenza                                                                                                            |       |
+| 2    | Display statico: sfondo, sprite, barre PV                                                                                                                                        |       |
+| 3    | Master: roster, modifica PV/PM e status, controlli della finestra nemici (manuale/auto, secondi), rivelazione PV/PM, fine battaglia                                              | ✅    |
+| 4    | Ponte BroadcastChannel: snapshot, riconnessione, presenza dello schermo, fase di preparazione                                                                                    | ✅    |
+| 5    | Animazioni base: barre fluide, shake, testo dei danni, dissolvenze di inizio e fine battaglia                                                                                    | ✅    |
+| 6    | Sequenza d'azione: avanzata, carica, effetti integrati o nessuno, impatto (stato visivo ritardato), ritorno; plancia master/detail con compositore per bersaglio e azione del GM | ✅    |
+| 7    | Libreria asset (IndexedDB) e audio con crossfade; scelta di sprite, ritratti, sfondo di battaglia e **sfondo della schermata di attesa**                                         |       |
+| 8    | Rifinitura: preset incontri da importare ed esportare, banner di vittoria                                                                                                        |       |

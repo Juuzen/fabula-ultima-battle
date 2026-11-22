@@ -4,19 +4,16 @@ import { createEmptyBattle, type BattleEvent, type BattleState } from '@/domain'
 
 import type { Stage } from './choreoStore'
 import { createSequencer, MAX_BACKLOG } from './sequencer'
-import { EFFECT_TIMING, SEQUENCE, sequenceLength } from './timeline'
+import { EFFECT_TIMING, NO_EFFECT_TIMING, SEQUENCE, sequenceLength } from './timeline'
 
 const named = (name: string): BattleState => ({ ...createEmptyBattle(), name, phase: 'active' })
 
-const actionEvents = (effect: 'slash' | 'fire' = 'slash'): BattleEvent[] => [
-  {
-    type: 'ACTION_PERFORMED',
-    actorId: 'hero',
-    name: 'Fendente',
-    effect,
-    kind: 'damage',
-    targetIds: ['orc'],
-  },
+const actionEvents = (
+  effect: 'slash' | 'fire' | null = 'slash',
+  actorId: string | null = 'hero',
+  name = 'Fendente',
+): BattleEvent[] => [
+  { type: 'ACTION_PERFORMED', actorId, name, effect, targetIds: ['orc'] },
   { type: 'DAMAGED', id: 'orc', amount: 12, hp: 18 },
 ]
 
@@ -79,8 +76,37 @@ describe('sequencer', () => {
       targetIds: ['orc'],
       effect: 'fire',
       name: 'Fendente',
-      kind: 'damage',
     })
+  })
+
+  it('without a visual effect, the actor still steps forward and the hit lands soon', async () => {
+    const { sequencer, applied, steps, stages } = setup()
+    sequencer.enqueue(named('bare'), actionEvents(null))
+    await advance(SEQUENCE.advance + SEQUENCE.cast)
+    expect(stages.at(-1)).toMatchObject({ step: 'effect', effect: null })
+    await advance(Math.round(NO_EFFECT_TIMING.durationMs * NO_EFFECT_TIMING.impactAt))
+    expect(applied.map((a) => a.name)).toEqual(['bare'])
+    await advance(sequenceLength(null))
+    expect(steps()).toEqual(['advance', 'cast', 'effect', 'retreat', null])
+  })
+
+  it('a GM action (no actor) skips the moves: banner and effect only', async () => {
+    const { sequencer, applied, steps } = setup()
+    sequencer.enqueue(named('gm'), actionEvents('fire', null, 'Trappola'))
+    expect(steps()).toEqual(['effect'])
+    await advance(Math.round(EFFECT_TIMING.fire.durationMs * EFFECT_TIMING.fire.impactAt))
+    expect(applied.map((a) => a.name)).toEqual(['gm'])
+    await advance(sequenceLength('fire', false))
+    expect(steps()).toEqual(['effect', null])
+  })
+
+  it('a GM action with neither name nor effect is applied at once', () => {
+    const { sequencer, applied, stages } = setup()
+    sequencer.enqueue(named('quick'), actionEvents(null, null, ''))
+    expect(applied).toEqual([
+      { name: 'quick', events: [{ type: 'DAMAGED', id: 'orc', amount: 12, hp: 18 }] },
+    ])
+    expect(stages).toEqual([])
   })
 
   it('keeps updates that arrive during a sequence in order, after it', async () => {

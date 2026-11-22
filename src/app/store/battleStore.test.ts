@@ -37,7 +37,6 @@ describe('battle store', () => {
 
     expect(store.getState().battle.combatants[0]?.hp).toBe(15)
     expect(changes).toHaveLength(2)
-    expect(changes[1]?.cause).toBe('command')
     expect(changes[1]?.events.map((e) => e.type)).toEqual(['DAMAGED', 'CRISIS_ENTERED'])
   })
 
@@ -50,59 +49,25 @@ describe('battle store', () => {
 
     expect(result.ok).toBe(false)
     expect(store.getState().lastError?.code).toBe('COMBATANT_NOT_FOUND')
-    expect(store.getState().past).toEqual([])
     expect(listener).not.toHaveBeenCalled()
 
     store.getState().clearError()
     expect(store.getState().lastError).toBeNull()
   })
 
-  it('undoes the last change and notifies with cause "undo"', () => {
+  it('publishes nothing for no-op commands', () => {
     const store = createBattleStore({ storage: null })
-    const changes: BattleChange[] = []
-    store.changes.subscribe((c) => changes.push(c))
-
+    const listener = vi.fn<(c: BattleChange) => void>()
     store.getState().dispatch(addHero)
-    store.getState().dispatch({ type: 'DAMAGE', id: 'hero', amount: 10 })
-    store.getState().undo()
-
-    expect(store.getState().battle.combatants[0]?.hp).toBe(40)
-    expect(changes.at(-1)).toMatchObject({ cause: 'undo', events: [] })
-
-    store.getState().undo()
-    expect(store.getState().battle.combatants).toEqual([])
-    store.getState().undo() // nothing left: no-op
-    expect(changes).toHaveLength(4)
-  })
-
-  it('records the command with the state it undoes', () => {
-    const store = createBattleStore({ storage: null })
-    store.getState().dispatch(addHero)
-    const damage = { type: 'DAMAGE', id: 'hero', amount: 10 } as const
-    store.getState().dispatch(damage)
-    const last = store.getState().past.at(-1)
-    expect(last?.command).toEqual(damage)
-    expect(last?.battle.combatants[0]?.hp).toBe(40)
-  })
-
-  it('does not record no-op commands in history', () => {
-    const store = createBattleStore({ storage: null })
-    store.getState().dispatch(addHero)
+    store.changes.subscribe(listener)
     const status = { type: 'SET_STATUS', id: 'hero', status: 'slow', active: true } as const
     store.getState().dispatch(status)
     store.getState().dispatch(status)
-    expect(store.getState().past).toHaveLength(2)
-  })
-
-  it('caps the undo history', () => {
-    const store = createBattleStore({ storage: null, historyLimit: 3 })
-    store.getState().dispatch(addHero)
-    for (let i = 0; i < 5; i++) store.getState().dispatch({ type: 'DAMAGE', id: 'hero', amount: 1 })
-    expect(store.getState().past).toHaveLength(3)
+    expect(listener).toHaveBeenCalledTimes(1)
   })
 
   describe('persistence', () => {
-    it('saves the battle (not the history) and restores it in a new store', () => {
+    it('saves the battle and restores it in a new store', () => {
       const storage = memoryStorage()
       const first = createBattleStore({ storage })
       first.getState().dispatch(addHero)
@@ -113,7 +78,6 @@ describe('battle store', () => {
 
       const second = createBattleStore({ storage })
       expect(second.getState().battle.combatants[0]?.hp).toBe(35)
-      expect(second.getState().past).toEqual([])
     })
 
     it('ignores corrupt persisted data', () => {

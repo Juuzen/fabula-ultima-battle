@@ -1,4 +1,4 @@
-import { BedDouble, Lock, Plus } from 'lucide-react'
+import { BedDouble, Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
@@ -44,7 +44,8 @@ function RestButton({ disabled }: { disabled: boolean }) {
 export function UnitLibraryPage({ kind }: { kind: UnitKind }) {
   const { t } = useTranslation()
   const units = useUnits(kind)
-  const locked = useBattleStore((s) => s.battle.phase === 'active')
+  // Riposo would refill sheets the field is about to overwrite: not during a fight.
+  const fighting = useBattleStore((s) => s.battle.phase === 'active')
   const [params, setParams] = useSearchParams()
   const [createdId, setCreatedId] = useState<string | null>(null)
   const title = t(kind === 'party' ? 'master.nav.party' : 'master.nav.enemies')
@@ -72,23 +73,13 @@ export function UnitLibraryPage({ kind }: { kind: UnitKind }) {
           {units && <span className="text-sm text-slate-400 tabular-nums">{units.length}</span>}
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          {kind === 'party' && <RestButton disabled={locked || !units?.length} />}
-          <Button variant="primary" disabled={locked} onClick={() => void create()}>
+          {kind === 'party' && <RestButton disabled={fighting || !units?.length} />}
+          <Button variant="primary" onClick={() => void create()}>
             <Plus className="h-4 w-4" aria-hidden="true" />
             {t(`library.create.${kind}`)}
           </Button>
         </div>
       </header>
-
-      {locked && (
-        <p
-          role="note"
-          className="flex items-start gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200"
-        >
-          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
-          {t('library.locked')}
-        </p>
-      )}
 
       {units === undefined ? null : units.length === 0 ? (
         <p className="max-w-prose text-base text-slate-300">{t(`library.empty.${kind}`)}</p>
@@ -106,7 +97,6 @@ export function UnitLibraryPage({ kind }: { kind: UnitKind }) {
             <UnitEditor
               key={selected.id}
               unit={selected}
-              locked={locked}
               autoFocusName={selected.id === createdId}
               onDeleted={() => select(null)}
             />

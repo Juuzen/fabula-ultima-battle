@@ -23,8 +23,10 @@ const uniqueStatuses = z
 export const AbilitySchema = z.object({
   id: z.string().min(1),
   name: z.string().trim().min(1).max(60),
-  effect: EffectIdSchema,
-  kind: ActionKindSchema,
+  /** null = no visual effect. */
+  effect: EffectIdSchema.nullable(),
+  /** null = statuses only, no PV/PM change. */
+  kind: ActionKindSchema.nullable(),
   statuses: uniqueStatuses,
   mpCostHint: z.int().min(0).nullable(),
   amountHint: z.int().min(0).nullable(),
@@ -105,6 +107,15 @@ export function combatantFromUnit(unit: Unit, id: string, name = unit.name): New
 }
 
 const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/**
+ * A copy's name after its sheet is renamed: "Goblin 2" (sheet "Goblin" → "Orco") becomes
+ * "Orco 2". A name that does not come from the old sheet name is kept as it is.
+ */
+export function renamedCopy(name: string, previousBase: string, base: string): string {
+  const match = new RegExp(`^${escapeRegExp(previousBase)}( \\d+)?$`).exec(name)
+  return match ? `${base}${match[1] ?? ''}` : name
+}
 
 /**
  * Names for `count` new copies of an enemy, continuing the numbering already on the field:

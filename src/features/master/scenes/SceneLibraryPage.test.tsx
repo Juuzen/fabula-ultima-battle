@@ -14,7 +14,7 @@ const goblin = createUnit({ id: 'gob', kind: 'enemy', name: 'Goblin', maxHp: 20,
 describe('Battle scenes page', () => {
   beforeEach(async () => {
     localStorage.clear()
-    battleStore.setState({ battle: createEmptyBattle(), past: [], lastError: null })
+    battleStore.setState({ battle: createEmptyBattle(), lastError: null })
     await library.db.units.clear()
     await library.db.scenes.clear()
     await Promise.all([library.saveUnit(lyra), library.saveUnit(goblin)])

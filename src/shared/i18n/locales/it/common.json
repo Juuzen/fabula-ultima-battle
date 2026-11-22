@@ -8,9 +8,19 @@
     "openDisplay": "Apri schermo giocatori",
     "openDisplayHint": "Sposta la finestra sul secondo schermo e premi F11 per lo schermo intero.",
     "popupBlocked": "Il browser ha bloccato la finestra. Consenti i popup per questo sito.",
-    "undo": "Annulla ultima azione",
-    "undoShortcut": "Ctrl+Z",
-    "preview": "Anteprima schermo giocatori",
+    "preview": {
+      "title": "Schermo giocatori",
+      "toggle": "Anteprima",
+      "toggleHint": "Mostra o nascondi l'anteprima dello schermo giocatori",
+      "move": "Sposta l'anteprima",
+      "moveHint": "Trascina, o usa le frecce (Maiusc per passi più lunghi)",
+      "resize": "Ridimensiona l'anteprima",
+      "resizeHint": "Trascina, o usa le frecce",
+      "minimize": "Riduci",
+      "expand": "Espandi",
+      "close": "Chiudi anteprima",
+      "waiting": "In attesa"
+    },
     "party": "Party",
     "enemies": "Nemici",
     "emptyParty": "Nessun personaggio in campo: usa Schiera.",
@@ -25,52 +35,30 @@
       "placeholderEnemy": "Es. Goblin"
     },
     "combatant": {
-      "amount": "Valore",
-      "damage": "Danno",
-      "heal": "Cura",
-      "spendMp": "− PM",
-      "restoreMp": "+ PM",
-      "edit": "Modifica",
-      "remove": "Rimuovi",
+      "remove": "Rimuovi dalla battaglia…",
       "moveUp": "Sposta su",
       "moveDown": "Sposta giù",
-      "statuses": "Status di {{name}}",
-      "reveal": "PV/PM visibili",
-      "revealHint": "Mostra PV e PM di questo nemico ai giocatori",
-      "revealedByAll": "Visibili a tutti",
-      "act": "Agisci",
       "more": "Altre azioni di {{name}}",
-      "statusesNone": "Nessuno status",
       "count": "Combattenti in campo:",
-      "target": "Bersaglio",
-      "targetOf": "Bersaglio: {{name}}",
-      "acting": "Agisce",
-      "actHint": "Usa {{name}} come attore di un'azione",
-      "actDisabled": "Inizia la battaglia per eseguire azioni"
-    },
-    "edit": {
-      "title": "Modifica {{name}}",
-      "name": "Nome",
-      "maxHp": "PV max",
-      "maxMp": "PM max",
-      "hp": "PV attuali",
-      "mp": "PM attuali",
-      "flip": "Specchia sprite",
-      "save": "Salva",
-      "cancel": "Annulla"
+      "revealStats": "Mostra PV/PM ai giocatori",
+      "hideStats": "Nascondi PV/PM ai giocatori",
+      "removeConfirm": "Rimuovere {{name}} dalla battaglia?",
+      "removeConfirmed": "Rimuovi",
+      "keep": "Annulla"
     },
     "enemyPanel": {
       "title": "Finestra nemici",
       "mode": "Modalità",
       "manual": "Manuale",
       "auto": "Automatica",
-      "show": "Mostra",
-      "hide": "Nascondi",
+      "show": "Mostra finestra nemici",
+      "hide": "Nascondi finestra nemici",
       "visibleNow": "Visibile ora",
       "autoHide": "Nascondi dopo (secondi)",
       "autoHint": "Compare da sola quando cambia qualcosa sui nemici e sparisce dopo i secondi indicati.",
       "manualHint": "Resta come la imposti tu.",
-      "revealAll": "Mostra PV/PM di tutti i nemici"
+      "revealAll": "Mostra PV/PM di tutti i nemici",
+      "toggleHint": "Mostra o nascondi la finestra nemici sullo schermo dei giocatori"
     },
     "battle": {
       "end": "Termina battaglia",
@@ -90,18 +78,13 @@
       "INVALID_BATTLE": "Battaglia non valida.",
       "INVALID_PRESENTATION": "Impostazione non valida.",
       "INVALID_ACTION": "Azione non valida: controlla bersagli e valori.",
-      "BATTLE_NOT_ACTIVE": "Le azioni si possono eseguire solo a battaglia iniziata.",
       "NOT_ENOUGH_MP": "PM insufficienti per questa azione.",
       "UNIT_ALREADY_DEPLOYED": "Questo personaggio è già in campo."
     },
     "connected": "Schermo giocatori collegato",
     "notConnected": "Schermo giocatori non collegato",
     "enemiesHidden": "Nascosti ai giocatori",
-    "previewPreparation": "In preparazione: i giocatori vedono la schermata di attesa.",
     "action": {
-      "title": "Azione",
-      "actor": "Chi agisce",
-      "chooseActor": "Scegli…",
       "name": "Nome azione",
       "namePlaceholder": "Es. Palla di fuoco",
       "effect": "Effetto",
@@ -109,27 +92,33 @@
       "kinds": {
         "damage": "Danno PV",
         "heal": "Cura PV",
-        "mpDamage": "Danno PM"
+        "mpDamage": "Danno PM",
+        "mpRestore": "Recupero PM",
+        "none": "Solo status"
       },
       "targets": "Bersagli",
       "amount": "Valore per {{name}}",
       "mpCost": "Costo PM",
       "mpAvailable": "disponibili: {{mp}}",
       "statuses": "Status all'impatto",
-      "perform": "Esegui",
-      "notActive": "Inizia la battaglia per eseguire azioni con la sequenza animata.",
-      "chooseTargets": "Scegli almeno un bersaglio e indica un valore.",
+      "perform": "Agisci",
       "notEnoughMp": "PM insufficienti ({{mp}} disponibili).",
-      "ability": "Abilità",
       "free": "Azione libera",
       "hintMp": "promemoria: {{n}}",
       "acting": "{{name}} agisce",
-      "exit": "Esci",
-      "exitHint": "Esci dall'azione (Esc)",
       "targetsCount_one": "{{count}} bersaglio",
       "targetsCount_other": "{{count}} bersagli",
-      "pickTargets": "Scegli i bersagli sulle card e scrivi gli importi.",
-      "bar": "Azione in corso di composizione"
+      "pickTargets": "Scegli i bersagli qui sotto.",
+      "gmTitle": "Azione del GM",
+      "gmHint": "Nessuno agisce: sei tu a cambiare le cose (trappole, pozioni, correzioni).",
+      "nameOptional": "Nome (facoltativo)",
+      "gmNamePlaceholder": "Es. Trappola, Pozione",
+      "back": "Abilità",
+      "backHint": "Torna alle abilità (Esc)",
+      "actingHint": "{{name}} agisce",
+      "preparing": "Battaglia non iniziata: i valori cambiano, ma i giocatori non vedono la sequenza.",
+      "emptyTarget": "Ogni bersaglio ha bisogno di un valore o di uno status.",
+      "badNumber": "Usa numeri interi, 0 o più."
     },
     "nav": {
       "label": "Sezioni della plancia",
@@ -156,56 +145,58 @@
     "strip": {
       "label": "Comandi della battaglia",
       "reopen": "Riapri schermo",
-      "undo": "Annulla",
-      "nothingToUndo": "Niente da annullare",
       "shortcuts": "Scorciatoie",
       "shortcutsHint": "Scorciatoie da tastiera (?)",
       "shortcutsTitle": "Scorciatoie da tastiera",
-      "keys": { "enter": "Invio", "shift": "Maiusc" },
+      "keys": {
+        "enter": "Invio"
+      },
       "shortcutGroups": {
-        "card": "Sulla card",
-        "action": "In modalità azione",
+        "action": "Nel dettaglio",
         "everywhere": "Ovunque"
       },
       "shortcutList": {
-        "damage": "Danno con il valore scritto",
-        "heal": "Cura con il valore scritto",
-        "perform": "Esegui l'azione (dal valore di un bersaglio)",
-        "exitAction": "Esci dalla modalità azione",
-        "undo": "Annulla l'ultima azione (anche dai campi valore)",
+        "perform": "Agisci (da un campo dell'azione)",
+        "exitAction": "Torna indietro o deseleziona",
         "sections": "Vai alla sezione 1…6 della barra laterale",
         "help": "Mostra o nascondi questo elenco",
         "fullscreen": "Schermo intero, nella finestra del Display"
       }
     },
-    "undoLabels": {
-      "add": "Aggiunto {{name}}",
-      "update": "Modificato {{name}}",
-      "remove": "Rimosso {{name}}",
-      "move": "Spostato {{name}}",
-      "damage": "Danno {{amount}} → {{name}}",
-      "heal": "Cura {{amount}} → {{name}}",
-      "setHp": "PV {{value}} → {{name}}",
-      "spendMp": "−{{amount}} PM → {{name}}",
-      "restoreMp": "+{{amount}} PM → {{name}}",
-      "setMp": "PM {{value}} → {{name}}",
-      "statusOn": "{{status}} → {{name}}",
-      "statusOff": "Tolto {{status}} a {{name}}",
-      "revealOn": "PV/PM visibili: {{name}}",
-      "revealOff": "PV/PM nascosti: {{name}}",
-      "presentation": "Finestra nemici",
-      "background": "Sfondo",
-      "rename": "Nome battaglia",
-      "load": "Battaglia caricata",
-      "start": "Inizio battaglia",
-      "end": "Fine battaglia",
-      "action": "{{action}} di {{actor}}",
-      "targets_one": "{{count}} bersaglio",
-      "targets_other": "{{count}} bersagli",
-      "someone": "?",
-      "deploy": "Schierati {{count}} combattenti",
-      "deployOne": "Schierato {{name}}",
-      "scene": "Scena: {{name}}"
+    "ability": {
+      "title": "Abilità",
+      "none": "Nessuna abilità salvata sulla scheda.",
+      "freeHint": "Nome, effetto e bersagli a tua scelta.",
+      "mpHint": "~{{n}} PM",
+      "amountHint": "~{{n}}"
+    },
+    "target": {
+      "toggle": "Bersaglio: {{name}}",
+      "kind": "Tipo per {{name}}",
+      "noChange": "nessun valore",
+      "addStatus": "Aggiungi {{status}}",
+      "removeStatus": "Togli {{status}}",
+      "statuses": "Status per {{name}}",
+      "nobody": "Nessuno in campo: schiera qualcuno a sinistra."
+    },
+    "field": {
+      "title": "Campo",
+      "selectHint": "Seleziona {{name}} per vedere cosa può fare",
+      "deselectHint": "Deseleziona {{name}}",
+      "revealed": "PV/PM visibili ai giocatori",
+      "targeted": "Bersaglio dell'azione"
+    },
+    "detail": {
+      "title": "Dettaglio",
+      "deselect": "Deseleziona",
+      "deselectHint": "Torna all'azione del GM (Esc)",
+      "notes": "Note del GM"
+    },
+    "settings": {
+      "title": "Impostazioni schermo"
+    },
+    "screen": {
+      "untitled": "Battaglia senza nome"
     }
   },
   "display": {
@@ -236,6 +227,7 @@
     "poisoned": "Avvelenato"
   },
   "effects": {
+    "none": "Nessun effetto",
     "slash": "Taglio",
     "impact": "Impatto",
     "fire": "Fuoco",
@@ -262,7 +254,6 @@
     },
     "noMatch": "Nessuna scheda corrisponde alla ricerca.",
     "select": "Scegli una scheda dall'elenco, o creane una nuova.",
-    "locked": "Battaglia in corso: le schede si modificano a scontro finito. Per correzioni al volo usa Modifica sulla card o un'azione libera.",
     "abilitiesCount_one": "{{count}} abilità",
     "abilitiesCount_other": "{{count}} abilità",
     "fields": {
@@ -322,7 +313,10 @@
       "action": "Riposo",
       "hint": "Riporta PV e PM di tutto il party al massimo.",
       "done": "Party a riposo: PV e PM al massimo."
-    }
+    },
+    "onField": "In campo: PV e PM attuali si cambiano dalla plancia.",
+    "deleteOnField": "In campo: toglila dalla battaglia prima di eliminarla.",
+    "syncHint": "Le modifiche valgono subito anche per chi è in campo."
   },
   "scenes": {
     "create": "Nuova scena",
@@ -373,8 +367,6 @@
   },
   "deploy": {
     "title": "Schiera",
-    "open": "Apri Schiera",
-    "close": "Chiudi Schiera",
     "tabs": {
       "scene": "Scena",
       "party": "Party",
@@ -405,6 +397,9 @@
       "enemies": "Vai a Nemici"
     },
     "sceneLoaded": "Scena caricata: {{name}}. Premi Inizia battaglia quando sei pronto.",
-    "dismiss": "Chiudi avviso"
+    "dismiss": "Chiudi avviso",
+    "hint": "Aggiungi combattenti al campo",
+    "closeSetup": "Fatto",
+    "emptyHint": "Il campo è vuoto: carica una scena o schiera party e nemici."
   }
 }

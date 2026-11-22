@@ -289,6 +289,81 @@ describe('applyCommand', () => {
     })
   })
 
+  describe('SYNC_UNIT', () => {
+    const fromSheet = (): BattleState => ({
+      ...createEmptyBattle(),
+      combatants: [
+        createCombatant({ id: 'g1', name: 'Goblin 1', side: 'enemy', maxHp: 20, unitId: 'u-gob' }),
+        createCombatant({ id: 'g2', name: 'Goblin 2', side: 'enemy', maxHp: 20, unitId: 'u-gob' }),
+        createCombatant({ id: 'imp', name: 'Goblin', side: 'enemy', maxHp: 20 }),
+      ],
+    })
+    const sheet = {
+      name: 'Orco',
+      maxHp: 8,
+      maxMp: 5,
+      spriteAssetId: 'spr',
+      portraitAssetId: null,
+      flipSprite: true,
+    }
+
+    it('updates every copy deployed from the sheet, keeping their number', () => {
+      const { state, events } = run(fromSheet(), {
+        type: 'SYNC_UNIT',
+        unitId: 'u-gob',
+        previousName: 'Goblin',
+        sheet,
+      })
+      const [g1, g2, imp] = state.combatants
+      expect(g1).toMatchObject({
+        name: 'Orco 1',
+        maxHp: 8,
+        hp: 8,
+        maxMp: 5,
+        mp: 0,
+        spriteAssetId: 'spr',
+        flipSprite: true,
+      })
+      expect(g2?.name).toBe('Orco 2')
+      expect(imp).toMatchObject({ name: 'Goblin', maxHp: 20 }) // not from that sheet
+      expect(events.filter((e) => e.type === 'COMBATANT_UPDATED')).toHaveLength(2)
+    })
+
+    it('changes nothing when the sheet fields the field uses are the same', () => {
+      const before = fromSheet()
+      const g1 = before.combatants[0]!
+      const result = run(before, {
+        type: 'SYNC_UNIT',
+        unitId: 'u-gob',
+        previousName: 'Goblin',
+        sheet: {
+          name: 'Goblin',
+          maxHp: 20,
+          maxMp: 0,
+          spriteAssetId: null,
+          portraitAssetId: null,
+          flipSprite: false,
+        },
+      })
+      expect(g1.name).toBe('Goblin 1')
+      expect(result.state).toBe(before)
+      expect(result.events).toEqual([])
+    })
+
+    it('keeps the current PV, clamped to the new maximum, and reports Crisis', () => {
+      const hurt = run(fromSheet(), { type: 'SET_HP', id: 'g1', hp: 12 }).state
+      const { state, events } = run(hurt, {
+        type: 'SYNC_UNIT',
+        unitId: 'u-gob',
+        previousName: 'Goblin',
+        sheet: { ...sheet, maxHp: 30 },
+      })
+      expect(hpOf(state, 'g1')).toBe(12)
+      expect(hpOf(state, 'g2')).toBe(20)
+      expect(events).toContainEqual({ type: 'CRISIS_ENTERED', id: 'g1' })
+    })
+  })
+
   it('END_BATTLE empties the field, clears the scene and resets enemy visibility', () => {
     const prepared = run(battleWith(), {
       type: 'SET_PRESENTATION',

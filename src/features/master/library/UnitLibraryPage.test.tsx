@@ -17,7 +17,6 @@ const stored = async (id: string) => (await library.getUnits([id])).get(id)
 function seedBattle(phase: 'preparation' | 'active' = 'preparation') {
   battleStore.setState({
     battle: { ...createEmptyBattle(), phase },
-    past: [],
     lastError: null,
   })
 }
@@ -111,16 +110,55 @@ describe('unit libraries', () => {
     ).toEqual([expect.stringContaining('Goblin')])
   })
 
-  it('locks the sheets while a battle is running', async () => {
+  it('stays editable in battle: deployed copies follow the sheet, keeping their number', async () => {
     await library.saveUnit(goblin)
-    seedBattle('active')
+    battleStore.setState({
+      battle: {
+        ...createEmptyBattle(),
+        phase: 'active',
+        combatants: [
+          createCombatant({ ...combatantFromUnit(goblin, 'g1', 'Goblin 1'), hp: 15 }),
+          createCombatant(combatantFromUnit(goblin, 'g2', 'Goblin 2')),
+        ],
+      },
+      lastError: null,
+    })
+    const user = userEvent.setup()
     renderMaster('/master/enemies')
     const editor = await screen.findByRole('article', { name: 'Goblin' })
+    expect(screen.getByRole('button', { name: 'Nuovo nemico' })).toBeEnabled()
+    expect(within(editor).getByText(/toglila dalla battaglia/)).toBeInTheDocument()
 
-    expect(screen.getByRole('note')).toHaveTextContent('Battaglia in corso')
-    expect(within(editor).getByLabelText('Nome')).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Nuovo nemico' })).toBeDisabled()
-    expect(within(editor).queryByRole('button', { name: 'Elimina scheda' })).not.toBeInTheDocument()
+    const name = within(editor).getByLabelText('Nome')
+    await user.clear(name)
+    await user.type(name, 'Orco')
+    const maxHp = within(editor).getByLabelText('PV max')
+    await user.clear(maxHp)
+    await user.type(maxHp, '12')
+
+    await waitFor(() =>
+      expect(battleStore.getState().battle.combatants).toMatchObject([
+        { name: 'Orco 1', maxHp: 12, hp: 12 },
+        { name: 'Orco 2', maxHp: 12, hp: 12 },
+      ]),
+    )
+  })
+
+  it("shows a deployed party member's live PV/PM, read-only", async () => {
+    await library.saveUnit(lyra)
+    battleStore.setState({
+      battle: {
+        ...createEmptyBattle(),
+        phase: 'active',
+        combatants: [createCombatant({ ...combatantFromUnit(lyra, 'c-lyra'), hp: 9, mp: 4 })],
+      },
+      lastError: null,
+    })
+    renderMaster('/master/party')
+    const editor = await screen.findByRole('article', { name: 'Lyra' })
+    expect(within(editor).getByText('9 / 40')).toBeInTheDocument()
+    expect(within(editor).getByText('4 / 30')).toBeInTheDocument()
+    expect(within(editor).queryByLabelText('PV attuali')).not.toBeInTheDocument()
   })
 
   it('deletes a sheet after confirmation', async () => {
@@ -146,7 +184,6 @@ describe('unit libraries', () => {
           createCombatant({ id: 'orc', name: 'Orco', side: 'enemy', maxHp: 50 }),
         ],
       },
-      past: [],
       lastError: null,
     })
     const user = userEvent.setup()

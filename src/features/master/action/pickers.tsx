@@ -16,14 +16,17 @@ export const SELECT =
 
 const LABEL = 'text-xs font-medium tracking-wide text-slate-400 uppercase'
 
+/** `<select>` can't hold null: the "no effect" option uses this value. */
+const NONE = ''
+
 type EffectSelectProps = {
-  value: EffectId
-  onChange: (effect: EffectId) => void
+  value: EffectId | null
+  onChange: (effect: EffectId | null) => void
   disabled?: boolean
   id?: string
 }
 
-/** Visual effect played on impact. */
+/** Visual effect played on impact, or none (the hit lands without a drawing). */
 export function EffectSelect({ value, onChange, disabled, id }: EffectSelectProps) {
   const { t } = useTranslation()
   const fallbackId = useId()
@@ -36,10 +39,11 @@ export function EffectSelect({ value, onChange, disabled, id }: EffectSelectProp
       <select
         id={selectId}
         className={SELECT}
-        value={value}
+        value={value ?? NONE}
         disabled={disabled}
-        onChange={(e) => onChange(e.target.value as EffectId)}
+        onChange={(e) => onChange(e.target.value === NONE ? null : (e.target.value as EffectId))}
       >
+        <option value={NONE}>{t('effects.none')}</option>
         {BUILTIN_EFFECTS.map((effect) => (
           <option key={effect} value={effect}>
             {t(`effects.${effect}`)}
@@ -51,23 +55,26 @@ export function EffectSelect({ value, onChange, disabled, id }: EffectSelectProp
 }
 
 type KindPickerProps = {
-  value: ActionKind
-  onChange: (kind: ActionKind) => void
+  value: ActionKind | null
+  onChange: (kind: ActionKind | null) => void
+  /** Offers "statuses only" (a saved ability that changes no PV/PM). */
+  allowNone?: boolean
   disabled?: boolean
 }
 
-/** Damage PV / heal PV / damage PM, as a segmented control. */
-export function KindPicker({ value, onChange, disabled }: KindPickerProps) {
+/** Damage PV / heal PV / damage PM / restore PM, as a segmented control. */
+export function KindPicker({ value, onChange, allowNone = false, disabled }: KindPickerProps) {
   const { t } = useTranslation()
+  const options: (ActionKind | null)[] = allowNone ? [...ACTION_KINDS, null] : [...ACTION_KINDS]
   return (
     <div
       role="radiogroup"
       aria-label={t('master.action.kind')}
-      className="inline-flex self-start rounded-md bg-slate-950 p-1 ring-1 ring-slate-700"
+      className="inline-flex flex-wrap self-start rounded-md bg-slate-950 p-1 ring-1 ring-slate-700"
     >
-      {ACTION_KINDS.map((kind) => (
+      {options.map((kind) => (
         <button
-          key={kind}
+          key={kind ?? 'none'}
           type="button"
           role="radio"
           aria-checked={value === kind}
@@ -77,10 +84,38 @@ export function KindPicker({ value, onChange, disabled }: KindPickerProps) {
             value === kind ? 'bg-indigo-600 text-white' : 'text-slate-300 hover:text-white'
           }`}
         >
-          {t(`master.action.kinds.${kind}`)}
+          {t(kind ? `master.action.kinds.${kind}` : 'master.action.kinds.none')}
         </button>
       ))}
     </div>
+  )
+}
+
+type KindSelectProps = {
+  value: ActionKind
+  onChange: (kind: ActionKind) => void
+  label: string
+  /** Hides PM kinds for a target without PM. */
+  hasMp: boolean
+}
+
+/** Compact kind choice for one target's row. */
+export function KindSelect({ value, onChange, label, hasMp }: KindSelectProps) {
+  const { t } = useTranslation()
+  const kinds = ACTION_KINDS.filter((k) => hasMp || (k !== 'mpDamage' && k !== 'mpRestore'))
+  return (
+    <select
+      aria-label={label}
+      className={`${SELECT} w-auto pr-8`}
+      value={value}
+      onChange={(e) => onChange(e.target.value as ActionKind)}
+    >
+      {kinds.map((kind) => (
+        <option key={kind} value={kind}>
+          {t(`master.action.kinds.${kind}`)}
+        </option>
+      ))}
+    </select>
   )
 }
 

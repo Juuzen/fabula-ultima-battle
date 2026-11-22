@@ -35,8 +35,9 @@ Uno schermo di battaglia dedicato alle regole di Fabula Ultima (PV, PM, soglia d
 - Regole tracciate: PV, PM, Crisi (`0 < PV ≤ floor(PV max / 2)`), KO. Status (Lento, Confuso, Debole, Scosso, Furente, Avvelenato) solo visivi. PI e turni non gestiti: il GM sceglie chi agisce.
 - Fasi di battaglia: In preparazione (schermata di attesa, nessun combattente ai giocatori) → In corso → Termina.
 - Informazioni sui nemici: nome, status, Crisi/KO sempre visibili; PV/PM solo se rivelati dal GM. Finestra nemici manuale o automatica.
-- Azioni coreografate (avanzata, carica, effetto, impatto, ritorno) con effetti integrati: taglio, impatto, fuoco, ghiaccio, tuono, luce, ombra.
-- Annulla (fino a 50 passi), salvataggio in `localStorage` versionato.
+- Azioni coreografate (avanzata, carica, effetto, impatto, ritorno) con effetti integrati (taglio, impatto, fuoco, ghiaccio, tuono, luce, ombra) oppure senza effetto grafico. Ogni bersaglio ha il proprio esito (PV, PM, status aggiunti o tolti). Il GM può agire anche senza attore (trappole, pozioni, correzioni): banner e numeri, nessun movimento.
+- Salvataggio in `localStorage` versionato. Nessun annulla: le operazioni distruttive chiedono conferma e ogni valore si corregge con un'azione del GM.
+- Le schede di Party e Nemici restano modificabili in battaglia e aggiornano subito chi è in campo.
 - Stage logico 16:9 a 1920×1080, scalato alla finestra.
 - UI localizzata: italiano predefinito, inglese. Codice in inglese.
 - Rispetto di "riduci movimento" del sistema operativo.
@@ -55,7 +56,7 @@ Uno schermo di battaglia dedicato alle regole di Fabula Ultima (PV, PM, soglia d
 
 ## Product Principles
 
-1. **Il ritmo del tavolo viene prima.** Ogni operazione del GM deve essere rapida, annullabile e non deve costringere a fermare la scena.
+1. **Il ritmo del tavolo viene prima.** Ogni operazione del GM deve essere rapida, correggibile al volo e non deve costringere a fermare la scena.
 2. **Il Master è la verità, il Display è spettacolo.** I giocatori vedono solo ciò che il GM ha deciso di mostrare; il Display non contiene logica di gioco.
 3. **Leggibile a distanza e in streaming.** La scena deve funzionare su un televisore dall'altra parte del tavolo e su una finestra compressa in una videochiamata.
 4. **Fedele alle regole, senza automatizzarle oltre il necessario.** Si tracciano i numeri; il giudizio resta al GM.

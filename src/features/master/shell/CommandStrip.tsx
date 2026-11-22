@@ -1,33 +1,24 @@
-import { MonitorCheck, MonitorOff, MonitorUp, Undo2 } from 'lucide-react'
+import { MonitorCheck, MonitorOff, MonitorUp, PictureInPicture2 } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
-import { useBattleActions, useLastHistoryEntry } from '@/app/store'
 import { Button } from '@/shared/ui/Button'
 
 import { ErrorBanner } from '../controls/ErrorBanner'
 import { openDisplayWindow } from '../openDisplayWindow'
+import { usePreviewWindow } from '../preview/previewWindowStore'
 import { BattlePhaseControls } from './BattlePhaseControls'
-import { describeCommand } from './describeCommand'
 import { ShortcutHelp } from './ShortcutHelp'
 
-function UndoButton() {
+/** Shows or hides the floating player-screen preview. */
+function PreviewToggle() {
   const { t } = useTranslation()
-  const { undo } = useBattleActions()
-  const last = useLastHistoryEntry()
-  const label = last ? describeCommand(last, t) : null
-
+  const open = usePreviewWindow((s) => s.open)
+  const toggle = usePreviewWindow((s) => s.toggle)
   return (
-    <Button
-      onClick={undo}
-      disabled={!last}
-      aria-label={label ? `${t('master.strip.undo')}: ${label}` : undefined}
-      title={`${label ? `${t('master.strip.undo')}: ${label}` : t('master.strip.nothingToUndo')} (${t('master.undoShortcut')})`}
-      className="max-w-[22rem] min-w-0"
-    >
-      <Undo2 className="h-4 w-4" aria-hidden="true" />
-      <span>{t('master.strip.undo')}</span>
-      {label && <span className="truncate font-normal text-slate-300 tabular-nums">{label}</span>}
+    <Button aria-pressed={open} onClick={toggle} title={t('master.preview.toggleHint')}>
+      <PictureInPicture2 className="h-4 w-4" aria-hidden="true" />
+      {t('master.preview.toggle')}
     </Button>
   )
 }
@@ -95,7 +86,7 @@ export function CommandStrip({ displays }: { displays: number }) {
       <div className="flex min-h-16 flex-wrap items-center gap-x-6 gap-y-2 px-6 py-3">
         <DisplayConnection displays={displays} />
         <div className="ml-auto flex min-w-0 items-center gap-3">
-          <UndoButton />
+          <PreviewToggle />
           <BattlePhaseControls />
           <ShortcutHelp />
         </div>

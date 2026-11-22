@@ -7,16 +7,12 @@ import { useChoreoStore, type Stage } from '../choreography/choreoStore'
 import { demoBattle } from '../demo/demoBattle'
 import { BattleScene } from '../scene/BattleScene'
 
-function stage(step: Stage['step'], effect: EffectId = 'fire', name = 'Palla di fuoco'): Stage {
-  return {
-    runId: 1,
-    step,
-    actorId: 'a1',
-    name,
-    effect,
-    kind: 'damage',
-    targetIds: ['e1', 'e2'],
-  }
+function stage(
+  step: Stage['step'],
+  effect: EffectId | null = 'fire',
+  name = 'Palla di fuoco',
+): Stage {
+  return { runId: 1, step, actorId: 'a1', name, effect, targetIds: ['e1', 'e2'] }
 }
 
 describe('action sequence on the scene', () => {
@@ -31,6 +27,13 @@ describe('action sequence on the scene', () => {
       expect(screen.getByTestId(`effect-${effect}-e2`)).toBeInTheDocument()
     },
   )
+
+  it('draws nothing for an action without a visual effect, but keeps the banner', () => {
+    render(<BattleScene battle={demoBattle} />)
+    act(() => useChoreoStore.getState().setStage(stage('effect', null)))
+    expect(screen.queryByTestId('effect-layer')).not.toBeInTheDocument()
+    expect(screen.getByTestId('action-banner')).toHaveTextContent('Palla di fuoco')
+  })
 
   it('shows no effect before or after the effect step', () => {
     render(<BattleScene battle={demoBattle} />)

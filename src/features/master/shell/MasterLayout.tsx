@@ -2,8 +2,8 @@ import { Outlet } from 'react-router'
 
 import { usePartyWriteBack } from '@/app/library/hooks'
 
+import { FloatingPreview } from '../preview/FloatingPreview'
 import { useMasterSync } from '../useMasterSync'
-import { useUndoShortcut } from '../useUndoShortcut'
 import { CommandStrip } from './CommandStrip'
 import { MasterSidebar } from './MasterSidebar'
 import { useSectionShortcuts } from './useSectionShortcuts'
@@ -14,7 +14,6 @@ import { useSectionShortcuts } from './useSectionShortcuts'
  */
 export function MasterLayout() {
   const displays = useMasterSync()
-  useUndoShortcut()
   useSectionShortcuts()
   usePartyWriteBack()
 
@@ -27,6 +26,8 @@ export function MasterLayout() {
           <Outlet />
         </main>
       </div>
+      {/* Above every section: the GM can keep an eye on the player screen while editing sheets. */}
+      <FloatingPreview />
     </div>
   )
 }

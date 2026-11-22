@@ -20,9 +20,14 @@ import {
 import { domainError, type DomainError } from './errors'
 import type { BattleEvent } from './events'
 import type { StatusId } from './status'
+import { renamedCopy } from './unit'
 
 type EditableFields =
   'name' | 'maxHp' | 'maxMp' | 'hp' | 'mp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
+
+/** What a combatant takes from its library sheet while on the field. */
+export type SheetFields =
+  'name' | 'maxHp' | 'maxMp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
 
 export type PresentationChanges = {
   revealAllEnemyStats?: boolean
@@ -46,6 +51,17 @@ export type BattleCommand =
       combatants: NewCombatant[]
     }
   | { type: 'UPDATE_COMBATANT'; id: CombatantId; changes: Partial<Pick<Combatant, EditableFields>> }
+  /**
+   * A library sheet changed: every combatant deployed from it follows (name, maximums, art).
+   * Current PV/PM stay, clamped to the new maximums. Enemy copies keep their number.
+   */
+  | {
+      type: 'SYNC_UNIT'
+      unitId: string
+      /** The sheet's name before the change, to rename "Goblin 2" into "Orco 2". */
+      previousName: string
+      sheet: Pick<Combatant, SheetFields>
+    }
   | { type: 'REMOVE_COMBATANT'; id: CombatantId }
   /** Moves a combatant to `toIndex` among the combatants of its own side. */
   | { type: 'MOVE_COMBATANT'; id: CombatantId; toIndex: number }
@@ -205,35 +221,46 @@ function addCombatants(state: BattleState, incoming: NewCombatant[]): CommandRes
   )
 }
 
+const KIND_COMMAND = {
+  damage: 'DAMAGE',
+  heal: 'HEAL',
+  mpDamage: 'SPEND_MP',
+  mpRestore: 'RESTORE_MP',
+} as const
+
 /**
- * Applies an action as a chain of basic commands (MP cost, then each target's outcome and
- * statuses), all or nothing. The chain's events follow ACTION_PERFORMED, which opens the
- * sequence on the Display.
+ * Applies an action as a chain of basic commands (MP cost, then each target's own outcome
+ * and statuses), all or nothing. The chain's events follow ACTION_PERFORMED, which opens the
+ * sequence on the Display (only while the battle is in progress: see the projection).
  */
 function performAction(state: BattleState, input: Action): CommandResult {
-  if (state.phase !== 'active') {
-    return fail(domainError('BATTLE_NOT_ACTIVE', 'Actions need a battle in progress'))
-  }
   const parsed = ActionSchema.safeParse(input)
   if (!parsed.success) return fail(domainError('INVALID_ACTION', parsed.error.message))
   const action = parsed.data
 
-  const actor = findCombatant(state, action.actorId)
-  if (!actor) return notFound(action.actorId)
+  const actor = action.actorId === null ? null : findCombatant(state, action.actorId)
+  if (action.actorId !== null && !actor) return notFound(action.actorId)
   for (const target of action.targets) {
     if (!findCombatant(state, target.id)) return notFound(target.id)
   }
-  if (action.mpCost > actor.mp) {
+  if (actor && action.mpCost > actor.mp) {
     return fail(domainError('NOT_ENOUGH_MP', `${actor.name} has ${actor.mp} MP`))
   }
 
   const steps: BattleCommand[] = []
-  if (action.mpCost > 0) steps.push({ type: 'SPEND_MP', id: actor.id, amount: action.mpCost })
+  if (actor && action.mpCost > 0) {
+    steps.push({ type: 'SPEND_MP', id: actor.id, amount: action.mpCost })
+  }
   for (const target of action.targets) {
-    const type = { damage: 'DAMAGE', heal: 'HEAL', mpDamage: 'SPEND_MP' } as const
-    steps.push({ type: type[action.kind], id: target.id, amount: target.amount })
-    for (const status of action.statuses) {
+    if (target.change) {
+      const { kind, amount } = target.change
+      steps.push({ type: KIND_COMMAND[kind], id: target.id, amount })
+    }
+    for (const status of target.addStatuses) {
       steps.push({ type: 'SET_STATUS', id: target.id, status, active: true })
+    }
+    for (const status of target.removeStatuses) {
+      steps.push({ type: 'SET_STATUS', id: target.id, status, active: false })
     }
   }
 
@@ -241,10 +268,9 @@ function performAction(state: BattleState, input: Action): CommandResult {
   const events: BattleEvent[] = [
     {
       type: 'ACTION_PERFORMED',
-      actorId: actor.id,
+      actorId: actor?.id ?? null,
       name: action.name,
       effect: action.effect,
-      kind: action.kind,
       targetIds: action.targets.map((t) => t.id),
     },
   ]
@@ -303,6 +329,26 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
         { type: 'COMBATANT_UPDATED', combatant: next },
         ...thresholdEvents(current, next),
       ])
+    }
+
+    case 'SYNC_UNIT': {
+      let next = state
+      const events: BattleEvent[] = []
+      for (const current of state.combatants) {
+        if (current.unitId !== command.unitId) continue
+        const changes = {
+          ...command.sheet,
+          name: renamedCopy(current.name, command.previousName, command.sheet.name),
+        }
+        // Saving a sheet without touching what the field uses changes nothing here.
+        const keys = Object.keys(changes) as (keyof typeof changes)[]
+        if (keys.every((k) => current[k] === changes[k])) continue
+        const result = applyCommand(next, { type: 'UPDATE_COMBATANT', id: current.id, changes })
+        if (!result.ok) return result
+        next = result.state
+        events.push(...result.events)
+      }
+      return ok(next, events)
     }
 
     case 'REMOVE_COMBATANT': {

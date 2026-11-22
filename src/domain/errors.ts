@@ -6,7 +6,6 @@ export type DomainErrorCode =
   | 'INVALID_BATTLE'
   | 'INVALID_PRESENTATION'
   | 'INVALID_ACTION'
-  | 'BATTLE_NOT_ACTIVE'
   | 'NOT_ENOUGH_MP'
   | 'UNIT_ALREADY_DEPLOYED'
 

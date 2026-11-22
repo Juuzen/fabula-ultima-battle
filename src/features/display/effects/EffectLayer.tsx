@@ -14,7 +14,8 @@ import { EFFECT_BOX } from './effectBox'
  */
 export function EffectLayer({ centres }: { centres: ReadonlyMap<CombatantId, Anchor> }) {
   const stage = useChoreoStore((s) => s.stage)
-  if (!stage || stage.step !== 'effect') return null
+  // No visual effect chosen: the hit lands without a drawing.
+  if (!stage || stage.step !== 'effect' || !stage.effect) return null
 
   const Effect = BUILTIN_EFFECT_COMPONENTS[stage.effect]
   const duration = EFFECT_TIMING[stage.effect].durationMs / 1000

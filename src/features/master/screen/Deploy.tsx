@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Minus, Plus, UserPlus, Users } from 'lucide-react'
+import { Check, Minus, Plus, UserPlus, Users } from 'lucide-react'
 import { useId, useRef, useState, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -8,6 +8,7 @@ import { useScenes, useUnits } from '@/app/library/hooks'
 import { useBattleActions, useBattleStore } from '@/app/store'
 import { combatantFromUnit, MAX_ENEMY_COPIES, numberedNames, type Side, type Unit } from '@/domain'
 import { Button } from '@/shared/ui/Button'
+import { Popover } from '@/shared/ui/Popover'
 
 import { AddCombatantForm } from '../roster/AddCombatantForm'
 import { LoadSceneButton } from '../scenes/LoadSceneButton'
@@ -211,7 +212,7 @@ function EnemiesTab() {
     )
   }
   return (
-    <ul className="flex max-h-96 flex-col gap-2 overflow-y-auto pr-1">
+    <ul className="flex flex-col gap-2">
       {bestiary.map((unit) => (
         <EnemyDeployRow key={unit.id} unit={unit} />
       ))}
@@ -251,14 +252,12 @@ function QuickTab() {
 }
 
 /**
- * Puts combatants on the field: a whole prepared scene, party members, enemies from the
- * bestiary (×N), or someone improvised. Open by default while the field is empty.
+ * The four ways to put combatants on the field: a whole prepared scene, party members,
+ * enemies from the bestiary (×N), or someone improvised. Arrow keys move between tabs.
  */
-export function DeployPanel() {
+export function DeployTabs() {
   const { t } = useTranslation()
   const id = useId()
-  const emptyField = useBattleStore((s) => s.battle.combatants.length === 0)
-  const [open, setOpen] = useState(emptyField)
   const [tab, setTab] = useState<Tab>('scene')
   const tabRefs = useRef<Partial<Record<Tab, HTMLButtonElement | null>>>({})
 
@@ -273,67 +272,63 @@ export function DeployPanel() {
   }
 
   return (
-    <section
-      aria-labelledby={`${id}-title`}
-      className="rounded-xl border border-slate-800 bg-slate-900/80"
-    >
-      <h2 id={`${id}-title`} className="m-0">
-        <button
-          type="button"
-          aria-expanded={open}
-          aria-controls={`${id}-body`}
-          onClick={() => setOpen((o) => !o)}
-          className="flex w-full items-center justify-between gap-3 rounded-xl p-4 text-left focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-400"
-        >
-          <span className="font-display text-lg tracking-wide text-slate-100">
-            {t('deploy.title')}
-          </span>
-          <ChevronDown
-            className={`h-5 w-5 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
-            aria-hidden="true"
-          />
-        </button>
-      </h2>
-
-      {open && (
-        <div id={`${id}-body`} className="flex flex-col gap-4 px-4 pb-4">
-          <div
-            role="tablist"
-            aria-label={t('deploy.title')}
-            onKeyDown={onTabKey}
-            className="flex gap-1 border-b border-slate-800"
+    <div className="flex flex-col gap-4">
+      <div
+        role="tablist"
+        aria-label={t('deploy.title')}
+        onKeyDown={onTabKey}
+        className="flex gap-1 border-b border-slate-800"
+      >
+        {TABS.map((key) => (
+          <button
+            key={key}
+            ref={(el) => {
+              tabRefs.current[key] = el
+            }}
+            type="button"
+            role="tab"
+            id={`${id}-tab-${key}`}
+            aria-selected={tab === key}
+            aria-controls={`${id}-panel`}
+            tabIndex={tab === key ? 0 : -1}
+            onClick={() => setTab(key)}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-400 ${
+              tab === key
+                ? 'border-indigo-400 text-white'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
           >
-            {TABS.map((key) => (
-              <button
-                key={key}
-                ref={(el) => {
-                  tabRefs.current[key] = el
-                }}
-                type="button"
-                role="tab"
-                id={`${id}-tab-${key}`}
-                aria-selected={tab === key}
-                aria-controls={`${id}-panel`}
-                tabIndex={tab === key ? 0 : -1}
-                onClick={() => setTab(key)}
-                className={`-mb-px border-b-2 px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-indigo-400 ${
-                  tab === key
-                    ? 'border-indigo-400 text-white'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {t(`deploy.tabs.${key}`)}
-              </button>
-            ))}
-          </div>
-          <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${tab}`}>
-            {tab === 'scene' && <SceneTab />}
-            {tab === 'party' && <PartyTab />}
-            {tab === 'enemies' && <EnemiesTab />}
-            {tab === 'quick' && <QuickTab />}
-          </div>
-        </div>
-      )}
-    </section>
+            {t(`deploy.tabs.${key}`)}
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-tab-${tab}`}>
+        {tab === 'scene' && <SceneTab />}
+        {tab === 'party' && <PartyTab />}
+        {tab === 'enemies' && <EnemiesTab />}
+        {tab === 'quick' && <QuickTab />}
+      </div>
+    </div>
+  )
+}
+
+/** "Schiera" over a populated field: the same tabs in a panel anchored to the button. */
+export function DeployPopover() {
+  const { t } = useTranslation()
+  return (
+    <Popover
+      label={t('deploy.title')}
+      title={t('deploy.hint')}
+      align="end"
+      panelClassName="w-[min(30rem,calc(100vw-2rem))] max-h-[70vh] overflow-y-auto"
+      trigger={
+        <>
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
+          {t('deploy.title')}
+        </>
+      }
+    >
+      <DeployTabs />
+    </Popover>
   )
 }

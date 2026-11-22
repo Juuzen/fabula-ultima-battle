@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import type { ActionKind, CombatantId, EffectId } from '@/domain'
+import type { CombatantId, EffectId } from '@/domain'
 
 export type StageStep = 'advance' | 'cast' | 'effect' | 'retreat'
 
@@ -9,10 +9,11 @@ export type Stage = {
   /** Increases with every sequence, so effects remount even for identical actions. */
   runId: number
   step: StageStep
-  actorId: CombatantId
+  /** null = the GM acts: nobody steps forward. */
+  actorId: CombatantId | null
   name: string
-  effect: EffectId
-  kind: ActionKind
+  /** null = no visual effect, only the impact. */
+  effect: EffectId | null
   targetIds: CombatantId[]
 }
 

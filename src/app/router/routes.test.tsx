@@ -17,14 +17,14 @@ describe('routes', () => {
   it('redirects / to the Master dashboard', async () => {
     const router = renderAt('/')
     expect(await screen.findByRole('heading', { name: 'Plancia del Master' })).toBeInTheDocument()
-    expect(await screen.findByRole('region', { name: 'Party' })).toBeInTheDocument()
+    expect(await screen.findByRole('region', { name: 'Campo' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/master/screen')
   })
 
   it('navigates between sections from the sidebar, keeping the command strip', async () => {
     const router = renderAt('/master')
     const nav = await screen.findByRole('navigation', { name: 'Sezioni della plancia' })
-    await screen.findByRole('region', { name: 'Party' })
+    await screen.findByRole('region', { name: 'Campo' })
     const current = within(nav).getByRole('link', { name: 'Controllo schermo' })
     expect(current).toHaveAttribute('aria-current', 'page')
 

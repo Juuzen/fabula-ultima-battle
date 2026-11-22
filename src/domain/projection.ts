@@ -21,9 +21,9 @@ function subjectOf(event: BattleEvent): CombatantId | null {
 }
 
 /**
- * Drops events about combatants the players cannot see (all of them while preparing).
- * Battle-level events (start, end, presentation…) always go through; the full-state
- * load event never does.
+ * Drops events about combatants the players cannot see (all of them while preparing, and
+ * with them any action sequence: the waiting screen has nobody to play it). Battle-level
+ * events (start, end, presentation…) always go through; the full-state load event never does.
  */
 export function projectEventsForPlayers(
   events: readonly BattleEvent[],
@@ -32,6 +32,6 @@ export function projectEventsForPlayers(
   return events.filter((event) => {
     if (event.type === 'BATTLE_LOADED') return false
     if (next.phase === 'active') return true
-    return subjectOf(event) === null
+    return event.type !== 'ACTION_PERFORMED' && subjectOf(event) === null
   })
 }

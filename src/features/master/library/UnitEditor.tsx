@@ -1,9 +1,12 @@
-import { Image, Plus, Trash2 } from 'lucide-react'
-import { useId, useState, type ReactNode } from 'react'
+import { Image, Plus, Swords, Trash2 } from 'lucide-react'
+import { useCallback, useId, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useShallow } from 'zustand/shallow'
 
 import { library } from '@/app/library/library'
-import type { Unit } from '@/domain'
+import { battleStore, useBattleStore } from '@/app/store'
+import type { Combatant, Unit } from '@/domain'
+import { parseWholeNumber } from '@/shared/lib/numbers'
 import { Button } from '@/shared/ui/Button'
 import { NumberField, TextField, Toggle } from '@/shared/ui/fields'
 
@@ -40,6 +43,10 @@ function ArtSlot({ label }: { label: string }) {
 function DeleteSheet({ unit, onDeleted }: { unit: Unit; onDeleted: () => void }) {
   const { t } = useTranslation()
   const [armed, setArmed] = useState(false)
+  const onField = useBattleStore((s) => s.battle.combatants.some((c) => c.unitId === unit.id))
+  if (onField) {
+    return <p className="text-sm text-slate-400">{t('library.deleteOnField')}</p>
+  }
   if (!armed) {
     return (
       <Button variant="ghost" onClick={() => setArmed(true)} className="hover:text-rose-300">
@@ -67,21 +74,74 @@ function DeleteSheet({ unit, onDeleted }: { unit: Unit; onDeleted: () => void })
   )
 }
 
+/** A party member's live PV/PM while on the field: changed from the cockpit, not here. */
+function LiveValue({ label, value, max }: { label: string; value: number; max: number }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className={LABEL}>{label}</span>
+      <span className="flex h-10 items-center rounded-md bg-slate-900 px-3 text-slate-200 tabular-nums ring-1 ring-slate-700">
+        {value} / {max}
+      </span>
+    </div>
+  )
+}
+
+/** Keeps a number typed as text within a maximum typed as text (when both parse). */
+function clampText(value: string, max: string): string {
+  const v = parseWholeNumber(value)
+  const m = parseWholeNumber(max)
+  return v !== null && m !== null && v > m ? String(m) : value
+}
+
+/**
+ * Saves the sheet, then has every combatant deployed from it follow (name, maximums, art):
+ * the library stays editable during a battle and the field never lags behind.
+ */
+function useSaveAndSync(initialName: string) {
+  const synced = useRef(initialName)
+  return useCallback(async (next: Unit) => {
+    const saved = await library.saveUnit(next)
+    const { battle, dispatch } = battleStore.getState()
+    if (battle.combatants.some((c) => c.unitId === saved.id)) {
+      dispatch({
+        type: 'SYNC_UNIT',
+        unitId: saved.id,
+        previousName: synced.current,
+        sheet: {
+          name: saved.name,
+          maxHp: saved.maxHp,
+          maxMp: saved.maxMp,
+          spriteAssetId: saved.spriteAssetId,
+          portraitAssetId: saved.portraitAssetId,
+          flipSprite: saved.flipSprite,
+        },
+      })
+    }
+    synced.current = saved.name
+    return saved
+  }, [])
+}
+
 type Props = {
   unit: Unit
-  locked: boolean
   autoFocusName?: boolean
   onDeleted: () => void
 }
 
 /**
- * Editor for one sheet. Changes save themselves once valid. Locked (read-only) while a
- * battle is running: sheets only change outside the fight.
+ * Editor for one sheet. Changes save themselves once valid, also during a battle: whoever
+ * is on the field from this sheet follows at once. A party member on the field shows live
+ * PV/PM here (they change from the cockpit and come back when the character leaves).
  */
-export function UnitEditor({ unit, locked, autoFocusName, onDeleted }: Props) {
+export function UnitEditor({ unit, autoFocusName, onDeleted }: Props) {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<UnitDraft>(() => toDraft(unit))
   const party = unit.kind === 'party'
+  const deployed = useBattleStore(
+    useShallow((s) => s.battle.combatants.filter((c) => c.unitId === unit.id)),
+  )
+  const live: Combatant | undefined = party ? deployed[0] : undefined
+  const saveAndSync = useSaveAndSync(unit.name)
 
   // PV/PM can change from outside (write-back from the field, Riposo): follow them.
   const [seen, setSeen] = useState({ hp: unit.hp, mp: unit.mp })
@@ -90,8 +150,12 @@ export function UnitEditor({ unit, locked, autoFocusName, onDeleted }: Props) {
     setDraft((d) => ({ ...d, hp: String(unit.hp), mp: String(unit.mp) }))
   }
 
-  const { unit: valid, errors } = fromDraft(draft, unit)
-  const status = useAutosave(locked ? null : valid, library.saveUnit)
+  // On the field the current PV/PM are not edited here: only kept within the new maximums.
+  const effective = live
+    ? { ...draft, hp: clampText(draft.hp, draft.maxHp), mp: clampText(draft.mp, draft.maxMp) }
+    : draft
+  const { unit: valid, errors } = fromDraft(effective, unit)
+  const status = useAutosave(valid, saveAndSync)
   const set = (changes: Partial<UnitDraft>) => setDraft((d) => ({ ...d, ...changes }))
 
   const fieldError = (field: DraftField) => {
@@ -113,7 +177,16 @@ export function UnitEditor({ unit, locked, autoFocusName, onDeleted }: Props) {
 
   return (
     <article aria-label={unit.name} className="flex min-w-0 flex-col gap-6">
-      <fieldset disabled={locked} className="flex min-w-0 flex-col gap-6 disabled:opacity-60">
+      {deployed.length > 0 && (
+        <p
+          role="note"
+          className="flex items-start gap-2 rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-200"
+        >
+          <Swords className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden="true" />
+          {t('library.syncHint')}
+        </p>
+      )}
+      <div className="flex min-w-0 flex-col gap-6">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_14rem]">
           <div className="flex flex-col gap-1">
             <TextField
@@ -142,10 +215,16 @@ export function UnitEditor({ unit, locked, autoFocusName, onDeleted }: Props) {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {numberField('maxHp')}
             {numberField('maxMp')}
-            {party && numberField('hp')}
-            {party && numberField('mp')}
+            {party && !live && numberField('hp')}
+            {party && !live && numberField('mp')}
+            {live && <LiveValue label={t('library.fields.hp')} value={live.hp} max={live.maxHp} />}
+            {live && <LiveValue label={t('library.fields.mp')} value={live.mp} max={live.maxMp} />}
           </div>
-          {party && <p className="text-sm text-slate-400">{t('library.currentHint')}</p>}
+          {party && (
+            <p className="text-sm text-slate-400">
+              {t(live ? 'library.onField' : 'library.currentHint')}
+            </p>
+          )}
         </Section>
 
         <Section title={t('library.sections.abilities')}>
@@ -196,7 +275,6 @@ export function UnitEditor({ unit, locked, autoFocusName, onDeleted }: Props) {
               <Toggle
                 label={t('library.fields.flip')}
                 checked={draft.flipSprite}
-                disabled={locked}
                 onChange={(flipSprite) => set({ flipSprite })}
               />
               <p className="max-w-xs text-sm text-slate-400">{t('library.art.soon')}</p>
@@ -207,11 +285,11 @@ export function UnitEditor({ unit, locked, autoFocusName, onDeleted }: Props) {
         <Section title={t('library.sections.notes')}>
           <NotesField value={draft.notes} onChange={(notes) => set({ notes })} />
         </Section>
-      </fieldset>
+      </div>
 
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-4">
-        {locked ? <span /> : <SaveIndicator status={status} />}
-        {!locked && <DeleteSheet unit={unit} onDeleted={onDeleted} />}
+        <SaveIndicator status={status} />
+        <DeleteSheet unit={unit} onDeleted={onDeleted} />
       </footer>
     </article>
   )

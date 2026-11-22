@@ -8,9 +8,19 @@
     "openDisplay": "Open player screen",
     "openDisplayHint": "Move the window to the second screen and press F11 for full screen.",
     "popupBlocked": "The browser blocked the window. Allow pop-ups for this site.",
-    "undo": "Undo last action",
-    "undoShortcut": "Ctrl+Z",
-    "preview": "Player screen preview",
+    "preview": {
+      "title": "Player screen",
+      "toggle": "Preview",
+      "toggleHint": "Show or hide the player-screen preview",
+      "move": "Move the preview",
+      "moveHint": "Drag, or use the arrow keys (Shift for bigger steps)",
+      "resize": "Resize the preview",
+      "resizeHint": "Drag, or use the arrow keys",
+      "minimize": "Roll up",
+      "expand": "Expand",
+      "close": "Close preview",
+      "waiting": "Waiting"
+    },
     "party": "Party",
     "enemies": "Enemies",
     "emptyParty": "No characters on the field: use Deploy.",
@@ -25,52 +35,30 @@
       "placeholderEnemy": "E.g. Goblin"
     },
     "combatant": {
-      "amount": "Amount",
-      "damage": "Damage",
-      "heal": "Heal",
-      "spendMp": "− MP",
-      "restoreMp": "+ MP",
-      "edit": "Edit",
-      "remove": "Remove",
+      "remove": "Remove from battle…",
       "moveUp": "Move up",
       "moveDown": "Move down",
-      "statuses": "Statuses of {{name}}",
-      "reveal": "HP/MP visible",
-      "revealHint": "Show this enemy's HP and MP to the players",
-      "revealedByAll": "Visible for all",
-      "act": "Act",
       "more": "More actions for {{name}}",
-      "statusesNone": "No statuses",
       "count": "Combatants on the field:",
-      "target": "Target",
-      "targetOf": "Target: {{name}}",
-      "acting": "Acting",
-      "actHint": "Make {{name}} act",
-      "actDisabled": "Start the battle to perform actions"
-    },
-    "edit": {
-      "title": "Edit {{name}}",
-      "name": "Name",
-      "maxHp": "Max HP",
-      "maxMp": "Max MP",
-      "hp": "Current HP",
-      "mp": "Current MP",
-      "flip": "Mirror sprite",
-      "save": "Save",
-      "cancel": "Cancel"
+      "revealStats": "Show PV/PM to players",
+      "hideStats": "Hide PV/PM from players",
+      "removeConfirm": "Remove {{name}} from the battle?",
+      "removeConfirmed": "Remove",
+      "keep": "Cancel"
     },
     "enemyPanel": {
       "title": "Enemy window",
       "mode": "Mode",
       "manual": "Manual",
       "auto": "Automatic",
-      "show": "Show",
-      "hide": "Hide",
+      "show": "Show enemy window",
+      "hide": "Hide enemy window",
       "visibleNow": "Visible now",
       "autoHide": "Hide after (seconds)",
       "autoHint": "Pops up when something changes on the enemies and hides after the given seconds.",
       "manualHint": "Stays as you set it.",
-      "revealAll": "Show HP/MP of all enemies"
+      "revealAll": "Show HP/MP of all enemies",
+      "toggleHint": "Show or hide the enemy window on the player screen"
     },
     "battle": {
       "end": "End battle",
@@ -90,18 +78,13 @@
       "INVALID_BATTLE": "Invalid battle.",
       "INVALID_PRESENTATION": "Invalid setting.",
       "INVALID_ACTION": "Invalid action: check targets and values.",
-      "BATTLE_NOT_ACTIVE": "Actions can only be performed once the battle has started.",
       "NOT_ENOUGH_MP": "Not enough MP for this action.",
       "UNIT_ALREADY_DEPLOYED": "This character is already on the field."
     },
     "connected": "Player screen connected",
     "notConnected": "Player screen not connected",
     "enemiesHidden": "Hidden from players",
-    "previewPreparation": "Preparing: players see the waiting screen.",
     "action": {
-      "title": "Action",
-      "actor": "Who acts",
-      "chooseActor": "Choose…",
       "name": "Action name",
       "namePlaceholder": "E.g. Fireball",
       "effect": "Effect",
@@ -109,27 +92,33 @@
       "kinds": {
         "damage": "HP damage",
         "heal": "HP heal",
-        "mpDamage": "MP damage"
+        "mpDamage": "MP damage",
+        "mpRestore": "Restore MP",
+        "none": "Statuses only"
       },
       "targets": "Targets",
       "amount": "Amount for {{name}}",
       "mpCost": "MP cost",
       "mpAvailable": "available: {{mp}}",
       "statuses": "Statuses on impact",
-      "perform": "Perform",
-      "notActive": "Start the battle to perform actions with the animated sequence.",
-      "chooseTargets": "Choose at least one target and enter an amount.",
+      "perform": "Act",
       "notEnoughMp": "Not enough MP ({{mp}} available).",
-      "ability": "Ability",
       "free": "Free action",
       "hintMp": "reminder: {{n}}",
       "acting": "{{name}} acts",
-      "exit": "Exit",
-      "exitHint": "Leave the action (Esc)",
       "targetsCount_one": "{{count}} target",
       "targetsCount_other": "{{count}} targets",
-      "pickTargets": "Pick targets on the cards and type the amounts.",
-      "bar": "Action being composed"
+      "pickTargets": "Pick the targets below.",
+      "gmTitle": "GM action",
+      "gmHint": "Nobody acts: you change things yourself (traps, potions, fixes).",
+      "nameOptional": "Name (optional)",
+      "gmNamePlaceholder": "E.g. Trap, Potion",
+      "back": "Abilities",
+      "backHint": "Back to the abilities (Esc)",
+      "actingHint": "{{name}} acts",
+      "preparing": "Battle not started: values change, but the players see no sequence.",
+      "emptyTarget": "Every target needs an amount or a status.",
+      "badNumber": "Use whole numbers, 0 or more."
     },
     "nav": {
       "label": "Board sections",
@@ -156,56 +145,58 @@
     "strip": {
       "label": "Battle commands",
       "reopen": "Reopen screen",
-      "undo": "Undo",
-      "nothingToUndo": "Nothing to undo",
       "shortcuts": "Shortcuts",
       "shortcutsHint": "Keyboard shortcuts (?)",
       "shortcutsTitle": "Keyboard shortcuts",
-      "keys": { "enter": "Enter", "shift": "Shift" },
+      "keys": {
+        "enter": "Enter"
+      },
       "shortcutGroups": {
-        "card": "On a card",
-        "action": "In action mode",
+        "action": "In the detail",
         "everywhere": "Anywhere"
       },
       "shortcutList": {
-        "damage": "Damage by the typed amount",
-        "heal": "Heal by the typed amount",
-        "perform": "Run the action (from a target's amount)",
-        "exitAction": "Leave action mode",
-        "undo": "Undo the last action (amount fields too)",
+        "perform": "Act (from a field of the action)",
+        "exitAction": "Go back or deselect",
         "sections": "Go to sidebar section 1…6",
         "help": "Show or hide this list",
         "fullscreen": "Fullscreen, in the Display window"
       }
     },
-    "undoLabels": {
-      "add": "Added {{name}}",
-      "update": "Edited {{name}}",
-      "remove": "Removed {{name}}",
-      "move": "Moved {{name}}",
-      "damage": "Damage {{amount}} → {{name}}",
-      "heal": "Heal {{amount}} → {{name}}",
-      "setHp": "HP {{value}} → {{name}}",
-      "spendMp": "−{{amount}} MP → {{name}}",
-      "restoreMp": "+{{amount}} MP → {{name}}",
-      "setMp": "MP {{value}} → {{name}}",
-      "statusOn": "{{status}} → {{name}}",
-      "statusOff": "Removed {{status}} from {{name}}",
-      "revealOn": "HP/MP shown: {{name}}",
-      "revealOff": "HP/MP hidden: {{name}}",
-      "presentation": "Enemy window",
-      "background": "Background",
-      "rename": "Battle name",
-      "load": "Battle loaded",
-      "start": "Battle start",
-      "end": "Battle end",
-      "action": "{{action}} by {{actor}}",
-      "targets_one": "{{count}} target",
-      "targets_other": "{{count}} targets",
-      "someone": "?",
-      "deploy": "Deployed {{count}} combatants",
-      "deployOne": "Deployed {{name}}",
-      "scene": "Scene: {{name}}"
+    "ability": {
+      "title": "Abilities",
+      "none": "No abilities saved on the sheet.",
+      "freeHint": "Name, effect and targets of your choice.",
+      "mpHint": "~{{n}} MP",
+      "amountHint": "~{{n}}"
+    },
+    "target": {
+      "toggle": "Target: {{name}}",
+      "kind": "Kind for {{name}}",
+      "noChange": "no amount",
+      "addStatus": "Add {{status}}",
+      "removeStatus": "Remove {{status}}",
+      "statuses": "Statuses for {{name}}",
+      "nobody": "Nobody on the field: deploy someone on the left."
+    },
+    "field": {
+      "title": "Field",
+      "selectHint": "Select {{name}} to see what they can do",
+      "deselectHint": "Deselect {{name}}",
+      "revealed": "PV/PM visible to players",
+      "targeted": "Target of the action"
+    },
+    "detail": {
+      "title": "Detail",
+      "deselect": "Deselect",
+      "deselectHint": "Back to the GM action (Esc)",
+      "notes": "GM notes"
+    },
+    "settings": {
+      "title": "Screen settings"
+    },
+    "screen": {
+      "untitled": "Untitled battle"
     }
   },
   "display": {
@@ -236,6 +227,7 @@
     "poisoned": "Poisoned"
   },
   "effects": {
+    "none": "No effect",
     "slash": "Slash",
     "impact": "Impact",
     "fire": "Fire",
@@ -262,7 +254,6 @@
     },
     "noMatch": "No sheet matches the search.",
     "select": "Pick a sheet from the list, or create a new one.",
-    "locked": "Battle in progress: sheets can be edited once the fight is over. For quick fixes use Edit on the card or a free action.",
     "abilitiesCount_one": "{{count}} ability",
     "abilitiesCount_other": "{{count}} abilities",
     "fields": {
@@ -322,7 +313,10 @@
       "action": "Rest",
       "hint": "Restores the whole party to full HP and MP.",
       "done": "Party rested: HP and MP at full."
-    }
+    },
+    "onField": "On the field: current PV and MP are changed from the cockpit.",
+    "deleteOnField": "On the field: remove it from the battle before deleting it.",
+    "syncHint": "Changes also apply right away to anyone on the field."
   },
   "scenes": {
     "create": "New scene",
@@ -373,8 +367,6 @@
   },
   "deploy": {
     "title": "Deploy",
-    "open": "Open Deploy",
-    "close": "Close Deploy",
     "tabs": {
       "scene": "Scene",
       "party": "Party",
@@ -405,6 +397,9 @@
       "enemies": "Go to Enemies"
     },
     "sceneLoaded": "Scene loaded: {{name}}. Press Start battle when you are ready.",
-    "dismiss": "Dismiss notice"
+    "dismiss": "Dismiss notice",
+    "hint": "Add combatants to the field",
+    "closeSetup": "Done",
+    "emptyHint": "The field is empty: load a scene or deploy party and enemies."
   }
 }

@@ -1,4 +1,4 @@
-import type { ActionKind, EffectId } from './action'
+import type { EffectId } from './action'
 import type { BattleState, Presentation } from './battle'
 import type { Combatant, CombatantId } from './combatant'
 import type { StatusId } from './status'
@@ -35,10 +35,11 @@ export type BattleEvent =
    */
   | {
       type: 'ACTION_PERFORMED'
-      actorId: CombatantId
+      /** null = the GM acts: nobody steps forward. */
+      actorId: CombatantId | null
       name: string
-      effect: EffectId
-      kind: ActionKind
+      /** null = no visual effect, only the impact. */
+      effect: EffectId | null
       targetIds: CombatantId[]
     }
   | { type: 'BATTLE_ENDED'; removedIds: CombatantId[] }

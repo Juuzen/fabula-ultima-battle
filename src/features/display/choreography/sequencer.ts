@@ -1,7 +1,7 @@
 import type { BattleEvent, BattleState } from '@/domain'
 
 import type { Stage } from './choreoStore'
-import { EFFECT_TIMING, SEQUENCE } from './timeline'
+import { SEQUENCE, timingOf } from './timeline'
 
 /** With more updates than this waiting, sequences are skipped to catch up with the Master. */
 export const MAX_BACKLOG = 3
@@ -42,17 +42,21 @@ export function createSequencer({
   let disposed = false
   let runId = 0
 
+  /**
+   * With an actor: advance, cast, effect (or a bare hit), retreat. Without one (the GM acts)
+   * nobody moves: the banner and the effect go straight to the targets.
+   */
   const play = async (state: BattleState, events: BattleEvent[]) => {
     const opening = events[0]
     if (opening?.type !== 'ACTION_PERFORMED') return
-    const { durationMs, impactAt } = EFFECT_TIMING[opening.effect]
+    const { durationMs, impactAt } = timingOf(opening.effect)
     const impactMs = Math.round(durationMs * impactAt)
+    const withActor = opening.actorId !== null
     const base = {
       runId: ++runId,
       actorId: opening.actorId,
       name: opening.name,
       effect: opening.effect,
-      kind: opening.kind,
       targetIds: opening.targetIds,
     }
 
@@ -62,17 +66,28 @@ export function createSequencer({
       return !disposed
     }
 
-    setStage({ ...base, step: 'advance' })
-    if (!(await pause(SEQUENCE.advance))) return
-    setStage({ ...base, step: 'cast' })
-    if (!(await pause(SEQUENCE.cast))) return
+    if (withActor) {
+      setStage({ ...base, step: 'advance' })
+      if (!(await pause(SEQUENCE.advance))) return
+      setStage({ ...base, step: 'cast' })
+      if (!(await pause(SEQUENCE.cast))) return
+    }
     setStage({ ...base, step: 'effect' })
     if (!(await pause(impactMs))) return
     apply(state, events.slice(1)) // the hit lands
     if (!(await pause(durationMs - impactMs + SEQUENCE.hold))) return
-    setStage({ ...base, step: 'retreat' })
-    if (!(await pause(SEQUENCE.retreat))) return
+    if (withActor) {
+      setStage({ ...base, step: 'retreat' })
+      if (!(await pause(SEQUENCE.retreat))) return
+    }
     setStage(null)
+  }
+
+  /** A GM action with neither a name nor an effect has nothing to show: just the numbers. */
+  const hasSequence = (events: BattleEvent[]) => {
+    const opening = events[0]
+    if (opening?.type !== 'ACTION_PERFORMED') return false
+    return opening.actorId !== null || opening.effect !== null || opening.name !== ''
   }
 
   const run = async () => {
@@ -82,7 +97,7 @@ export function createSequencer({
       const { state, events } = queue.shift()!
       const isAction = events[0]?.type === 'ACTION_PERFORMED'
       const behind = queue.length >= MAX_BACKLOG
-      if (isAction && !behind && !reducedMotion()) {
+      if (isAction && hasSequence(events) && !behind && !reducedMotion()) {
         await play(state, events)
       } else {
         apply(state, isAction ? events.slice(1) : events)

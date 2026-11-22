@@ -51,15 +51,7 @@ export function ShortcutHelp() {
   }, [])
 
   const enter = t('master.strip.keys.enter')
-  const shift = t('master.strip.keys.shift')
   const groups: { title: string; rows: Row[] }[] = [
-    {
-      title: t('master.strip.shortcutGroups.card'),
-      rows: [
-        { keys: [enter], label: t('master.strip.shortcutList.damage') },
-        { keys: [shift, enter], label: t('master.strip.shortcutList.heal') },
-      ],
-    },
     {
       title: t('master.strip.shortcutGroups.action'),
       rows: [
@@ -70,7 +62,6 @@ export function ShortcutHelp() {
     {
       title: t('master.strip.shortcutGroups.everywhere'),
       rows: [
-        { keys: ['Ctrl', 'Z'], label: t('master.strip.shortcutList.undo') },
         { keys: ['Alt', '1…6'], label: t('master.strip.shortcutList.sections') },
         { keys: ['?'], label: t('master.strip.shortcutList.help') },
         { keys: ['F11'], label: t('master.strip.shortcutList.fullscreen') },

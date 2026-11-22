@@ -25,8 +25,18 @@ export const EFFECT_TIMING: Record<EffectId, EffectTiming> = {
   shadow: { durationMs: 1000, impactAt: 0.55 },
 }
 
-/** Total length of a sequence with the given effect (useful for tests and pacing). */
-export function sequenceLength(effect: EffectId): number {
+/** An action without a visual effect: just the hit, a beat after the wind-up. */
+export const NO_EFFECT_TIMING: EffectTiming = { durationMs: 300, impactAt: 0.5 }
+
+export const timingOf = (effect: EffectId | null): EffectTiming =>
+  effect ? EFFECT_TIMING[effect] : NO_EFFECT_TIMING
+
+/**
+ * Total length of a sequence (useful for tests and pacing). Without an actor (the GM acts)
+ * nobody steps forward or back, so only the effect and the hold are left.
+ */
+export function sequenceLength(effect: EffectId | null, withActor = true): number {
   const { advance, cast, hold, retreat } = SEQUENCE
-  return advance + cast + EFFECT_TIMING[effect].durationMs + hold + retreat
+  const moves = withActor ? advance + cast + retreat : 0
+  return moves + timingOf(effect).durationMs + hold
 }
