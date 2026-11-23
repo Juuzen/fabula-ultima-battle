@@ -9,6 +9,7 @@ import { useLatestHit } from '../fx/fxContext'
 import { StatusIcons } from '../hud/StatusIcons'
 import type { Slot } from './formation'
 import { PlaceholderSprite } from './PlaceholderSprite'
+import { useSceneEditing } from './sceneEditing'
 import { SPRITE_BOX } from './spriteBox'
 
 type Props = {
@@ -78,6 +79,7 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
   const crisis = isInCrisis(combatant)
   const scope = useHitReaction(combatant.id)
   const acting = useActingStep(combatant.id)
+  const editing = useSceneEditing()
   const forward = acting !== null && acting !== 'retreat'
   // Towards the centre: enemies (left) move right, the party (right) moves left.
   const stepX = forward ? (combatant.side === 'enemy' ? STEP_FORWARD : -STEP_FORWARD) : 0
@@ -87,6 +89,7 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
   const top = slot.y - SPRITE_BOX.height
   // Enemies come in from the left edge, the party from the right.
   const enterFrom = combatant.side === 'enemy' ? -160 : 160
+  const slide = editing ? 0 : 0.4
 
   return (
     <motion.div
@@ -102,23 +105,26 @@ export function CombatantSprite({ combatant, slot, entranceDelay = 0 }: Props) {
         scale: slot.scale,
         transformOrigin: 'bottom center',
       }}
-      initial={{ opacity: 0, x: enterFrom, left, top }}
+      initial={editing ? false : { opacity: 0, x: enterFrom, left, top }}
       // left/top animate too, so reordering or adding someone slides the others into place.
       animate={{ opacity: 1, x: 0, left, top }}
       exit={{ opacity: 0, transition: { duration: 0.5 } }}
       transition={{
         opacity: { duration: 0.5, delay: entranceDelay },
         x: { duration: 0.6, delay: entranceDelay, ease: 'easeOut' },
-        left: { duration: 0.4, ease: 'easeInOut' },
-        top: { duration: 0.4, ease: 'easeInOut' },
+        left: { duration: slide, ease: 'easeInOut' },
+        top: { duration: slide, ease: 'easeInOut' },
       }}
     >
       {/* Ground shadow */}
       <div className="absolute -bottom-3 left-1/2 h-6 w-36 -translate-x-1/2 rounded-[50%] bg-black/45 blur-sm" />
 
-      {/* Step forward / back when this combatant acts (see the Display's sequencer). */}
+      {/* Step forward / back when this combatant acts (see the Display's sequencer). The body
+          turns around its feet; the ground shadow stays flat. */}
       <motion.div
+        data-testid="sprite-body"
         className="relative h-full w-full"
+        style={{ rotate: slot.rotation, transformOrigin: 'bottom center' }}
         animate={{ x: stepX }}
         transition={{ duration: 0.28, ease: 'easeInOut' }}
       >

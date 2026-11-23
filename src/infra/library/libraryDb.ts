@@ -1,6 +1,14 @@
 import { Dexie, type Table } from 'dexie'
 
-import type { AssetMeta, BattleScene, CustomEffect, Unit } from '@/domain'
+import {
+  enemyLayoutKey,
+  partyLayoutKey,
+  type AssetMeta,
+  type BattleScene,
+  type CustomEffect,
+  type SceneSprite,
+  type Unit,
+} from '@/domain'
 
 export const LIBRARY_DB_NAME = 'fu-battle-library'
 
@@ -39,5 +47,50 @@ export class LibraryDb extends Dexie {
       effects: 'id, name',
       settings: 'key',
     })
+    // v3: mirroring moves from the sheet to each sprite of a scene's layout.
+    this.version(3).upgrade(async (tx) => {
+      const flipped = new Map<string, 'party' | 'enemy'>()
+      await tx
+        .table('units')
+        .toCollection()
+        .modify((unit: Record<string, unknown>) => {
+          if (unit.flipSprite === true)
+            flipped.set(unit.id as string, unit.kind as 'party' | 'enemy')
+          delete unit.flipSprite
+        })
+      await tx
+        .table('scenes')
+        .toCollection()
+        .modify((scene: Record<string, unknown>) => {
+          scene.layout = flippedLayout(scene, flipped)
+        })
+    })
   }
+}
+
+type LegacyScene = { partyUnitIds?: unknown; enemies?: unknown; layout?: unknown }
+
+/** The layout a pre-v3 scene gets: every sprite of a mirrored sheet stays mirrored. */
+export function flippedLayout(
+  scene: LegacyScene,
+  flipped: ReadonlyMap<string, 'party' | 'enemy'>,
+): Record<string, SceneSprite> {
+  const layout: Record<string, SceneSprite> = {
+    ...(scene.layout as Record<string, SceneSprite> | undefined),
+  }
+  const sprite: SceneSprite = { transform: null, depth: null, flip: true }
+  const party = Array.isArray(scene.partyUnitIds) ? (scene.partyUnitIds as string[]) : []
+  for (const unitId of party) {
+    if (flipped.get(unitId) === 'party') layout[partyLayoutKey(unitId)] = sprite
+  }
+  const totals = new Map<string, number>()
+  const enemies = Array.isArray(scene.enemies)
+    ? (scene.enemies as { unitId: string; count: number }[])
+    : []
+  for (const { unitId, count } of enemies) totals.set(unitId, (totals.get(unitId) ?? 0) + count)
+  for (const [unitId, count] of totals) {
+    if (flipped.get(unitId) !== 'enemy') continue
+    for (let copy = 1; copy <= count; copy++) layout[enemyLayoutKey(unitId, copy)] = sprite
+  }
+  return layout
 }

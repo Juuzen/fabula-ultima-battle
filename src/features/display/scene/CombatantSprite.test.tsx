@@ -20,7 +20,7 @@ vi.mock('motion/react', async (importOriginal) => {
 })
 
 const orc = createCombatant({ id: 'orc', name: 'Orc', side: 'enemy', maxHp: 40 })
-const slot = { x: 500, y: 600, scale: 1, zIndex: 1 }
+const slot = { x: 500, y: 600, scale: 1, rotation: 0, zIndex: 1 }
 
 function renderSprite(items: Fx[]) {
   const sprite = (list: Fx[]) => (

@@ -184,7 +184,9 @@
       "title": "Detail",
       "deselect": "Deselect",
       "deselectHint": "Back to the GM action (Esc)",
-      "notes": "GM notes"
+      "notes": "GM notes",
+      "flip": "Mirror sprite",
+      "flipHint": "For this battle only; the facing saved in the scene does not change."
     },
     "settings": {
       "title": "Screen settings",
@@ -323,8 +325,7 @@
       "hp": "Current HP",
       "mp": "Current MP",
       "notes": "GM notes",
-      "notesHint": "Only you see these: weaknesses, tactics, rule reminders.",
-      "flip": "Mirror sprite"
+      "notesHint": "Only you see these: weaknesses, tactics, rule reminders."
     },
     "sections": {
       "stats": "Stats",
@@ -389,7 +390,8 @@
     "sections": {
       "party": "Party",
       "enemies": "Enemies",
-      "ambience": "Setting"
+      "ambience": "Setting",
+      "layout": "Battlefield layout"
     },
     "party": {
       "none": "No Party sheets yet: create them on the Party page.",
@@ -409,6 +411,80 @@
     "ambience": {
       "background": "Background",
       "music": "Music"
+    },
+    "layout": {
+      "title": "Live preview",
+      "hint": "Position, size, rotation, depth and facing of every sprite, exactly as the players will see them.",
+      "open": "Open live preview",
+      "close": "Close",
+      "automatic": "Automatic formation: no sprite moved.",
+      "customized_one": "{{count}} sprite placed by hand, the others in automatic formation.",
+      "customized_other": "{{count}} sprites placed by hand, the others in automatic formation.",
+      "empty": "Add party members or enemies to the scene to place them.",
+      "reset": "Restore default layout",
+      "resetConfirm": "Confirm: everyone back in formation",
+      "resetCancel": "Cancel",
+      "view": "View",
+      "stage": "Battlefield",
+      "toggles": {
+        "hud": "HUD",
+        "hudHint": "Show the party panel and the enemy window, to see what they cover",
+        "grid": "Grid",
+        "gridHint": "Show the grid and snap sprites to it",
+        "guides": "Guides",
+        "guidesHint": "Line up sprites' feet with each other and the centre of the field while dragging"
+      },
+      "list": {
+        "label": "Sprites in the scene",
+        "enemies": "Enemies",
+        "party": "Party"
+      },
+      "badges": {
+        "custom": "Placed by hand",
+        "flipped": "Mirrored",
+        "depth": "Depth layer {{n}}"
+      },
+      "handles": {
+        "scale": "Drag to resize",
+        "rotate": "Drag to rotate (Shift: 15° steps)"
+      },
+      "actions": {
+        "flip": "Mirror",
+        "forward": "Bring forward",
+        "backward": "Send backward",
+        "resetSelected": "Restore position"
+      },
+      "inspector": {
+        "label": "Sprite properties",
+        "none": "Select a sprite on the field or in the list. Hold Shift or Ctrl to select more than one.",
+        "many_one": "{{count}} sprite selected",
+        "many_other": "{{count}} sprites selected",
+        "auto": "In automatic formation",
+        "custom": "Placed by hand",
+        "partial": "Partly placed by hand",
+        "position": "Position",
+        "scale": "Scale %",
+        "rotation": "Rotation °",
+        "mixed": "mixed",
+        "look": "Look",
+        "depth": "Depth",
+        "depthAuto": "Auto",
+        "depthHint": "Auto: lower feet stand in front. A higher layer always wins."
+      },
+      "keys": {
+        "pageUp": "PgUp",
+        "pageDown": "PgDn"
+      },
+      "shortcuts": {
+        "title": "Shortcuts",
+        "move": "Move (Shift: 10 px)",
+        "rotate": "Rotate (Shift: 15°)",
+        "scale": "Bigger / smaller",
+        "depth": "Forward / backward",
+        "all": "Select all",
+        "noSnap": "Drag without snapping",
+        "escape": "Deselect, then close"
+      }
     },
     "summary": "{{party}} PCs · {{enemies}} enemies",
     "load": "Load into Screen Control",

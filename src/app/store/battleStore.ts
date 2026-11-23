@@ -16,7 +16,7 @@ import { createEventBus, type EventBus } from '@/shared/lib/eventBus'
 import { migratePersistedBattle } from './migrations'
 
 export const BATTLE_STORAGE_KEY = 'fu-battle.battle'
-export const BATTLE_STORAGE_VERSION = 6
+export const BATTLE_STORAGE_VERSION = 7
 
 /** Published after every state change; the sync layer forwards it to the Display. */
 export type BattleChange = { state: BattleState; events: BattleEvent[] }

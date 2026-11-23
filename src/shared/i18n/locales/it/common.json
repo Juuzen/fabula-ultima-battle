@@ -184,7 +184,9 @@
       "title": "Dettaglio",
       "deselect": "Deseleziona",
       "deselectHint": "Torna all'azione del GM (Esc)",
-      "notes": "Note del GM"
+      "notes": "Note del GM",
+      "flip": "Specchia sprite",
+      "flipHint": "Vale per questa battaglia; il verso salvato nella scena non cambia."
     },
     "settings": {
       "title": "Impostazioni schermo",
@@ -323,8 +325,7 @@
       "hp": "PV attuali",
       "mp": "PM attuali",
       "notes": "Note del GM",
-      "notesHint": "Visibili solo a te: debolezze, tattiche, promemoria di regole.",
-      "flip": "Specchia sprite"
+      "notesHint": "Visibili solo a te: debolezze, tattiche, promemoria di regole."
     },
     "sections": {
       "stats": "Statistiche",
@@ -389,7 +390,8 @@
     "sections": {
       "party": "Party",
       "enemies": "Nemici",
-      "ambience": "Ambientazione"
+      "ambience": "Ambientazione",
+      "layout": "Disposizione in campo"
     },
     "party": {
       "none": "Nessuna scheda nel Party: creale nella pagina Party.",
@@ -409,6 +411,80 @@
     "ambience": {
       "background": "Sfondo",
       "music": "Musica"
+    },
+    "layout": {
+      "title": "Anteprima live",
+      "hint": "Posizione, dimensione, rotazione, profondità e verso di ogni sprite, esattamente come li vedranno i giocatori.",
+      "open": "Apri anteprima live",
+      "close": "Chiudi",
+      "automatic": "Formazione automatica: nessuno sprite spostato.",
+      "customized_one": "{{count}} sprite disposto a mano, gli altri in formazione automatica.",
+      "customized_other": "{{count}} sprite disposti a mano, gli altri in formazione automatica.",
+      "empty": "Aggiungi party o nemici alla scena per disporli in campo.",
+      "reset": "Ripristina layout di default",
+      "resetConfirm": "Conferma: tutti in formazione automatica",
+      "resetCancel": "Annulla",
+      "view": "Vista",
+      "stage": "Campo di battaglia",
+      "toggles": {
+        "hud": "HUD",
+        "hudHint": "Mostra il pannello del party e la finestra dei nemici, per vedere cosa coprono",
+        "grid": "Griglia",
+        "gridHint": "Mostra la griglia e aggancia gli sprite ai suoi incroci",
+        "guides": "Guide",
+        "guidesHint": "Allinea i piedi degli sprite tra loro e al centro del campo mentre trascini"
+      },
+      "list": {
+        "label": "Sprite della scena",
+        "enemies": "Nemici",
+        "party": "Party"
+      },
+      "badges": {
+        "custom": "Disposto a mano",
+        "flipped": "Specchiato",
+        "depth": "Livello di profondità {{n}}"
+      },
+      "handles": {
+        "scale": "Trascina per ridimensionare",
+        "rotate": "Trascina per ruotare (Shift: a scatti di 15°)"
+      },
+      "actions": {
+        "flip": "Specchia",
+        "forward": "Porta avanti",
+        "backward": "Manda indietro",
+        "resetSelected": "Ripristina posizione"
+      },
+      "inspector": {
+        "label": "Proprietà dello sprite",
+        "none": "Seleziona uno sprite sul campo o nell'elenco. Con Shift o Ctrl ne selezioni più di uno.",
+        "many_one": "{{count}} sprite selezionato",
+        "many_other": "{{count}} sprite selezionati",
+        "auto": "In formazione automatica",
+        "custom": "Disposto a mano",
+        "partial": "In parte disposti a mano",
+        "position": "Posizione",
+        "scale": "Scala %",
+        "rotation": "Rotazione °",
+        "mixed": "misto",
+        "look": "Aspetto",
+        "depth": "Profondità",
+        "depthAuto": "Auto",
+        "depthHint": "Auto: chi ha i piedi più in basso sta davanti. Un livello più alto vince sempre."
+      },
+      "keys": {
+        "pageUp": "PagSu",
+        "pageDown": "PagGiù"
+      },
+      "shortcuts": {
+        "title": "Scorciatoie",
+        "move": "Sposta (Shift: 10 px)",
+        "rotate": "Ruota (Shift: 15°)",
+        "scale": "Ingrandisci / riduci",
+        "depth": "Avanti / indietro",
+        "all": "Seleziona tutti",
+        "noSnap": "Trascina senza aggancio",
+        "escape": "Deseleziona, poi chiudi"
+      }
     },
     "summary": "{{party}} PG · {{enemies}} nemici",
     "load": "Carica in Controllo schermo",

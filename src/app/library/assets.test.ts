@@ -100,6 +100,7 @@ describe('library files', () => {
       enemies: [],
       backgroundAssetId: null,
       musicAssetId: music.id,
+      layout: {},
       updatedAt: 0,
     })
     await lib.saveEffect(effect(video.id, boom.id))

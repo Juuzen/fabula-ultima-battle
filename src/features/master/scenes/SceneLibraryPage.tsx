@@ -99,6 +99,7 @@ export function SceneLibraryPage() {
       enemies: [],
       backgroundAssetId: null,
       musicAssetId: null,
+      layout: {},
       updatedAt: 0,
     })
     setCreatedId(scene.id)

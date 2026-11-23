@@ -8,7 +8,7 @@ import { battleStore, useBattleStore } from '@/app/store'
 import type { Combatant, Unit } from '@/domain'
 import { parseWholeNumber } from '@/shared/lib/numbers'
 import { Button } from '@/shared/ui/Button'
-import { NumberField, TextField, Toggle } from '@/shared/ui/fields'
+import { NumberField, TextField } from '@/shared/ui/fields'
 
 import { AssetPicker } from '../assets/AssetPicker'
 import { AbilityEditor } from './AbilityEditor'
@@ -103,7 +103,6 @@ function useSaveAndSync(initialName: string) {
           maxMp: saved.maxMp,
           spriteAssetId: saved.spriteAssetId,
           portraitAssetId: saved.portraitAssetId,
-          flipSprite: saved.flipSprite,
         },
       })
     }
@@ -279,11 +278,6 @@ export function UnitEditor({ unit, autoFocusName, onDeleted }: Props) {
               onChange={(portraitAssetId) => set({ portraitAssetId })}
             />
           </div>
-          <Toggle
-            label={t('library.fields.flip')}
-            checked={draft.flipSprite}
-            onChange={(flipSprite) => set({ flipSprite })}
-          />
         </Section>
 
         <Section title={t('library.sections.notes')}>

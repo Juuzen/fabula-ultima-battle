@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { STAGE_WIDTH } from '../stage/stageScale'
-import { FIELD, formationSlots } from './formation'
+import { DEPTH_LAYER_STEP, FIELD, formationSlots, resolveSlots } from './formation'
 
 describe('formationSlots', () => {
   it('returns no slots for an empty side', () => {
@@ -49,5 +49,30 @@ describe('formationSlots', () => {
     expect(b!.y).toBeGreaterThan(a!.y)
     expect(b!.scale).toBeGreaterThan(a!.scale)
     expect(b!.zIndex).toBeGreaterThan(a!.zIndex)
+  })
+})
+
+describe('resolveSlots', () => {
+  const auto = { placement: null, depth: null }
+
+  it('without a layout is the automatic formation', () => {
+    expect(resolveSlots([auto, auto, auto], 'enemy')).toEqual(formationSlots(3, 'enemy'))
+  })
+
+  it('uses the layout where there is one, keeping the others in their automatic slot', () => {
+    const placement = { x: 200, y: 900, scale: 1.8, rotation: -15 }
+    const [first, second] = resolveSlots([auto, { placement, depth: null }], 'enemy')
+    expect(first).toEqual(formationSlots(2, 'enemy')[0])
+    expect(second).toEqual({ ...placement, zIndex: 900 })
+  })
+
+  it('a depth layer outranks any position', () => {
+    const low = { placement: { x: 300, y: 1000, scale: 1, rotation: 0 }, depth: null }
+    const high = { placement: { x: 300, y: 400, scale: 1, rotation: 0 }, depth: 1 }
+    const behind = { placement: { x: 300, y: 1000, scale: 1, rotation: 0 }, depth: -1 }
+    const [a, b, c] = resolveSlots([low, high, behind], 'enemy')
+    expect(b!.zIndex).toBe(400 + DEPTH_LAYER_STEP)
+    expect(b!.zIndex).toBeGreaterThan(a!.zIndex)
+    expect(c!.zIndex).toBeLessThan(a!.zIndex)
   })
 })

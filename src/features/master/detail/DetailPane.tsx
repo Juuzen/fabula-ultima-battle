@@ -7,6 +7,7 @@ import { useBattleStore } from '@/app/store'
 import type { Ability, Combatant, Unit } from '@/domain'
 import { ResourceGauge, StateTag, StatusIcons } from '@/features/display'
 import { Button } from '@/shared/ui/Button'
+import { Toggle } from '@/shared/ui/fields'
 
 import { useActionDraft } from '../action/actionDraft'
 import { useEffectName } from '../action/effectName'
@@ -90,6 +91,7 @@ function AbilityList({ actor, unit }: { actor: Combatant; unit: Unit | undefined
 function ActorHeader({ actor, unit }: { actor: Combatant; unit: Unit | undefined }) {
   const { t } = useTranslation()
   const select = useActionDraft((s) => s.select)
+  const dispatch = useBattleStore((s) => s.dispatch)
   const notes = unit?.notes.trim() ?? ''
 
   return (
@@ -132,6 +134,17 @@ function ActorHeader({ actor, unit }: { actor: Combatant; unit: Unit | undefined
           />
         )}
       </div>
+      {/* Mirroring applies to real artwork only (the placeholder is symmetric). */}
+      {actor.spriteAssetId && (
+        <Toggle
+          label={t('master.detail.flip')}
+          description={t('master.detail.flipHint')}
+          checked={actor.flipSprite}
+          onChange={(flipSprite) =>
+            dispatch({ type: 'UPDATE_COMBATANT', id: actor.id, changes: { flipSprite } })
+          }
+        />
+      )}
       {notes && (
         <details className="group text-sm text-slate-300">
           <summary className="inline-flex cursor-pointer items-center gap-1.5 text-slate-400 hover:text-slate-200">

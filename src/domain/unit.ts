@@ -51,7 +51,6 @@ export const UnitSchema = z
     mp: z.int().min(0),
     spriteAssetId: AssetRefSchema,
     portraitAssetId: AssetRefSchema,
-    flipSprite: z.boolean(),
     /** Free category, e.g. "Bestia", "Elite", "Boss". Empty = none. */
     tag: z.string().trim().max(30),
     /** GM-only notes: weaknesses, tactics, rule reminders. */
@@ -79,7 +78,6 @@ export function createUnit(input: NewUnit): Unit {
     mp: maxMp,
     spriteAssetId: null,
     portraitAssetId: null,
-    flipSprite: false,
     tag: '',
     notes: '',
     abilities: [],
@@ -105,7 +103,6 @@ export function combatantFromUnit(unit: Unit, id: string, name = unit.name): New
     mp: party ? Math.min(unit.mp, unit.maxMp) : unit.maxMp,
     spriteAssetId: unit.spriteAssetId,
     portraitAssetId: unit.portraitAssetId,
-    flipSprite: unit.flipSprite,
   }
 }
 

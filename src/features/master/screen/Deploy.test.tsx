@@ -47,6 +47,7 @@ const scene: BattleScene = {
   enemies: [{ unitId: 'gob', count: 2 }],
   backgroundAssetId: null,
   musicAssetId: null,
+  layout: {},
   updatedAt: 0,
 }
 

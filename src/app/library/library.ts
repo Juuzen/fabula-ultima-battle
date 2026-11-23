@@ -8,6 +8,7 @@ import {
   CustomEffectSchema,
   fitsRole,
   kindOfMime,
+  pruneLayout,
   SoundSettingsSchema,
   UnitSchema,
   type AssetId,
@@ -109,7 +110,8 @@ export function createLibrary(db: LibraryDb = new LibraryDb(), now: () => number
             partyUnitIds.length !== scene.partyUnitIds.length ||
             enemies.length !== scene.enemies.length
           ) {
-            await db.scenes.put({ ...scene, partyUnitIds, enemies, updatedAt: now() })
+            const layout = pruneLayout({ partyUnitIds, enemies, layout: scene.layout ?? {} })
+            await db.scenes.put({ ...scene, partyUnitIds, enemies, layout, updatedAt: now() })
           }
         }
       })
@@ -121,6 +123,7 @@ export function createLibrary(db: LibraryDb = new LibraryDb(), now: () => number
 
     async saveScene(scene: BattleScene): Promise<BattleScene> {
       const parsed = BattleSceneSchema.parse({ ...scene, updatedAt: now() })
+      parsed.layout = pruneLayout(parsed)
       await db.scenes.put(parsed)
       return parsed
     },

@@ -78,5 +78,22 @@ export function migratePersistedBattle(persisted: unknown, fromVersion: number):
     }
   }
 
+  if (fromVersion < 7 && data?.battle) {
+    // v7: scene layout (position, size, rotation, depth). Older combatants use the formation.
+    const battle = data.battle
+    const combatants = Array.isArray(battle.combatants) ? battle.combatants : []
+    data = {
+      ...data,
+      battle: {
+        ...battle,
+        combatants: combatants.map((c: Record<string, unknown>) => ({
+          placement: null,
+          depth: null,
+          ...c,
+        })),
+      },
+    }
+  }
+
   return data
 }

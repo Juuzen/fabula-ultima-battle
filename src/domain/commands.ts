@@ -28,8 +28,7 @@ type EditableFields =
   'name' | 'maxHp' | 'maxMp' | 'hp' | 'mp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
 
 /** What a combatant takes from its library sheet while on the field. */
-export type SheetFields =
-  'name' | 'maxHp' | 'maxMp' | 'spriteAssetId' | 'portraitAssetId' | 'flipSprite'
+export type SheetFields = 'name' | 'maxHp' | 'maxMp' | 'spriteAssetId' | 'portraitAssetId'
 
 export type PresentationChanges = {
   revealAllEnemyStats?: boolean

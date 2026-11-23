@@ -104,6 +104,7 @@ describe('asset library', () => {
       enemies: [],
       backgroundAssetId: null,
       musicAssetId: theme.id,
+      layout: {},
       updatedAt: 0,
     })
     const user = userEvent.setup()

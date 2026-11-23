@@ -5,6 +5,7 @@ import type { Combatant } from '@/domain'
 import { entranceDelay } from './entrance'
 import { EnemyNameplate } from './EnemyNameplate'
 import type { Slot } from './formation'
+import { useSceneEditing } from './sceneEditing'
 import { SPRITE_BOX } from './spriteBox'
 
 /**
@@ -13,6 +14,8 @@ import { SPRITE_BOX } from './spriteBox'
  * and follow their sprite when the formation changes.
  */
 export function NameplateLayer({ enemies, slots }: { enemies: Combatant[]; slots: Slot[] }) {
+  const editing = useSceneEditing()
+  const slide = editing ? 0 : 0.4
   return (
     <div className="pointer-events-none absolute inset-0" style={{ zIndex: 1200 }}>
       <AnimatePresence>
@@ -25,13 +28,13 @@ export function NameplateLayer({ enemies, slots }: { enemies: Combatant[]; slots
             <motion.div
               key={enemy.id}
               className="absolute -translate-x-1/2 -translate-y-full"
-              initial={{ opacity: 0, left, top }}
+              initial={editing ? false : { opacity: 0, left, top }}
               animate={{ opacity: 1, left, top }}
               exit={{ opacity: 0 }}
               transition={{
                 opacity: { duration: 0.4, delay: entranceDelay(i) + 0.3 },
-                left: { duration: 0.4, ease: 'easeInOut' },
-                top: { duration: 0.4, ease: 'easeInOut' },
+                left: { duration: slide, ease: 'easeInOut' },
+                top: { duration: slide, ease: 'easeInOut' },
               }}
             >
               <EnemyNameplate enemy={enemy} />
