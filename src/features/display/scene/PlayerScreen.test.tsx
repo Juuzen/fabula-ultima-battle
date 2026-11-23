@@ -29,6 +29,32 @@ describe('PlayerScreen', () => {
     expect(container.querySelector('img')?.getAttribute('src')).toBe('blob:tavern')
   })
 
+  it('plays a video background silently, in a loop, on the waiting screen and in battle', () => {
+    const base = createEmptyBattle()
+    const resolver = (id: string) => ({ url: `blob:${id}`, kind: 'video' as const })
+    const waiting: BattleState = {
+      ...base,
+      presentation: { ...base.presentation, waitingBackgroundAssetId: 'campfire' },
+    }
+    const { unmount } = render(
+      <AssetResolverProvider resolver={resolver}>
+        <PlayerScreen battle={waiting} />
+      </AssetResolverProvider>,
+    )
+    const video = screen.getByTestId('background-video') as HTMLVideoElement
+    expect(video).toHaveAttribute('src', 'blob:campfire')
+    expect(video.muted).toBe(true)
+    expect(video.loop).toBe(true)
+    unmount()
+
+    render(
+      <AssetResolverProvider resolver={resolver}>
+        <PlayerScreen battle={{ ...demoBattle, backgroundAssetId: 'storm' }} />
+      </AssetResolverProvider>,
+    )
+    expect(screen.getByTestId('background-video')).toHaveAttribute('src', 'blob:storm')
+  })
+
   it('shows the battle once it has started', () => {
     render(<PlayerScreen battle={demoBattle} />)
     expect(screen.queryByTestId('waiting-screen')).not.toBeInTheDocument()

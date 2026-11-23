@@ -1,12 +1,15 @@
-import { useAssetUrl } from '@/infra/assets/assetResolver'
+import { useAsset } from '@/infra/assets/assetResolver'
 
-/** Full-stage background: the chosen image, or a neutral dusk battlefield when none is set. */
+import { BackgroundMedia } from './BackgroundMedia'
+
+/**
+ * Full-stage background: the chosen image or looping video, or a neutral dusk battlefield
+ * when none is set (or the file is gone).
+ */
 export function Backdrop({ assetId }: { assetId: string | null }) {
-  const url = useAssetUrl(assetId)
+  const asset = useAsset(assetId)
 
-  if (url) {
-    return <img src={url} alt="" className="absolute inset-0 h-full w-full object-cover" />
-  }
+  if (asset && asset.kind !== 'audio') return <BackgroundMedia asset={asset} />
 
   return (
     <div className="absolute inset-0" data-testid="default-backdrop">

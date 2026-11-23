@@ -126,4 +126,27 @@ describe('BattleScene', () => {
     const drake = screen.getByTestId('sprite-x').querySelector('img')!.parentElement!
     expect(drake.style.transform).toBe('scaleX(-1)')
   })
+
+  it('draws sprites where the scene layout puts them, sized, turned and layered', () => {
+    const battle: BattleState = {
+      ...createEmptyBattle(),
+      combatants: [
+        createCombatant({
+          id: 'g',
+          name: 'Goblin',
+          side: 'enemy',
+          maxHp: 10,
+          placement: { x: 400, y: 800, scale: 2, rotation: 30 },
+          depth: 1,
+        }),
+      ],
+    }
+    render(<BattleScene battle={battle} />)
+    const sprite = screen.getByTestId('sprite-g')
+    expect(sprite.style.left).toBe('300px') // feet at x = 400, box 200 wide
+    expect(sprite.style.top).toBe('580px') // feet at y = 800, box 220 tall
+    expect(sprite.style.zIndex).toBe('2800')
+    expect(sprite.style.transform).toContain('scale(2)')
+    expect(within(sprite).getByTestId('sprite-body').style.transform).toContain('rotate(30deg)')
+  })
 })

@@ -6,6 +6,7 @@ import { Button } from '@/shared/ui/Button'
 import { NumberField, TextField } from '@/shared/ui/fields'
 
 import { EffectSelect, KindPicker, StatusPicker } from '../action/pickers'
+import { AssetPicker } from '../assets/AssetPicker'
 import type { AbilityDraft } from './unitDraft'
 
 type Props = {
@@ -69,6 +70,14 @@ export function AbilityEditor({ ability, index, invalid, onChange, onRemove }: P
           onToggle={(status) => set({ statuses: toggleStatusIn(ability.statuses, status) })}
         />
       </div>
+
+      <AssetPicker
+        role="sfx"
+        size="sm"
+        label={t('library.ability.sound')}
+        value={ability.soundAssetId}
+        onChange={(soundAssetId) => set({ soundAssetId })}
+      />
 
       {invalid && ability.name.trim() === '' && (
         <p className="text-xs text-rose-300">{t('library.errors.abilityName')}</p>

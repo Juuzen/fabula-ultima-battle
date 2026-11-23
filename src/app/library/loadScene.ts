@@ -23,6 +23,7 @@ export async function loadSceneIntoBattle(
     type: 'LOAD_SCENE',
     name: scene.name,
     backgroundAssetId: scene.backgroundAssetId,
+    musicAssetId: scene.musicAssetId,
     combatants,
   })
   return { ok: result.ok, missing: missing.length }

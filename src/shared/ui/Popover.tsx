@@ -14,7 +14,8 @@ type Props = {
   /** Which trigger edge the panel lines up with. */
   align?: 'start' | 'end'
   panelClassName?: string
-  children: ReactNode
+  /** Content, or a function of `close` for panels that close themselves (e.g. after a pick). */
+  children: ReactNode | ((close: () => void) => ReactNode)
 }
 
 const TRIGGER =
@@ -75,7 +76,7 @@ export function Popover({
             align === 'end' ? 'right-0' : 'left-0'
           } ${panelClassName}`}
         >
-          {children}
+          {typeof children === 'function' ? children(close) : children}
         </div>
       )}
     </div>

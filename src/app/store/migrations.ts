@@ -1,4 +1,4 @@
-import { createDefaultPresentation } from '@/domain'
+import { createDefaultAudio, createDefaultPresentation } from '@/domain'
 
 /**
  * Upgrades a persisted payload to the current shape. Each step only fills what the
@@ -61,6 +61,36 @@ export function migratePersistedBattle(persisted: unknown, fromVersion: number):
       battle: {
         ...battle,
         combatants: combatants.map((c: Record<string, unknown>) => ({ unitId: null, ...c })),
+      },
+    }
+  }
+
+  if (fromVersion < 6 && data?.battle) {
+    // v6: music, volumes and mute.
+    const battle = data.battle
+    const presentation = (battle.presentation ?? createDefaultPresentation()) as Record<
+      string,
+      unknown
+    >
+    data = {
+      ...data,
+      battle: { ...battle, presentation: { audio: createDefaultAudio(), ...presentation } },
+    }
+  }
+
+  if (fromVersion < 7 && data?.battle) {
+    // v7: scene layout (position, size, rotation, depth). Older combatants use the formation.
+    const battle = data.battle
+    const combatants = Array.isArray(battle.combatants) ? battle.combatants : []
+    data = {
+      ...data,
+      battle: {
+        ...battle,
+        combatants: combatants.map((c: Record<string, unknown>) => ({
+          placement: null,
+          depth: null,
+          ...c,
+        })),
       },
     }
   }

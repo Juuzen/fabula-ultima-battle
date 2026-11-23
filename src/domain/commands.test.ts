@@ -293,7 +293,14 @@ describe('applyCommand', () => {
     const fromSheet = (): BattleState => ({
       ...createEmptyBattle(),
       combatants: [
-        createCombatant({ id: 'g1', name: 'Goblin 1', side: 'enemy', maxHp: 20, unitId: 'u-gob' }),
+        createCombatant({
+          id: 'g1',
+          name: 'Goblin 1',
+          side: 'enemy',
+          maxHp: 20,
+          unitId: 'u-gob',
+          flipSprite: true,
+        }),
         createCombatant({ id: 'g2', name: 'Goblin 2', side: 'enemy', maxHp: 20, unitId: 'u-gob' }),
         createCombatant({ id: 'imp', name: 'Goblin', side: 'enemy', maxHp: 20 }),
       ],
@@ -304,7 +311,6 @@ describe('applyCommand', () => {
       maxMp: 5,
       spriteAssetId: 'spr',
       portraitAssetId: null,
-      flipSprite: true,
     }
 
     it('updates every copy deployed from the sheet, keeping their number', () => {
@@ -322,9 +328,9 @@ describe('applyCommand', () => {
         maxMp: 5,
         mp: 0,
         spriteAssetId: 'spr',
-        flipSprite: true,
+        flipSprite: true, // mirroring belongs to the scene layout, not to the sheet
       })
-      expect(g2?.name).toBe('Orco 2')
+      expect(g2).toMatchObject({ name: 'Orco 2', flipSprite: false })
       expect(imp).toMatchObject({ name: 'Goblin', maxHp: 20 }) // not from that sheet
       expect(events.filter((e) => e.type === 'COMBATANT_UPDATED')).toHaveLength(2)
     })
@@ -342,7 +348,6 @@ describe('applyCommand', () => {
           maxMp: 0,
           spriteAssetId: null,
           portraitAssetId: null,
-          flipSprite: false,
         },
       })
       expect(g1.name).toBe('Goblin 1')

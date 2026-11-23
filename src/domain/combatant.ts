@@ -1,5 +1,6 @@
 import { z } from 'zod'
 
+import { DepthSchema, SpriteTransformSchema } from './placement'
 import { StatusIdSchema } from './status'
 
 export const SIDES = ['ally', 'enemy'] as const
@@ -31,6 +32,10 @@ export const CombatantSchema = z
     portraitAssetId: AssetRefSchema,
     /** Mirror the sprite horizontally, for images drawn facing the "wrong" way. */
     flipSprite: z.boolean(),
+    /** Position, size and rotation chosen in the scene layout; null = automatic formation. */
+    placement: SpriteTransformSchema.nullable(),
+    /** Manual depth layer from the scene layout; null = by position only. */
+    depth: DepthSchema.nullable(),
     /** Enemies only: the GM revealed this foe's exact HP/MP to the players. */
     revealStats: z.boolean(),
   })
@@ -58,6 +63,8 @@ export function createCombatant(input: NewCombatant): Combatant {
     spriteAssetId: null,
     portraitAssetId: null,
     flipSprite: false,
+    placement: null,
+    depth: null,
     revealStats: false,
     ...input,
   }

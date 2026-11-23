@@ -29,6 +29,7 @@ const lyra = createUnit({
       id: 'fire',
       name: 'Palla di fuoco',
       effect: 'fire',
+      soundAssetId: null,
       kind: 'damage',
       statuses: ['shaken'],
       mpCostHint: 10,
@@ -46,6 +47,7 @@ const scene: BattleScene = {
   enemies: [{ unitId: 'gob', count: 2 }],
   backgroundAssetId: null,
   musicAssetId: null,
+  layout: {},
   updatedAt: 0,
 }
 

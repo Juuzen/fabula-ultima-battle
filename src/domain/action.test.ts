@@ -35,6 +35,7 @@ const action = (overrides: Partial<Action> = {}): Action => ({
   actorId: 'mage',
   name: 'Palla di fuoco',
   effect: 'fire',
+  soundAssetId: null,
   mpCost: 10,
   targets: [hit('gob', 12), hit('wolf', 8)],
   ...overrides,
@@ -66,6 +67,7 @@ describe('PERFORM_ACTION', () => {
       actorId: 'mage',
       name: 'Palla di fuoco',
       effect: 'fire',
+      soundAssetId: null,
       targetIds: ['gob', 'wolf'],
     })
   })
@@ -125,6 +127,7 @@ describe('PERFORM_ACTION', () => {
       actorId: null,
       name: 'Trappola',
       effect: null,
+      soundAssetId: null,
       targetIds: ['gob', 'wolf'],
     })
   })

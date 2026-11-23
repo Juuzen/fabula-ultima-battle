@@ -1,13 +1,15 @@
-import type { ReactNode } from 'react'
+import { useMemo, type ReactNode } from 'react'
 
-import { AssetResolverContext, type AssetResolver } from './assetResolver'
+import { AssetSourceContext, staticAssetSource, type ResolvedAsset } from './assetResolver'
 
+/** Test and preview helper: resolves ids synchronously (a plain string counts as an image). */
 export function AssetResolverProvider({
   resolver,
   children,
 }: {
-  resolver: AssetResolver
+  resolver: (id: string) => string | ResolvedAsset | null
   children: ReactNode
 }) {
-  return <AssetResolverContext value={resolver}>{children}</AssetResolverContext>
+  const source = useMemo(() => staticAssetSource(resolver), [resolver])
+  return <AssetSourceContext value={source}>{children}</AssetSourceContext>
 }

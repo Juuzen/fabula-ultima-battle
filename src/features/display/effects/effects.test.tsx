@@ -1,22 +1,65 @@
 import { act, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { BUILTIN_EFFECTS, type EffectId } from '@/domain'
+import { BUILTIN_EFFECTS, customEffectRef, type EffectRef } from '@/domain'
+import { AssetResolverProvider } from '@/infra/assets/AssetResolverProvider'
 
 import { useChoreoStore, type Stage } from '../choreography/choreoStore'
 import { demoBattle } from '../demo/demoBattle'
 import { BattleScene } from '../scene/BattleScene'
+import { useLibraryFeed } from '../state/libraryFeed'
+import { EFFECT_BOX } from './effectBox'
 
 function stage(
   step: Stage['step'],
-  effect: EffectId | null = 'fire',
+  effect: EffectRef | null = 'fire',
   name = 'Palla di fuoco',
 ): Stage {
   return { runId: 1, step, actorId: 'a1', name, effect, targetIds: ['e1', 'e2'] }
 }
 
 describe('action sequence on the scene', () => {
-  afterEach(() => useChoreoStore.setState({ stage: null }))
+  afterEach(() => {
+    useChoreoStore.setState({ stage: null })
+    useLibraryFeed.setState({ customEffects: new Map() })
+  })
+
+  it("plays a custom effect's video on every target, at the effect's size", () => {
+    useLibraryFeed.setState({
+      customEffects: new Map([
+        [
+          'black-flame',
+          {
+            id: 'black-flame',
+            name: 'Fiamma nera',
+            videoAssetId: 'flame-video',
+            durationMs: 1200,
+            impactAt: 0.4,
+            scale: 1.5,
+            soundAssetId: null,
+            updatedAt: 0,
+          },
+        ],
+      ]),
+    })
+    render(
+      <AssetResolverProvider resolver={(id) => ({ url: `blob:${id}`, kind: 'video' })}>
+        <BattleScene battle={demoBattle} />
+      </AssetResolverProvider>,
+    )
+    act(() => useChoreoStore.getState().setStage(stage('effect', customEffectRef('black-flame'))))
+    const box = screen.getByTestId('effect-custom:black-flame-e1')
+    const video = box.querySelector('video')
+    expect(video).toHaveAttribute('src', 'blob:flame-video')
+    expect(video).toHaveStyle({ width: `${EFFECT_BOX * 1.5}px` })
+    expect(screen.getByTestId('effect-custom:black-flame-e2')).toBeInTheDocument()
+  })
+
+  it('draws nothing for a custom effect that was deleted', () => {
+    render(<BattleScene battle={demoBattle} />)
+    act(() => useChoreoStore.getState().setStage(stage('effect', customEffectRef('gone'))))
+    expect(screen.queryByTestId('effect-layer')).not.toBeInTheDocument()
+  })
 
   it.each(BUILTIN_EFFECTS)(
     'draws the "%s" effect on every target during the effect step',

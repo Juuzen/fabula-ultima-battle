@@ -61,6 +61,8 @@ describe('createCombatant', () => {
       spriteAssetId: null,
       portraitAssetId: null,
       flipSprite: false,
+      placement: null,
+      depth: null,
       revealStats: false,
     })
     expect(CombatantSchema.safeParse(c).success).toBe(true)

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-import type { Ability, ActionKind, CombatantId, EffectId, StatusId } from '@/domain'
+import type { Ability, ActionKind, CombatantId, EffectRef, StatusId } from '@/domain'
 
 /** One target's outcome, as typed. An empty amount means "no PV/PM change". */
 export type TargetDraft = {
@@ -27,7 +27,9 @@ type ActionDraftState = {
   /** Saved ability being used; '' = free action. */
   abilityId: string
   name: string
-  effect: EffectId | null
+  effect: EffectRef | null
+  /** The ability's own sound, carried into the action; null = the effect's. */
+  soundAssetId: string | null
   /** Kept as typed text. */
   mpCost: string
   /** The ability's reminders, shown as field hints only (never applied). */
@@ -44,7 +46,7 @@ type ActionDraftState = {
   /** Back to the selected combatant's ability list. */
   back: () => void
   setName: (name: string) => void
-  setEffect: (effect: EffectId | null) => void
+  setEffect: (effect: EffectRef | null) => void
   setMpCost: (mpCost: string) => void
   toggleTarget: (id: CombatantId) => void
   setTargetKind: (id: CombatantId, kind: ActionKind) => void
@@ -61,6 +63,7 @@ const EMPTY_COMPOSER = {
   abilityId: '',
   name: '',
   effect: null,
+  soundAssetId: null,
   mpCost: '',
   mpCostHint: null,
   amountHint: null,
@@ -99,6 +102,7 @@ export const useActionDraft = create<ActionDraftState>()((set) => ({
         abilityId: ability?.id ?? '',
         name: ability?.name ?? '',
         effect: ability?.effect ?? null,
+        soundAssetId: ability?.soundAssetId ?? null,
         mpCost: '',
         mpCostHint: ability?.mpCostHint ?? null,
         amountHint: ability?.amountHint ?? null,

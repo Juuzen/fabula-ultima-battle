@@ -1,10 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router'
 
-import type { PlaceholderSectionId } from '@/features/master/shell/sections'
-
 import { NotFoundPage } from './NotFoundPage'
-
-const PLACEHOLDER_SECTIONS: PlaceholderSectionId[] = ['audio', 'video']
 
 /** Party and Enemies share one library page, one kind of sheet each. */
 const LIBRARY_SECTIONS = [
@@ -42,13 +38,18 @@ export const routes: RouteObject[] = [
           Component: (await import('@/features/master/scenes/SceneLibraryPage')).SceneLibraryPage,
         }),
       },
-      ...PLACEHOLDER_SECTIONS.map((section): RouteObject => ({
-        path: section,
-        lazy: async () => {
-          const { PlaceholderPage } = await import('@/features/master/screen/PlaceholderPage')
-          return { element: <PlaceholderPage section={section} /> }
-        },
-      })),
+      {
+        path: 'audio',
+        lazy: async () => ({
+          Component: (await import('@/features/master/assets/AudioLibraryPage')).AudioLibraryPage,
+        }),
+      },
+      {
+        path: 'video',
+        lazy: async () => ({
+          Component: (await import('@/features/master/assets/VideoLibraryPage')).VideoLibraryPage,
+        }),
+      },
     ],
   },
   {

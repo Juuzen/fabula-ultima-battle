@@ -1,3 +1,4 @@
+import { Dexie } from 'dexie'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { createUnit, type BattleScene } from '@/domain'
@@ -19,6 +20,7 @@ const scene: BattleScene = {
   enemies: [{ unitId: 'gob', count: 3 }],
   backgroundAssetId: null,
   musicAssetId: null,
+  layout: {},
   updatedAt: 0,
 }
 
@@ -48,6 +50,20 @@ describe('library', () => {
     expect((await lib.listUnits('enemy')).map((u) => u.id)).toEqual(['gob'])
   })
 
+  it('saving a scene drops the layout of sprites no longer in it', async () => {
+    const sprite = {
+      transform: { x: 300, y: 600, scale: 1, rotation: 0 },
+      depth: null,
+      flip: false,
+    }
+    const saved = await lib.saveScene({
+      ...scene,
+      enemies: [{ unitId: 'gob', count: 1 }],
+      layout: { 'enemy:gob:1': sprite, 'enemy:gob:3': sprite },
+    })
+    expect(Object.keys(saved.layout)).toEqual(['enemy:gob:1'])
+  })
+
   it('deleting a sheet removes it from the scenes that used it', async () => {
     await Promise.all([lib.saveUnit(lyra), lib.saveUnit(bastian), lib.saveUnit(goblin)])
     await lib.saveScene(scene)
@@ -69,5 +85,41 @@ describe('library', () => {
 
     await lib.restParty()
     expect((await lib.getUnits(['lyra'])).get('lyra')).toMatchObject({ hp: 40, mp: 30 })
+  })
+})
+
+describe('library database upgrade', () => {
+  it('v3 moves mirroring from the sheets to the scenes that use them', async () => {
+    const name = `test-library-upgrade-${++dbCount}`
+    const v2 = new Dexie(name)
+    v2.version(2).stores({
+      units: 'id, kind, name',
+      scenes: 'id, name',
+      assets: 'id, role, kind, name',
+      assetBlobs: 'id',
+      effects: 'id, name',
+      settings: 'key',
+    })
+    const { layout: _none, ...oldScene } = scene
+    await v2.table('units').bulkPut([
+      { ...lyra, flipSprite: true },
+      { ...bastian, flipSprite: false },
+      { ...goblin, flipSprite: true },
+    ])
+    await v2.table('scenes').put(oldScene)
+    v2.close()
+
+    const upgraded = createLibrary(new LibraryDb(name))
+    const [saved] = await upgraded.listScenes()
+    const flipped = { transform: null, depth: null, flip: true }
+    expect(saved?.layout).toEqual({
+      'party:lyra': flipped,
+      'enemy:gob:1': flipped,
+      'enemy:gob:2': flipped,
+      'enemy:gob:3': flipped,
+    })
+    const raw = await upgraded.db.units.get('lyra')
+    expect(raw).not.toHaveProperty('flipSprite')
+    await upgraded.db.delete()
   })
 })

@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
-import { ActionKindSchema, EffectIdSchema } from './action'
+import { ActionKindSchema } from './action'
+import { EffectRefSchema } from './effect'
 import type { NewCombatant } from './combatant'
 import { StatusIdSchema } from './status'
 
@@ -23,8 +24,10 @@ const uniqueStatuses = z
 export const AbilitySchema = z.object({
   id: z.string().min(1),
   name: z.string().trim().min(1).max(60),
-  /** null = no visual effect. */
-  effect: EffectIdSchema.nullable(),
+  /** Built-in or custom effect; null = no visual effect. */
+  effect: EffectRefSchema.nullable(),
+  /** The ability's own sound; null = the effect's. Older sheets have none. */
+  soundAssetId: z.string().min(1).nullable().default(null),
   /** null = statuses only, no PV/PM change. */
   kind: ActionKindSchema.nullable(),
   statuses: uniqueStatuses,
@@ -48,7 +51,6 @@ export const UnitSchema = z
     mp: z.int().min(0),
     spriteAssetId: AssetRefSchema,
     portraitAssetId: AssetRefSchema,
-    flipSprite: z.boolean(),
     /** Free category, e.g. "Bestia", "Elite", "Boss". Empty = none. */
     tag: z.string().trim().max(30),
     /** GM-only notes: weaknesses, tactics, rule reminders. */
@@ -76,7 +78,6 @@ export function createUnit(input: NewUnit): Unit {
     mp: maxMp,
     spriteAssetId: null,
     portraitAssetId: null,
-    flipSprite: false,
     tag: '',
     notes: '',
     abilities: [],
@@ -102,7 +103,6 @@ export function combatantFromUnit(unit: Unit, id: string, name = unit.name): New
     mp: party ? Math.min(unit.mp, unit.maxMp) : unit.maxMp,
     spriteAssetId: unit.spriteAssetId,
     portraitAssetId: unit.portraitAssetId,
-    flipSprite: unit.flipSprite,
   }
 }
 

@@ -1,0 +1,15 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": ["src/features/master/scenes/layout/SceneLayoutEditor.tsx"],
+        "createdAt": "2026-11-22T20:40:00.303Z",
+        "reason": "Claude triage: the kbd keycap's border-b-2 is a neutral slate bevel copied from the existing ShortcutHelp keycap style, not an accent border"
+      }
+    ]
+  }
+}

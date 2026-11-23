@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createEmptyBattle, type BattleEvent, type BattleState } from '@/domain'
+import { createEmptyBattle, customEffectRef, type BattleEvent, type BattleState } from '@/domain'
 
 import type { Stage } from './choreoStore'
 import { createSequencer, MAX_BACKLOG } from './sequencer'
-import { EFFECT_TIMING, NO_EFFECT_TIMING, SEQUENCE, sequenceLength } from './timeline'
+import { EFFECT_TIMING, NO_EFFECT_TIMING, SEQUENCE, sequenceLength, timingOf } from './timeline'
 
 const named = (name: string): BattleState => ({ ...createEmptyBattle(), name, phase: 'active' })
 
@@ -13,20 +13,25 @@ const actionEvents = (
   actorId: string | null = 'hero',
   name = 'Fendente',
 ): BattleEvent[] => [
-  { type: 'ACTION_PERFORMED', actorId, name, effect, targetIds: ['orc'] },
+  { type: 'ACTION_PERFORMED', actorId, name, effect, soundAssetId: null, targetIds: ['orc'] },
   { type: 'DAMAGED', id: 'orc', amount: 12, hp: 18 },
 ]
 
-function setup(options: { reduced?: boolean } = {}) {
+function setup(
+  options: { reduced?: boolean; timing?: Parameters<typeof createSequencer>[0]['timing'] } = {},
+) {
   const applied: { name: string; events: BattleEvent[] }[] = []
+  const landed: BattleEvent['type'][][] = []
   const stages: (Stage | null)[] = []
   const sequencer = createSequencer({
     apply: (state, events) => applied.push({ name: state.name, events }),
     setStage: (stage) => stages.push(stage),
     reducedMotion: () => options.reduced ?? false,
+    timing: options.timing,
+    onLand: (events) => landed.push(events.map((e) => e.type)),
   })
   const steps = () => stages.map((s) => s?.step ?? null)
-  return { sequencer, applied, stages, steps }
+  return { sequencer, applied, landed, stages, steps }
 }
 
 /** Advances fake time and lets the sequencer's awaits resolve. */
@@ -170,5 +175,45 @@ describe('sequencer', () => {
 
     await advance(sequenceLength('slash'))
     expect(applied.map((a) => a.name)).toEqual(['latest']) // nothing after dispose
+  })
+
+  it('reports each update as it lands, with its opening event, for the sounds', async () => {
+    const { sequencer, landed } = setup()
+    sequencer.enqueue(named('a'), [{ type: 'BATTLE_STARTED' }])
+    expect(landed).toEqual([['BATTLE_STARTED']])
+    sequencer.enqueue(named('b'), actionEvents())
+    await advance(SEQUENCE.advance + SEQUENCE.cast)
+    expect(landed).toHaveLength(1) // the effect is still travelling
+    await advance(Math.round(EFFECT_TIMING.slash.durationMs * EFFECT_TIMING.slash.impactAt))
+    expect(landed.at(-1)).toEqual(['ACTION_PERFORMED', 'DAMAGED'])
+  })
+
+  it('uses the timing it is given, e.g. a custom effect of the GM', async () => {
+    const ref = customEffectRef('black-flame')
+    const custom = new Map([
+      [
+        'black-flame',
+        {
+          id: 'black-flame',
+          name: 'Fiamma nera',
+          videoAssetId: 'vid',
+          durationMs: 2000,
+          impactAt: 0.75,
+          scale: 1,
+          soundAssetId: null,
+          updatedAt: 0,
+        },
+      ],
+    ])
+    const { sequencer, applied } = setup({ timing: (effect) => timingOf(effect, custom) })
+    const events = actionEvents(null, null)
+    events[0] = { ...events[0]!, effect: ref } as BattleEvent
+    sequencer.enqueue(named('custom'), events)
+    await advance(1499)
+    expect(applied).toEqual([])
+    await advance(1)
+    expect(applied.map((a) => a.name)).toEqual(['custom'])
+    // A custom effect that no longer exists plays like no effect.
+    expect(timingOf(customEffectRef('gone'), custom)).toEqual(NO_EFFECT_TIMING)
   })
 })

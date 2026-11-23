@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 
+import { displayAudio, useDisplayMusic } from './audio/displayAudio'
 import { demoBattle } from './demo/demoBattle'
 import { FxContext } from './fx/fxContext'
 import { useFxStore } from './fx/fxStore'
@@ -9,6 +10,7 @@ import { PlayerScreen } from './scene/PlayerScreen'
 import { WaitingScreen } from './scene/WaitingScreen'
 import { Stage } from './stage/Stage'
 import { useDisplayStore } from './state/displayStore'
+import { useLibraryFeedSync } from './state/libraryFeed'
 import { useDisplaySync } from './state/useDisplaySync'
 
 /**
@@ -27,6 +29,8 @@ export function DisplayPage() {
   const removeFx = useFxStore((s) => s.remove)
 
   useDisplaySync(!isDemo)
+  useLibraryFeedSync()
+  useDisplayMusic(battle)
 
   useEffect(() => {
     if (isDemo) showBattle(demoBattle)
@@ -46,7 +50,10 @@ export function DisplayPage() {
       {!started && (
         <button
           type="button"
-          onClick={() => setStarted(true)}
+          onClick={() => {
+            displayAudio()?.unlock()
+            setStarted(true)
+          }}
           className="absolute inset-0 z-[2000] flex cursor-pointer flex-col items-center justify-center gap-6 bg-black/70 text-slate-100"
         >
           <span className="font-display text-7xl tracking-widest">{t('display.start')}</span>

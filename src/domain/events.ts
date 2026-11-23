@@ -1,4 +1,4 @@
-import type { EffectId } from './action'
+import type { EffectRef } from './effect'
 import type { BattleState, Presentation } from './battle'
 import type { Combatant, CombatantId } from './combatant'
 import type { StatusId } from './status'
@@ -39,7 +39,8 @@ export type BattleEvent =
       actorId: CombatantId | null
       name: string
       /** null = no visual effect, only the impact. */
-      effect: EffectId | null
+      effect: EffectRef | null
+      soundAssetId: string | null
       targetIds: CombatantId[]
     }
   | { type: 'BATTLE_ENDED'; removedIds: CombatantId[] }

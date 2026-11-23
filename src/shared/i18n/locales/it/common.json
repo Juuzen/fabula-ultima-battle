@@ -136,12 +136,6 @@
       "shortcut": "Alt+{{n}}",
       "live": "In corso"
     },
-    "placeholder": {
-      "soon": "In arrivo",
-      "audio": "La libreria di musiche ed effetti sonori. La riproduzione dal vivo resterà in Controllo schermo.",
-      "video": "La libreria di sfondi ed effetti video. La riproduzione dal vivo resterà in Controllo schermo.",
-      "back": "Torna a Controllo schermo"
-    },
     "strip": {
       "label": "Comandi della battaglia",
       "reopen": "Riapri schermo",
@@ -190,13 +184,76 @@
       "title": "Dettaglio",
       "deselect": "Deseleziona",
       "deselectHint": "Torna all'azione del GM (Esc)",
-      "notes": "Note del GM"
+      "notes": "Note del GM",
+      "flip": "Specchia sprite",
+      "flipHint": "Vale per questa battaglia; il verso salvato nella scena non cambia."
     },
     "settings": {
-      "title": "Impostazioni schermo"
+      "title": "Impostazioni schermo",
+      "waitingBackground": "Sfondo dell'attesa"
     },
     "screen": {
       "untitled": "Battaglia senza nome"
+    },
+    "videoLibrary": {
+      "title": "Video",
+      "intro": "Sfondi, effetti e immagini delle schede. Tutto resta in questo browser e funziona offline.",
+      "backgrounds": "Sfondi",
+      "backgroundsHint": "Per le scene e per la schermata di attesa. Immagini o video in loop (senza audio).",
+      "effects": "Effetti personalizzati",
+      "effectsHint": "Un video che si aggiunge agli effetti predefiniti: lo scegli nelle abilità e nel compositore d'azione.",
+      "effectVideos": "Video degli effetti",
+      "art": "Immagini delle schede",
+      "artHint": "Sprite e ritratti caricati dalle schede di Party e Nemici."
+    },
+    "audioLibrary": {
+      "title": "Audio",
+      "intro": "Musiche ed effetti sonori. Si sentono dallo schermo giocatori.",
+      "music": "Musiche",
+      "musicHint": "Per le scene (partono con la battaglia, in loop) e per il cambio brano dal vivo.",
+      "sfx": "Effetti sonori",
+      "sfxHint": "Per le abilità, gli effetti visivi e i suoni di sistema.",
+      "system": "Suoni di sistema",
+      "systemHint": "Suonano quando un'azione non ha un suono suo, o il suo effetto non ne ha uno.",
+      "systemSounds": {
+        "hit": "Colpo",
+        "heal": "Cura",
+        "ko": "KO",
+        "battleStart": "Inizio battaglia"
+      },
+      "effectSounds": "Suoni degli effetti predefiniti",
+      "effectSoundsHint": "Suonano all'impatto. Gli effetti personalizzati hanno il loro nel pannello Video."
+    },
+    "customEffect": {
+      "add": "Nuovo effetto",
+      "newName": "Nuovo effetto",
+      "name": "Nome",
+      "video": "Video",
+      "impact": "Impatto",
+      "impactHint": "Quando il colpo va a segno: barre e numeri cambiano in quel momento.",
+      "scale": "Dimensione",
+      "sound": "Suono all'impatto",
+      "preview": "Anteprima",
+      "none": "Nessun effetto personalizzato. Creane uno da un video.",
+      "noVideo": "Scegli prima un video.",
+      "delete": "Elimina effetto",
+      "deleteConfirm": "Conferma: elimina {{name}}",
+      "deleteHint": "Le abilità che lo usano torneranno a nessun effetto.",
+      "label": "Effetto {{name}}",
+      "duration": "{{s}} s"
+    },
+    "liveAudio": {
+      "title": "Audio",
+      "trigger": "Audio dello schermo giocatori",
+      "track": "Brano",
+      "noTrack": "Silenzio",
+      "noMusic": "Nessuna musica: caricala nella sezione Audio.",
+      "trackHint": "Il cambio avviene in dissolvenza. La musica suona solo a battaglia iniziata.",
+      "music": "Volume musica",
+      "sfx": "Volume effetti",
+      "mute": "Silenzia",
+      "unmute": "Riattiva audio",
+      "muteHint": "Silenzia o riattiva lo schermo giocatori"
     }
   },
   "display": {
@@ -234,7 +291,10 @@
     "ice": "Ghiaccio",
     "thunder": "Fulmine",
     "light": "Luce",
-    "shadow": "Ombra"
+    "shadow": "Ombra",
+    "builtin": "Predefiniti",
+    "custom": "Personalizzati",
+    "missing": "Effetto eliminato"
   },
   "library": {
     "create": {
@@ -265,8 +325,7 @@
       "hp": "PV attuali",
       "mp": "PM attuali",
       "notes": "Note del GM",
-      "notesHint": "Visibili solo a te: debolezze, tattiche, promemoria di regole.",
-      "flip": "Specchia sprite"
+      "notesHint": "Visibili solo a te: debolezze, tattiche, promemoria di regole."
     },
     "sections": {
       "stats": "Statistiche",
@@ -277,8 +336,7 @@
     "currentHint": "I PV e PM attuali tornano qui quando il personaggio esce dal campo.",
     "art": {
       "sprite": "Sprite",
-      "portrait": "Ritratto",
-      "soon": "Le immagini si caricano con la libreria asset (in arrivo)."
+      "portrait": "Ritratto"
     },
     "ability": {
       "add": "Aggiungi abilità",
@@ -289,7 +347,8 @@
       "mpCostHint": "Costo PM",
       "amountHint": "Valore",
       "hintNote": "Costo PM e valore sono promemoria: compaiono come suggerimento, il numero vero lo scrivi tu in battaglia.",
-      "label": "Abilità {{n}}"
+      "label": "Abilità {{n}}",
+      "sound": "Suono"
     },
     "save": {
       "saving": "Salvataggio…",
@@ -331,7 +390,8 @@
     "sections": {
       "party": "Party",
       "enemies": "Nemici",
-      "ambience": "Ambientazione"
+      "ambience": "Ambientazione",
+      "layout": "Disposizione in campo"
     },
     "party": {
       "none": "Nessuna scheda nel Party: creale nella pagina Party.",
@@ -350,8 +410,81 @@
     },
     "ambience": {
       "background": "Sfondo",
-      "music": "Musica",
-      "soon": "Sfondi e musiche si scelgono con la libreria asset (in arrivo)."
+      "music": "Musica"
+    },
+    "layout": {
+      "title": "Anteprima live",
+      "hint": "Posizione, dimensione, rotazione, profondità e verso di ogni sprite, esattamente come li vedranno i giocatori.",
+      "open": "Apri anteprima live",
+      "close": "Chiudi",
+      "automatic": "Formazione automatica: nessuno sprite spostato.",
+      "customized_one": "{{count}} sprite disposto a mano, gli altri in formazione automatica.",
+      "customized_other": "{{count}} sprite disposti a mano, gli altri in formazione automatica.",
+      "empty": "Aggiungi party o nemici alla scena per disporli in campo.",
+      "reset": "Ripristina layout di default",
+      "resetConfirm": "Conferma: tutti in formazione automatica",
+      "resetCancel": "Annulla",
+      "view": "Vista",
+      "stage": "Campo di battaglia",
+      "toggles": {
+        "hud": "HUD",
+        "hudHint": "Mostra il pannello del party e la finestra dei nemici, per vedere cosa coprono",
+        "grid": "Griglia",
+        "gridHint": "Mostra la griglia e aggancia gli sprite ai suoi incroci",
+        "guides": "Guide",
+        "guidesHint": "Allinea i piedi degli sprite tra loro e al centro del campo mentre trascini"
+      },
+      "list": {
+        "label": "Sprite della scena",
+        "enemies": "Nemici",
+        "party": "Party"
+      },
+      "badges": {
+        "custom": "Disposto a mano",
+        "flipped": "Specchiato",
+        "depth": "Livello di profondità {{n}}"
+      },
+      "handles": {
+        "scale": "Trascina per ridimensionare",
+        "rotate": "Trascina per ruotare (Shift: a scatti di 15°)"
+      },
+      "actions": {
+        "flip": "Specchia",
+        "forward": "Porta avanti",
+        "backward": "Manda indietro",
+        "resetSelected": "Ripristina posizione"
+      },
+      "inspector": {
+        "label": "Proprietà dello sprite",
+        "none": "Seleziona uno sprite sul campo o nell'elenco. Con Shift o Ctrl ne selezioni più di uno.",
+        "many_one": "{{count}} sprite selezionato",
+        "many_other": "{{count}} sprite selezionati",
+        "auto": "In formazione automatica",
+        "custom": "Disposto a mano",
+        "partial": "In parte disposti a mano",
+        "position": "Posizione",
+        "scale": "Scala %",
+        "rotation": "Rotazione °",
+        "mixed": "misto",
+        "look": "Aspetto",
+        "depth": "Profondità",
+        "depthAuto": "Auto",
+        "depthHint": "Auto: chi ha i piedi più in basso sta davanti. Un livello più alto vince sempre."
+      },
+      "keys": {
+        "pageUp": "PagSu",
+        "pageDown": "PagGiù"
+      },
+      "shortcuts": {
+        "title": "Scorciatoie",
+        "move": "Sposta (Shift: 10 px)",
+        "rotate": "Ruota (Shift: 15°)",
+        "scale": "Ingrandisci / riduci",
+        "depth": "Avanti / indietro",
+        "all": "Seleziona tutti",
+        "noSnap": "Trascina senza aggancio",
+        "escape": "Deseleziona, poi chiudi"
+      }
     },
     "summary": "{{party}} PG · {{enemies}} nemici",
     "load": "Carica in Controllo schermo",
@@ -401,5 +534,42 @@
     "hint": "Aggiungi combattenti al campo",
     "closeSetup": "Fatto",
     "emptyHint": "Il campo è vuoto: carica una scena o schiera party e nemici."
+  },
+  "assets": {
+    "upload": "Carica",
+    "choose": "Scegli",
+    "remove": "Togli",
+    "none": "Nessuno",
+    "missing": "File eliminato",
+    "pickerTitle": "{{label}}: scegli dalla libreria",
+    "search": "Cerca per nome",
+    "emptyShelf": "Ancora nessun file qui: caricane uno, o trascinalo in questo riquadro.",
+    "noMatch": "Nessun file corrisponde alla ricerca.",
+    "drop": "Rilascia per caricare",
+    "uploading": "Caricamento…",
+    "accepts": {
+      "art": "immagini (PNG, GIF, WebP…)",
+      "background": "immagini o video in loop",
+      "effect": "video, meglio .webm con trasparenza",
+      "music": "file audio",
+      "sfx": "file audio brevi"
+    },
+    "errors": {
+      "unsupported": "Formato non supportato: servono immagini, video o audio.",
+      "wrongShelf": "Questo file non va bene qui: servono {{accepts}}.",
+      "failed": "Caricamento non riuscito: lo spazio del browser potrebbe essere pieno.",
+      "dismiss": "Chiudi"
+    },
+    "rename": "Nome del file",
+    "delete": "Elimina {{name}}",
+    "deleteConfirm": "Conferma: elimina",
+    "deleteCancel": "Annulla",
+    "deleteUsed_one": "Usato in {{count}} punto: lì tornerà a nessuno.",
+    "deleteUsed_other": "Usato in {{count}} punti: lì torneranno a nessuno.",
+    "deleteEffectVideo": "Gli effetti personalizzati fatti con questo video verranno eliminati.",
+    "play": "Ascolta {{name}}",
+    "stop": "Ferma",
+    "size": "{{size}}",
+    "storage": "Spazio usato: {{used}} di {{quota}}"
   }
 }

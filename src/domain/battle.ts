@@ -15,6 +15,25 @@ export const EnemyPanelSchema = z.object({
 })
 export type EnemyPanel = z.infer<typeof EnemyPanelSchema>
 
+export const MAX_VOLUME = 100
+
+/** What the Display plays. Music only runs while the battle is active. */
+export const AudioSettingsSchema = z.object({
+  /** Current track (the scene's, or changed live); null = silence. */
+  musicAssetId: z.string().min(1).nullable(),
+  musicVolume: z.int().min(0).max(MAX_VOLUME),
+  sfxVolume: z.int().min(0).max(MAX_VOLUME),
+  muted: z.boolean(),
+})
+export type AudioSettings = z.infer<typeof AudioSettingsSchema>
+
+export const createDefaultAudio = (): AudioSettings => ({
+  musicAssetId: null,
+  musicVolume: 70,
+  sfxVolume: 80,
+  muted: false,
+})
+
 /** GM choices about what the players get to see. Authoritative, so it lives in the state. */
 export const PresentationSchema = z.object({
   enemyPanel: EnemyPanelSchema,
@@ -22,6 +41,7 @@ export const PresentationSchema = z.object({
   revealAllEnemyStats: z.boolean(),
   /** Background of the waiting screen shown during preparation; null = built-in artwork. */
   waitingBackgroundAssetId: z.string().min(1).nullable(),
+  audio: AudioSettingsSchema,
 })
 export type Presentation = z.infer<typeof PresentationSchema>
 
@@ -52,6 +72,7 @@ export function createDefaultPresentation(): Presentation {
     enemyPanel: { mode: 'auto', visible: false, autoHideSeconds: 6 },
     revealAllEnemyStats: false,
     waitingBackgroundAssetId: null,
+    audio: createDefaultAudio(),
   }
 }
 

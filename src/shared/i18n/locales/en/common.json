@@ -136,12 +136,6 @@
       "shortcut": "Alt+{{n}}",
       "live": "Live"
     },
-    "placeholder": {
-      "soon": "Coming soon",
-      "audio": "The library of music and sound effects. Live playback will stay in Screen Control.",
-      "video": "The library of video backgrounds and effects. Live playback will stay in Screen Control.",
-      "back": "Back to Screen Control"
-    },
     "strip": {
       "label": "Battle commands",
       "reopen": "Reopen screen",
@@ -190,13 +184,76 @@
       "title": "Detail",
       "deselect": "Deselect",
       "deselectHint": "Back to the GM action (Esc)",
-      "notes": "GM notes"
+      "notes": "GM notes",
+      "flip": "Mirror sprite",
+      "flipHint": "For this battle only; the facing saved in the scene does not change."
     },
     "settings": {
-      "title": "Screen settings"
+      "title": "Screen settings",
+      "waitingBackground": "Waiting background"
     },
     "screen": {
       "untitled": "Untitled battle"
+    },
+    "videoLibrary": {
+      "title": "Video",
+      "intro": "Backgrounds, effects and sheet art. Everything stays in this browser and works offline.",
+      "backgrounds": "Backgrounds",
+      "backgroundsHint": "For scenes and the waiting screen. Images or looping videos (no sound).",
+      "effects": "Custom effects",
+      "effectsHint": "A video that joins the built-in effects: pick it in abilities and in the action composer.",
+      "effectVideos": "Effect videos",
+      "art": "Sheet art",
+      "artHint": "Sprites and portraits uploaded from Party and Enemy sheets."
+    },
+    "audioLibrary": {
+      "title": "Audio",
+      "intro": "Music and sound effects. They play from the player screen.",
+      "music": "Music",
+      "musicHint": "For scenes (they start with the battle and loop) and for live track changes.",
+      "sfx": "Sound effects",
+      "sfxHint": "For abilities, visual effects and system sounds.",
+      "system": "System sounds",
+      "systemHint": "They play when an action has no sound of its own and its effect has none either.",
+      "systemSounds": {
+        "hit": "Hit",
+        "heal": "Heal",
+        "ko": "KO",
+        "battleStart": "Battle start"
+      },
+      "effectSounds": "Built-in effect sounds",
+      "effectSoundsHint": "They play on impact. Custom effects have their own in the Video section."
+    },
+    "customEffect": {
+      "add": "New effect",
+      "newName": "New effect",
+      "name": "Name",
+      "video": "Video",
+      "impact": "Impact",
+      "impactHint": "When the hit lands: bars and numbers change at that moment.",
+      "scale": "Size",
+      "sound": "Sound on impact",
+      "preview": "Preview",
+      "none": "No custom effects yet. Make one from a video.",
+      "noVideo": "Choose a video first.",
+      "delete": "Delete effect",
+      "deleteConfirm": "Confirm: delete {{name}}",
+      "deleteHint": "Abilities using it go back to no effect.",
+      "label": "Effect {{name}}",
+      "duration": "{{s}} s"
+    },
+    "liveAudio": {
+      "title": "Audio",
+      "trigger": "Player screen audio",
+      "track": "Track",
+      "noTrack": "Silence",
+      "noMusic": "No music yet: upload some in the Audio section.",
+      "trackHint": "Tracks change with a crossfade. Music only plays once the battle has started.",
+      "music": "Music volume",
+      "sfx": "Effects volume",
+      "mute": "Mute",
+      "unmute": "Unmute",
+      "muteHint": "Mute or unmute the player screen"
     }
   },
   "display": {
@@ -234,7 +291,10 @@
     "ice": "Ice",
     "thunder": "Thunder",
     "light": "Light",
-    "shadow": "Shadow"
+    "shadow": "Shadow",
+    "builtin": "Built-in",
+    "custom": "Custom",
+    "missing": "Deleted effect"
   },
   "library": {
     "create": {
@@ -265,8 +325,7 @@
       "hp": "Current HP",
       "mp": "Current MP",
       "notes": "GM notes",
-      "notesHint": "Only you see these: weaknesses, tactics, rule reminders.",
-      "flip": "Mirror sprite"
+      "notesHint": "Only you see these: weaknesses, tactics, rule reminders."
     },
     "sections": {
       "stats": "Stats",
@@ -277,8 +336,7 @@
     "currentHint": "Current HP and MP come back here when the character leaves the field.",
     "art": {
       "sprite": "Sprite",
-      "portrait": "Portrait",
-      "soon": "Images will load from the asset library (coming soon)."
+      "portrait": "Portrait"
     },
     "ability": {
       "add": "Add ability",
@@ -289,7 +347,8 @@
       "mpCostHint": "MP cost",
       "amountHint": "Amount",
       "hintNote": "MP cost and amount are reminders: they show as hints, you type the real number in battle.",
-      "label": "Ability {{n}}"
+      "label": "Ability {{n}}",
+      "sound": "Sound"
     },
     "save": {
       "saving": "Saving…",
@@ -331,7 +390,8 @@
     "sections": {
       "party": "Party",
       "enemies": "Enemies",
-      "ambience": "Setting"
+      "ambience": "Setting",
+      "layout": "Battlefield layout"
     },
     "party": {
       "none": "No Party sheets yet: create them on the Party page.",
@@ -350,8 +410,81 @@
     },
     "ambience": {
       "background": "Background",
-      "music": "Music",
-      "soon": "Backgrounds and music are picked from the asset library (coming soon)."
+      "music": "Music"
+    },
+    "layout": {
+      "title": "Live preview",
+      "hint": "Position, size, rotation, depth and facing of every sprite, exactly as the players will see them.",
+      "open": "Open live preview",
+      "close": "Close",
+      "automatic": "Automatic formation: no sprite moved.",
+      "customized_one": "{{count}} sprite placed by hand, the others in automatic formation.",
+      "customized_other": "{{count}} sprites placed by hand, the others in automatic formation.",
+      "empty": "Add party members or enemies to the scene to place them.",
+      "reset": "Restore default layout",
+      "resetConfirm": "Confirm: everyone back in formation",
+      "resetCancel": "Cancel",
+      "view": "View",
+      "stage": "Battlefield",
+      "toggles": {
+        "hud": "HUD",
+        "hudHint": "Show the party panel and the enemy window, to see what they cover",
+        "grid": "Grid",
+        "gridHint": "Show the grid and snap sprites to it",
+        "guides": "Guides",
+        "guidesHint": "Line up sprites' feet with each other and the centre of the field while dragging"
+      },
+      "list": {
+        "label": "Sprites in the scene",
+        "enemies": "Enemies",
+        "party": "Party"
+      },
+      "badges": {
+        "custom": "Placed by hand",
+        "flipped": "Mirrored",
+        "depth": "Depth layer {{n}}"
+      },
+      "handles": {
+        "scale": "Drag to resize",
+        "rotate": "Drag to rotate (Shift: 15° steps)"
+      },
+      "actions": {
+        "flip": "Mirror",
+        "forward": "Bring forward",
+        "backward": "Send backward",
+        "resetSelected": "Restore position"
+      },
+      "inspector": {
+        "label": "Sprite properties",
+        "none": "Select a sprite on the field or in the list. Hold Shift or Ctrl to select more than one.",
+        "many_one": "{{count}} sprite selected",
+        "many_other": "{{count}} sprites selected",
+        "auto": "In automatic formation",
+        "custom": "Placed by hand",
+        "partial": "Partly placed by hand",
+        "position": "Position",
+        "scale": "Scale %",
+        "rotation": "Rotation °",
+        "mixed": "mixed",
+        "look": "Look",
+        "depth": "Depth",
+        "depthAuto": "Auto",
+        "depthHint": "Auto: lower feet stand in front. A higher layer always wins."
+      },
+      "keys": {
+        "pageUp": "PgUp",
+        "pageDown": "PgDn"
+      },
+      "shortcuts": {
+        "title": "Shortcuts",
+        "move": "Move (Shift: 10 px)",
+        "rotate": "Rotate (Shift: 15°)",
+        "scale": "Bigger / smaller",
+        "depth": "Forward / backward",
+        "all": "Select all",
+        "noSnap": "Drag without snapping",
+        "escape": "Deselect, then close"
+      }
     },
     "summary": "{{party}} PCs · {{enemies}} enemies",
     "load": "Load into Screen Control",
@@ -401,5 +534,42 @@
     "hint": "Add combatants to the field",
     "closeSetup": "Done",
     "emptyHint": "The field is empty: load a scene or deploy party and enemies."
+  },
+  "assets": {
+    "upload": "Upload",
+    "choose": "Choose",
+    "remove": "Remove",
+    "none": "None",
+    "missing": "Deleted file",
+    "pickerTitle": "{{label}}: choose from the library",
+    "search": "Search by name",
+    "emptyShelf": "No files here yet: upload one, or drop it on this box.",
+    "noMatch": "No file matches the search.",
+    "drop": "Drop to upload",
+    "uploading": "Uploading…",
+    "accepts": {
+      "art": "images (PNG, GIF, WebP…)",
+      "background": "images or looping videos",
+      "effect": "videos, ideally .webm with transparency",
+      "music": "audio files",
+      "sfx": "short audio files"
+    },
+    "errors": {
+      "unsupported": "Unsupported format: images, videos or audio only.",
+      "wrongShelf": "This file does not fit here: use {{accepts}}.",
+      "failed": "Upload failed: browser storage may be full.",
+      "dismiss": "Dismiss"
+    },
+    "rename": "File name",
+    "delete": "Delete {{name}}",
+    "deleteConfirm": "Confirm: delete",
+    "deleteCancel": "Cancel",
+    "deleteUsed_one": "Used in {{count}} place: it will be set to none.",
+    "deleteUsed_other": "Used in {{count}} places: they will be set to none.",
+    "deleteEffectVideo": "Custom effects made from this video will be deleted.",
+    "play": "Play {{name}}",
+    "stop": "Stop",
+    "size": "{{size}}",
+    "storage": "Storage used: {{used}} of {{quota}}"
   }
 }

@@ -29,8 +29,8 @@ describe('routes', () => {
     expect(current).toHaveAttribute('aria-current', 'page')
 
     await userEvent.click(within(nav).getByRole('link', { name: 'Video' }))
-    expect(await screen.findByText('In arrivo')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Video', level: 2 })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Video', level: 2 })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Sfondi', level: 3 })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/master/video')
     expect(screen.getByTestId('battle-phase')).toBeInTheDocument()
 

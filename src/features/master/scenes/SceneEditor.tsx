@@ -1,5 +1,5 @@
-import { Image, Minus, Music, Plus, Trash2, X } from 'lucide-react'
-import { useId, useState, type ReactNode } from 'react'
+import { Minus, MonitorPlay, Plus, RotateCcw, Trash2, X } from 'lucide-react'
+import { useId, useMemo, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { useUnits } from '@/app/library/hooks'
@@ -7,19 +7,25 @@ import { library } from '@/app/library/library'
 import {
   BattleSceneSchema,
   MAX_ENEMY_COPIES,
+  pruneLayout,
+  resetLayout,
   type BattleScene,
   type SceneEnemy,
+  type SceneLayout,
   type Unit,
+  type UnitId,
 } from '@/domain'
+import { BattleScene as BattleStage, SceneEditingContext, ScaledStage } from '@/features/display'
 import { Button } from '@/shared/ui/Button'
 import { TextField } from '@/shared/ui/fields'
 
 import { SELECT } from '../action/pickers'
+import { AssetPicker } from '../assets/AssetPicker'
 import { useAutosave } from '../library/useAutosave'
 import { SaveIndicator } from '../library/SaveIndicator'
+import { previewBattle, type PreviewScene } from './layout/previewBattle'
+import { SceneLayoutEditor } from './layout/SceneLayoutEditor'
 import { LoadSceneButton } from './LoadSceneButton'
-
-const LABEL = 'text-xs font-medium tracking-wide text-slate-400 uppercase'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   const id = useId()
@@ -179,6 +185,85 @@ function DeleteScene({ scene, onDeleted }: { scene: BattleScene; onDeleted: () =
   )
 }
 
+/** The scene's battlefield at a glance, and the way into the live preview. */
+function LayoutSection({
+  scene,
+  units,
+  onOpen,
+  onReset,
+}: {
+  scene: PreviewScene
+  units: ReadonlyMap<UnitId, Unit>
+  onOpen: () => void
+  onReset: () => void
+}) {
+  const { t } = useTranslation()
+  const [armed, setArmed] = useState(false)
+  const battle = useMemo(() => previewBattle(scene, units), [scene, units])
+  const sprites = battle.combatants.length
+  const layout = pruneLayout(scene)
+  const customized = Object.values(layout).filter((s) => s.transform || s.depth !== null).length
+  return (
+    <div className="flex flex-wrap items-start gap-6">
+      {/* A shortcut for the pointer; the button next to it is the accessible way in. */}
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={onOpen}
+        className="group relative w-full max-w-md shrink-0 overflow-hidden rounded-lg ring-1 ring-slate-700 transition-shadow hover:ring-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+      >
+        <div aria-hidden="true" className="pointer-events-none">
+          <ScaledStage>
+            <SceneEditingContext.Provider value={true}>
+              <BattleStage battle={battle} />
+            </SceneEditingContext.Provider>
+          </ScaledStage>
+        </div>
+      </button>
+      <div className="flex min-w-56 flex-1 flex-col gap-3">
+        <p className="max-w-prose text-sm text-slate-300">{t('scenes.layout.hint')}</p>
+        <p className="text-sm text-slate-400 tabular-nums">
+          {sprites === 0
+            ? t('scenes.layout.empty')
+            : customized === 0
+              ? t('scenes.layout.automatic')
+              : t('scenes.layout.customized', { count: customized })}
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="primary" onClick={onOpen}>
+            <MonitorPlay className="h-4 w-4" aria-hidden="true" />
+            {t('scenes.layout.open')}
+          </Button>
+          {customized > 0 &&
+            (armed ? (
+              <>
+                <Button
+                  variant="danger"
+                  autoFocus
+                  onClick={() => {
+                    onReset()
+                    setArmed(false)
+                  }}
+                >
+                  {t('scenes.layout.resetConfirm')}
+                </Button>
+                <Button variant="ghost" onClick={() => setArmed(false)}>
+                  {t('scenes.layout.resetCancel')}
+                </Button>
+              </>
+            ) : (
+              <Button variant="ghost" onClick={() => setArmed(true)}>
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                {t('scenes.layout.reset')}
+              </Button>
+            ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 type Props = {
   scene: BattleScene
   autoFocusName?: boolean
@@ -189,14 +274,27 @@ type Props = {
 /** Editor for one prepared encounter. Saves by itself once it has a name. */
 export function SceneEditor({ scene, autoFocusName, onDeleted, onLoaded }: Props) {
   const { t } = useTranslation()
-  const party = useUnits('party') ?? []
-  const bestiary = useUnits('enemy') ?? []
+  const partyRows = useUnits('party')
+  const bestiaryRows = useUnits('enemy')
+  const party = useMemo(() => partyRows ?? [], [partyRows])
+  const bestiary = useMemo(() => bestiaryRows ?? [], [bestiaryRows])
   const [draft, setDraft] = useState(() => ({
     name: scene.name,
     partyUnitIds: scene.partyUnitIds,
     enemies: scene.enemies,
+    backgroundAssetId: scene.backgroundAssetId,
+    musicAssetId: scene.musicAssetId,
+    layout: scene.layout,
   }))
+  const [editingLayout, setEditingLayout] = useState(false)
   const set = (changes: Partial<typeof draft>) => setDraft((d) => ({ ...d, ...changes }))
+  // A file deleted from the library is cleared here too.
+  const files = { bg: scene.backgroundAssetId, music: scene.musicAssetId }
+  const [seenFiles, setSeenFiles] = useState(files)
+  if (seenFiles.bg !== files.bg || seenFiles.music !== files.music) {
+    setSeenFiles(files)
+    set({ backgroundAssetId: files.bg, musicAssetId: files.music })
+  }
 
   const parsed = BattleSceneSchema.safeParse({ ...scene, ...draft, updatedAt: 0 })
   const status = useAutosave(parsed.success ? parsed.data : null, library.saveScene)
@@ -204,6 +302,11 @@ export function SceneEditor({ scene, autoFocusName, onDeleted, onLoaded }: Props
   const enemyById = new Map(bestiary.map((u) => [u.id, u]))
   const addable = bestiary.filter((u) => !draft.enemies.some((e) => e.unitId === u.id))
   const enemyCount = draft.enemies.reduce((sum, e) => sum + e.count, 0)
+  const units = useMemo(
+    () => new Map<UnitId, Unit>([...party, ...bestiary].map((u) => [u.id, u])),
+    [party, bestiary],
+  )
+  const setLayout = (layout: SceneLayout) => set({ layout })
 
   return (
     <article aria-label={scene.name} className="flex min-w-0 flex-col gap-6">
@@ -282,21 +385,40 @@ export function SceneEditor({ scene, autoFocusName, onDeleted, onLoaded }: Props
       </Section>
 
       <Section title={t('scenes.sections.ambience')}>
-        <div className="flex flex-wrap items-end gap-6">
-          {[
-            { label: t('scenes.ambience.background'), Icon: Image },
-            { label: t('scenes.ambience.music'), Icon: Music },
-          ].map(({ label, Icon }) => (
-            <div key={label} className="flex flex-col gap-1">
-              <span className={LABEL}>{label}</span>
-              <div className="flex h-20 w-36 items-center justify-center rounded-lg border border-dashed border-slate-700 bg-slate-950/60 text-slate-400">
-                <Icon className="h-6 w-6" aria-hidden="true" />
-              </div>
-            </div>
-          ))}
-          <p className="max-w-xs pb-1 text-sm text-slate-400">{t('scenes.ambience.soon')}</p>
+        <div className="flex flex-wrap items-start gap-8">
+          <AssetPicker
+            role="background"
+            label={t('scenes.ambience.background')}
+            value={draft.backgroundAssetId}
+            onChange={(backgroundAssetId) => set({ backgroundAssetId })}
+          />
+          <AssetPicker
+            role="music"
+            label={t('scenes.ambience.music')}
+            value={draft.musicAssetId}
+            onChange={(musicAssetId) => set({ musicAssetId })}
+          />
         </div>
       </Section>
+
+      <Section title={t('scenes.sections.layout')}>
+        <LayoutSection
+          scene={draft}
+          units={units}
+          onOpen={() => setEditingLayout(true)}
+          onReset={() => setLayout(resetLayout(draft.layout))}
+        />
+      </Section>
+
+      {editingLayout && (
+        <SceneLayoutEditor
+          scene={draft}
+          units={units}
+          saveStatus={status}
+          onChange={setLayout}
+          onClose={() => setEditingLayout(false)}
+        />
+      )}
 
       <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-800 pt-4">
         <div className="flex flex-wrap items-center gap-4">

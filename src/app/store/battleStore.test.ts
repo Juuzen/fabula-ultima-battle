@@ -164,5 +164,38 @@ describe('battle store', () => {
       const [restored] = createBattleStore({ storage }).getState().battle.combatants
       expect(restored).toMatchObject({ id: 'hero', unitId: null })
     })
+
+    it('upgrades a v5 save with default music settings', () => {
+      const { audio: _dropped, ...v5Presentation } = createEmptyBattle().presentation
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({
+          state: { battle: { ...createEmptyBattle(), presentation: v5Presentation } },
+          version: 5,
+        }),
+      })
+      const { audio } = createBattleStore({ storage }).getState().battle.presentation
+      expect(audio).toEqual({ musicAssetId: null, musicVolume: 70, sfxVolume: 80, muted: false })
+    })
+
+    it('upgrades a v6 save: combatants keep the automatic formation', () => {
+      const {
+        placement: _p,
+        depth: _d,
+        ...v6Hero
+      } = createCombatant({
+        id: 'hero',
+        name: 'Hero',
+        side: 'ally',
+        maxHp: 30,
+      })
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({
+          state: { battle: { ...createEmptyBattle(), combatants: [v6Hero] } },
+          version: 6,
+        }),
+      })
+      const [restored] = createBattleStore({ storage }).getState().battle.combatants
+      expect(restored).toMatchObject({ id: 'hero', placement: null, depth: null })
+    })
   })
 })

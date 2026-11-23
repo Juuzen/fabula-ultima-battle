@@ -13,7 +13,7 @@ import { useEnemyPanelVisibility } from '../hud/useEnemyPanelVisibility'
 import { Backdrop } from './Backdrop'
 import { CombatantSprite } from './CombatantSprite'
 import { entranceDelay } from './entrance'
-import { formationSlots, type Slot } from './formation'
+import { resolveSlots, type Slot } from './formation'
 import { NameplateLayer } from './NameplateLayer'
 import { SPRITE_BOX } from './spriteBox'
 
@@ -48,11 +48,14 @@ function anchorsOf(groups: [Combatant[], Slot[]][], heightRatio = 0.55): Map<str
 
 function sideLayout(battle: BattleState, side: Side) {
   const combatants = combatantsOnSide(battle, side)
-  return { combatants, slots: formationSlots(combatants.length, side) }
+  return { combatants, slots: resolveSlots(combatants, side) }
 }
 
-/** The whole player-facing scene, in 1920×1080 stage coordinates. Purely presentational. */
-export function BattleScene({ battle }: { battle: BattleState }) {
+/**
+ * The whole player-facing scene, in 1920×1080 stage coordinates. Purely presentational.
+ * `hud: false` hides the party panel and the enemy window (the layout editor's toggle).
+ */
+export function BattleScene({ battle, hud = true }: { battle: BattleState; hud?: boolean }) {
   const enemySide = useMemo(() => sideLayout(battle, 'enemy'), [battle])
   const allySide = useMemo(() => sideLayout(battle, 'ally'), [battle])
   const anchors = useMemo(
@@ -87,7 +90,8 @@ export function BattleScene({ battle }: { battle: BattleState }) {
     <div className="absolute inset-0">
       <Backdrop assetId={battle.backgroundAssetId} />
 
-      <div className="absolute inset-0">
+      {/* Own stacking context: depth layers may use any z-index without passing the HUD. */}
+      <div className="absolute inset-0 isolate">
         <SideFormation combatants={enemies} slots={enemySide.slots} />
         <SideFormation combatants={allies} slots={allySide.slots} />
       </div>
@@ -97,7 +101,7 @@ export function BattleScene({ battle }: { battle: BattleState }) {
       <FloatingTextLayer anchors={anchors} />
       <ActionBanner />
 
-      {enemies.length > 0 && (
+      {hud && enemies.length > 0 && (
         <EnemyInfoWindow
           enemies={enemies}
           presentation={battle.presentation}
@@ -105,7 +109,7 @@ export function BattleScene({ battle }: { battle: BattleState }) {
         />
       )}
 
-      {allies.length > 0 && (
+      {hud && allies.length > 0 && (
         <div className="absolute inset-x-0 bottom-5 h-[262px]" style={{ zIndex: 1400 }}>
           <PartyPanel allies={allies} />
         </div>

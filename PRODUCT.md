@@ -41,7 +41,9 @@ Uno schermo di battaglia dedicato alle regole di Fabula Ultima (PV, PM, soglia d
 - Stage logico 16:9 a 1920×1080, scalato alla finestra.
 - UI localizzata: italiano predefinito, inglese. Codice in inglese.
 - Rispetto di "riduci movimento" del sistema operativo.
-- Ancora da costruire: libreria asset in IndexedDB, audio con crossfade, scelta di sprite/ritratti/sfondi (fase 7); preset di incontri e banner di vittoria (fase 8).
+- Libreria asset nel browser (IndexedDB, offline): immagini, video e audio caricati dalle schede, dalle scene o dalle sezioni Audio e Video, riutilizzabili ovunque. Sfondi anche video in loop; effetti personalizzati da un video, accanto a quelli integrati.
+- Audio dallo schermo giocatori: musica della scena (parte con la battaglia, in loop), cambio brano dal vivo in dissolvenza, volumi separati di musica ed effetti, silenzia. Suoni per abilità, per effetto visivo e di sistema (colpo, cura, KO, inizio battaglia).
+- Ancora da costruire: preset di incontri e banner di vittoria (fase 8).
 
 ## Brand Commitments
 
@@ -51,7 +53,7 @@ Uno schermo di battaglia dedicato alle regole di Fabula Ultima (PV, PM, soglia d
 ## Evidence on Hand
 
 - Incontro dimostrativo che copre tutti gli stati visivi: `#/display?demo=1` (`src/features/display/demo/demoBattle.ts`).
-- Nessun asset grafico definitivo: sprite, ritratti e sfondi sono placeholder finché l'utente non li carica (fase 7). Non inventare arte ufficiale né asset di terze parti.
+- Nessun asset grafico definitivo: sprite, ritratti, sfondi, video e suoni li carica l'utente; finché mancano si vedono i placeholder. Non inventare arte ufficiale né asset di terze parti.
 - Documentazione tecnica: `docs/ARCHITECTURE.md`.
 
 ## Product Principles

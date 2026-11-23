@@ -16,7 +16,8 @@ export type UnitDraft = {
   maxMp: string
   hp: string
   mp: string
-  flipSprite: boolean
+  spriteAssetId: string | null
+  portraitAssetId: string | null
   abilities: AbilityDraft[]
 }
 
@@ -38,7 +39,8 @@ export function toDraft(unit: Unit): UnitDraft {
     maxMp: String(unit.maxMp),
     hp: String(unit.hp),
     mp: String(unit.mp),
-    flipSprite: unit.flipSprite,
+    spriteAssetId: unit.spriteAssetId,
+    portraitAssetId: unit.portraitAssetId,
     abilities: unit.abilities.map((a) => ({
       ...a,
       mpCostHint: hintText(a.mpCostHint),
@@ -103,7 +105,8 @@ export function fromDraft(
     maxMp,
     hp,
     mp,
-    flipSprite: draft.flipSprite,
+    spriteAssetId: draft.spriteAssetId,
+    portraitAssetId: draft.portraitAssetId,
     abilities,
   })
   return { unit: parsed.success ? parsed.data : null, errors }
@@ -114,6 +117,7 @@ export function newAbilityDraft(id: string, name: string): AbilityDraft {
     id,
     name,
     effect: 'slash',
+    soundAssetId: null,
     kind: 'damage',
     statuses: [],
     mpCostHint: '',
