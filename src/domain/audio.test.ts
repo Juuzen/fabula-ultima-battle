@@ -35,7 +35,7 @@ describe('audio settings', () => {
     expect(state.presentation.enemyPanel).toEqual(createEmptyBattle().presentation.enemyPanel)
   })
 
-  it("LOAD_SCENE brings the scene's music; END_BATTLE stops it and keeps the volumes", () => {
+  it("LOAD_SCENE brings the scene's music; END_SCENE stops it and keeps the volumes", () => {
     const quiet = run(createEmptyBattle(), {
       type: 'SET_PRESENTATION',
       changes: { audio: { musicVolume: 30 } },
@@ -48,7 +48,13 @@ describe('audio settings', () => {
       combatants: [createCombatant({ id: 'gob', name: 'Goblin', side: 'enemy', maxHp: 10 })],
     })
     expect(loaded.presentation.audio).toMatchObject({ musicAssetId: 'harbour', musicVolume: 30 })
-    const ended = run(run(loaded, { type: 'START_BATTLE' }), { type: 'END_BATTLE' })
+    const won = run(run(loaded, { type: 'START_BATTLE' }), {
+      type: 'END_BATTLE',
+      outcome: { kind: 'victory', text: '' },
+    })
+    // The track stays set while the banner is up (the Display plays the victory music).
+    expect(won.presentation.audio.musicAssetId).toBe('harbour')
+    const ended = run(won, { type: 'END_SCENE' })
     expect(ended.presentation.audio).toMatchObject({ musicAssetId: null, musicVolume: 30 })
   })
 })

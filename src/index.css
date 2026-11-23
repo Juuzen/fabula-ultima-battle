@@ -113,3 +113,27 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
+
+/* Victory banner: one sweep of light across the words, then it rests (no idle glow). */
+.outcome-shine {
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 65%
+  );
+  transform: translateX(-120%);
+  animation: outcome-shine 1.1s ease-out 0.45s 1 forwards;
+}
+
+@keyframes outcome-shine {
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .outcome-shine {
+    display: none;
+  }
+}

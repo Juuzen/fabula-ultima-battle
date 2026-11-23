@@ -100,7 +100,7 @@ describe('battle scenes', () => {
         createCombatant(combatantFromUnit(goblin, 'c2')),
       ],
     }
-    const after = run(before, { type: 'END_BATTLE' }).state
+    const after = run(before, { type: 'END_SCENE' }).state
     expect(partyLeavingField(before, after)).toEqual([{ unitId: 'u-lyra', hp: 7, mp: 5 }])
     expect(partyLeavingField(before, before)).toEqual([])
   })

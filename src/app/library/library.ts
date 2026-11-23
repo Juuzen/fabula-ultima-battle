@@ -218,9 +218,11 @@ export function createLibrary(db: LibraryDb = new LibraryDb(), now: () => number
         (s) => s.backgroundAssetId === id || s.musicAssetId === id,
       ).length
       const inEffects = effects.filter((e) => e.videoAssetId === id || e.soundAssetId === id).length
-      const inSounds = [...Object.values(sounds.system), ...Object.values(sounds.effects)].filter(
-        (v) => v === id,
-      ).length
+      const inSounds = [
+        ...Object.values(sounds.system),
+        ...Object.values(sounds.effects),
+        ...Object.values(sounds.outcomes).map((o) => o.assetId),
+      ].filter((v) => v === id).length
       return inUnits + inScenes + inEffects + inSounds
     },
 
@@ -272,7 +274,20 @@ export function createLibrary(db: LibraryDb = new LibraryDb(), now: () => number
             ) as Record<K, string | null>
           await db.settings.put({
             key: SOUNDS_KEY,
-            value: { system: unset(sounds.system), effects: unset(sounds.effects) },
+            value: {
+              system: unset(sounds.system),
+              effects: unset(sounds.effects),
+              outcomes: {
+                victory: {
+                  ...sounds.outcomes.victory,
+                  assetId: clear(sounds.outcomes.victory.assetId),
+                },
+                defeat: {
+                  ...sounds.outcomes.defeat,
+                  assetId: clear(sounds.outcomes.defeat.assetId),
+                },
+              },
+            },
           })
         },
       )
@@ -318,6 +333,10 @@ export function createLibrary(db: LibraryDb = new LibraryDb(), now: () => number
       const parsed = SoundSettingsSchema.safeParse({
         system: { ...defaults.system, ...value?.system },
         effects: { ...defaults.effects, ...value?.effects },
+        outcomes: {
+          victory: { ...defaults.outcomes.victory, ...value?.outcomes?.victory },
+          defeat: { ...defaults.outcomes.defeat, ...value?.outcomes?.defeat },
+        },
       })
       return parsed.success ? parsed.data : defaults
     },

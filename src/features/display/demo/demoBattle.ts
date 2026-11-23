@@ -7,6 +7,7 @@ import { createCombatant, createDefaultPresentation, type BattleState } from '@/
 export const demoBattle: BattleState = {
   name: 'Demo',
   phase: 'active',
+  outcome: null,
   backgroundAssetId: null,
   presentation: {
     ...createDefaultPresentation(),

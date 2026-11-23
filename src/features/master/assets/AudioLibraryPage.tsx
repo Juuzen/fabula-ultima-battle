@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next'
 
 import { useSoundSettings } from '@/app/library/assetHooks'
 import { library } from '@/app/library/library'
-import { BUILTIN_EFFECTS, SYSTEM_SOUNDS, type SoundSettings } from '@/domain'
+import { BUILTIN_EFFECTS, OUTCOME_MUSIC_KINDS, SYSTEM_SOUNDS, type SoundSettings } from '@/domain'
+import { Toggle } from '@/shared/ui/fields'
 
 import { AssetPicker } from './AssetPicker'
 import { AssetShelf } from './AssetShelf'
@@ -36,6 +37,38 @@ function SoundSlots() {
               }
             />
           ))}
+        </div>
+      </LibraryBlock>
+      <LibraryBlock
+        title={t('master.audioLibrary.outcomes')}
+        hint={t('master.audioLibrary.outcomesHint')}
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
+          {OUTCOME_MUSIC_KINDS.map((kind) => {
+            const music = settings.outcomes[kind]
+            const set = (changes: Partial<typeof music>) =>
+              void save({
+                ...settings,
+                outcomes: { ...settings.outcomes, [kind]: { ...music, ...changes } },
+              })
+            return (
+              <div key={kind} className="flex flex-col gap-3">
+                <AssetPicker
+                  role="music"
+                  size="sm"
+                  label={t(`outcome.kinds.${kind}`)}
+                  value={music.assetId}
+                  onChange={(assetId) => set({ assetId })}
+                />
+                <Toggle
+                  label={t('master.audioLibrary.loopOf', { kind: t(`outcome.kinds.${kind}`) })}
+                  checked={music.loop}
+                  disabled={!music.assetId}
+                  onChange={(loop) => set({ loop })}
+                />
+              </div>
+            )
+          })}
         </div>
       </LibraryBlock>
       <LibraryBlock

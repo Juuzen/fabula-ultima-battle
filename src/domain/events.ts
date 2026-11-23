@@ -1,6 +1,7 @@
-import type { EffectRef } from './effect'
 import type { BattleState, Presentation } from './battle'
 import type { Combatant, CombatantId } from './combatant'
+import type { EffectRef } from './effect'
+import type { Outcome } from './outcome'
 import type { StatusId } from './status'
 
 /**
@@ -43,6 +44,9 @@ export type BattleEvent =
       soundAssetId: string | null
       targetIds: CombatantId[]
     }
-  | { type: 'BATTLE_ENDED'; removedIds: CombatantId[] }
+  | { type: 'BATTLE_ENDED'; outcome: Outcome }
+  | { type: 'BATTLE_RESUMED' }
+  /** The scene is over: everyone leaves the field and the players see the waiting screen. */
+  | { type: 'SCENE_ENDED'; removedIds: CombatantId[] }
 
 export type BattleEventType = BattleEvent['type']

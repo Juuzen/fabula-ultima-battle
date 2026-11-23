@@ -12,8 +12,11 @@ export type AudioEngine = {
   /** Call from a click: browsers only let a page make sound after a user gesture. */
   unlock: () => void
   setLevels: (levels: AudioLevels) => void
-  /** Crossfades to a looping track; null fades out. The same track keeps playing. */
-  playMusic: (assetId: string | null) => void
+  /**
+   * Crossfades to a track, looping unless told otherwise (a fanfare plays once); null fades
+   * out. The same track keeps playing.
+   */
+  playMusic: (assetId: string | null, options?: { loop?: boolean }) => void
   /** Plays a sound effect once (ignored until unlocked, so nothing piles up). */
   playSfx: (assetId: string) => void
   dispose: () => void
@@ -68,13 +71,13 @@ export function createAudioEngine({
     )
   }
 
-  const startTrack = async (assetId: string) => {
+  const startTrack = async (assetId: string, loop: boolean) => {
     const blob = await readBlob(assetId).catch(() => undefined)
     // Changed again (or closed) while the file was loading: that request is stale.
     if (disposed || wanted !== assetId || !blob) return
     const url = URL.createObjectURL(blob)
     const element = new Audio(url)
-    element.loop = true
+    element.loop = loop
     const gain = context.createGain()
     gain.gain.value = 0
     context.createMediaElementSource(element).connect(gain)
@@ -113,15 +116,18 @@ export function createAudioEngine({
       sfx.gain.setTargetAtTime(toGain(levels.sfx), now, 0.05)
       master.gain.setTargetAtTime(levels.muted ? 0 : 1, now, 0.05)
     },
-    playMusic(assetId) {
-      if (assetId === wanted) return
+    playMusic(assetId, { loop = true } = {}) {
+      if (assetId === wanted) {
+        if (current) current.element.loop = loop
+        return
+      }
       wanted = assetId
       if (assetId === null) {
         if (current) stopTrack(current)
         current = null
         return
       }
-      void startTrack(assetId)
+      void startTrack(assetId, loop)
     },
     playSfx(assetId) {
       if (context.state !== 'running') return

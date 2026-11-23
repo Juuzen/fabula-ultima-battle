@@ -105,7 +105,11 @@ describe('library files', () => {
     })
     await lib.saveEffect(effect(video.id, boom.id))
     const sounds = await lib.getSoundSettings()
-    await lib.saveSoundSettings({ ...sounds, system: { ...sounds.system, hit: boom.id } })
+    await lib.saveSoundSettings({
+      ...sounds,
+      system: { ...sounds.system, hit: boom.id },
+      outcomes: { ...sounds.outcomes, victory: { assetId: music.id, loop: true } },
+    })
 
     expect(await lib.assetUsage(boom.id)).toBe(3) // ability, effect, hit sound
     expect(await lib.assetUsage(art.id)).toBe(1)
@@ -120,8 +124,10 @@ describe('library files', () => {
     // The ability that used the deleted effect goes back to no effect.
     expect((await lib.getUnits(['gob'])).get('gob')?.abilities[0]?.effect).toBeNull()
 
+    expect(await lib.assetUsage(music.id)).toBe(2) // scene music, victory music
     await lib.deleteAsset(art.id)
     await lib.deleteAsset(music.id)
+    expect((await lib.getSoundSettings()).outcomes.victory).toEqual({ assetId: null, loop: true })
     expect((await lib.getUnits(['gob'])).get('gob')?.spriteAssetId).toBeNull()
     expect((await lib.listScenes())[0]?.musicAssetId).toBeNull()
     expect(await lib.listAssets()).toEqual([])
@@ -134,6 +140,8 @@ describe('library files', () => {
     const sounds = await lib.getSoundSettings()
     expect(sounds.system).toMatchObject({ ko: 'snd-ko', hit: null })
     expect(sounds.effects.fire).toBeNull()
+    // Settings saved before the end-of-battle music get it with no track.
+    expect(sounds.outcomes.defeat).toEqual({ assetId: null, loop: false })
   })
 
   it('old sheets without ability sounds still parse', async () => {

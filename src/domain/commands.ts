@@ -21,6 +21,7 @@ import {
 } from './combatant'
 import { domainError, type DomainError } from './errors'
 import type { BattleEvent } from './events'
+import { OutcomeSchema, type Outcome } from './outcome'
 import type { StatusId } from './status'
 import { renamedCopy } from './unit'
 
@@ -87,7 +88,12 @@ export type BattleCommand =
   /** A choreographed action (attack, spell…) on one or more targets: one undo step. */
   | { type: 'PERFORM_ACTION'; action: Action }
   /** Ends the scene: everyone leaves the field, back to an empty battle in preparation. */
-  | { type: 'END_BATTLE' }
+  /** The battle is over: its banner goes up and the screen stays as it is. */
+  | { type: 'END_BATTLE'; outcome: Outcome }
+  /** Takes the banner down and goes on fighting (e.g. an ending chosen by mistake). */
+  | { type: 'RESUME_BATTLE' }
+  /** Clears the field and goes back to preparation: the players see the waiting screen. */
+  | { type: 'END_SCENE' }
 
 export type CommandResult =
   { ok: true; state: BattleState; events: BattleEvent[] } | { ok: false; error: DomainError }
@@ -319,6 +325,7 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
         ...state,
         name: command.name.trim(),
         phase: 'preparation',
+        outcome: null,
         backgroundAssetId: command.backgroundAssetId,
         combatants: [],
         presentation: mergePresentation(state.presentation, {
@@ -454,16 +461,35 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
       return performAction(state, command.action)
 
     case 'START_BATTLE':
-      if (state.phase === 'active') return ok(state, [])
+      // An ended battle goes on with RESUME_BATTLE, not by starting again.
+      if (state.phase !== 'preparation') return ok(state, [])
       return ok({ ...state, phase: 'active' }, [{ type: 'BATTLE_STARTED' }])
 
     case 'END_BATTLE': {
+      if (state.phase !== 'active') {
+        return fail(domainError('BATTLE_NOT_ACTIVE', 'Only a battle in progress can end'))
+      }
+      const parsed = OutcomeSchema.safeParse(command.outcome)
+      if (!parsed.success) return fail(domainError('INVALID_OUTCOME', parsed.error.message))
+      return ok({ ...state, phase: 'ended', outcome: parsed.data }, [
+        { type: 'BATTLE_ENDED', outcome: parsed.data },
+      ])
+    }
+
+    case 'RESUME_BATTLE':
+      if (state.phase !== 'ended') {
+        return fail(domainError('BATTLE_NOT_ENDED', 'Only an ended battle can be resumed'))
+      }
+      return ok({ ...state, phase: 'active', outcome: null }, [{ type: 'BATTLE_RESUMED' }])
+
+    case 'END_SCENE': {
       const removedIds = state.combatants.map((c) => c.id)
       return ok(
         {
           ...state,
           name: '',
           phase: 'preparation',
+          outcome: null,
           backgroundAssetId: null,
           combatants: [],
           // The scene's music goes with it; volumes stay as the GM set them.
@@ -473,7 +499,7 @@ export function applyCommand(state: BattleState, command: BattleCommand): Comman
             audio: { musicAssetId: null },
           }),
         },
-        [{ type: 'BATTLE_ENDED', removedIds }],
+        [{ type: 'SCENE_ENDED', removedIds }],
       )
     }
   }

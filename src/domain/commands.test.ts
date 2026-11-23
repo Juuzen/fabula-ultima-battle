@@ -283,9 +283,53 @@ describe('applyCommand', () => {
       expect(run(started.state, { type: 'START_BATTLE' }).events).toEqual([])
     })
 
-    it('END_BATTLE goes back to preparation', () => {
+    it('END_BATTLE puts the outcome up and keeps the field; END_SCENE goes back to preparation', () => {
       const started = run(battleWith(), { type: 'START_BATTLE' }).state
-      expect(run(started, { type: 'END_BATTLE' }).state.phase).toBe('preparation')
+      const ended = run(started, {
+        type: 'END_BATTLE',
+        outcome: { kind: 'flee', text: '  Ritirata!  ' },
+      })
+      expect(ended.state.phase).toBe('ended')
+      expect(ended.state.outcome).toEqual({ kind: 'flee', text: 'Ritirata!' })
+      expect(ended.state.combatants).toEqual(started.combatants)
+      expect(ended.events).toEqual([
+        { type: 'BATTLE_ENDED', outcome: { kind: 'flee', text: 'Ritirata!' } },
+      ])
+      // Not a second start: an ended battle goes on with RESUME_BATTLE.
+      expect(run(ended.state, { type: 'START_BATTLE' }).state.phase).toBe('ended')
+
+      const scene = run(ended.state, { type: 'END_SCENE' }).state
+      expect(scene.phase).toBe('preparation')
+      expect(scene.outcome).toBeNull()
+      expect(scene.combatants).toEqual([])
+    })
+
+    it('RESUME_BATTLE takes the banner down and goes on fighting', () => {
+      const started = run(battleWith(), { type: 'START_BATTLE' }).state
+      const ended = run(started, { type: 'END_BATTLE', outcome: { kind: 'victory', text: '' } })
+      const resumed = run(ended.state, { type: 'RESUME_BATTLE' })
+      expect(resumed.state).toEqual(started)
+      expect(resumed.events).toEqual([{ type: 'BATTLE_RESUMED' }])
+      expect(applyCommand(started, { type: 'RESUME_BATTLE' })).toMatchObject({
+        ok: false,
+        error: { code: 'BATTLE_NOT_ENDED' },
+      })
+    })
+
+    it('ends only a battle in progress, and a custom ending needs its words', () => {
+      const end = (text: string) =>
+        ({ type: 'END_BATTLE', outcome: { kind: 'custom', text } }) as const
+      expect(applyCommand(battleWith(), end('Tregua'))).toMatchObject({
+        ok: false,
+        error: { code: 'BATTLE_NOT_ACTIVE' },
+      })
+      const started = run(battleWith(), { type: 'START_BATTLE' }).state
+      expect(applyCommand(started, end('   '))).toMatchObject({
+        ok: false,
+        error: { code: 'INVALID_OUTCOME' },
+      })
+      expect(applyCommand(started, end('x'.repeat(41)))).toMatchObject({ ok: false })
+      expect(run(started, end('Tregua')).state.outcome).toEqual({ kind: 'custom', text: 'Tregua' })
     })
   })
 
@@ -369,17 +413,17 @@ describe('applyCommand', () => {
     })
   })
 
-  it('END_BATTLE empties the field, clears the scene and resets enemy visibility', () => {
+  it('END_SCENE empties the field, clears the scene and resets enemy visibility', () => {
     const prepared = run(battleWith(), {
       type: 'SET_PRESENTATION',
       changes: { revealAllEnemyStats: true, enemyPanel: { visible: true } },
     }).state
-    const { state, events } = run(prepared, { type: 'END_BATTLE' })
+    const { state, events } = run(prepared, { type: 'END_SCENE' })
     expect(state.combatants).toEqual([])
     expect(state.name).toBe('')
     expect(state.backgroundAssetId).toBeNull()
     expect(state.presentation.revealAllEnemyStats).toBe(false)
     expect(state.presentation.enemyPanel.visible).toBe(false)
-    expect(events).toEqual([{ type: 'BATTLE_ENDED', removedIds: ['hero', 'mage', 'gob1', 'gob2'] }])
+    expect(events).toEqual([{ type: 'SCENE_ENDED', removedIds: ['hero', 'mage', 'gob1', 'gob2'] }])
   })
 })

@@ -191,7 +191,7 @@ describe('unit libraries', () => {
     await screen.findByRole('article', { name: 'Lyra' })
 
     act(() => {
-      battleStore.getState().dispatch({ type: 'END_BATTLE' })
+      battleStore.getState().dispatch({ type: 'END_SCENE' })
     })
     const editor = await screen.findByRole('article', { name: 'Lyra' })
     await waitFor(() => expect(within(editor).getByLabelText('PV attuali')).toHaveValue(9))

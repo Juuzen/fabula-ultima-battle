@@ -63,8 +63,22 @@ describe('projectEventsForPlayers', () => {
     expect(step(battle('preparation'), { type: 'START_BATTLE' })).toEqual([
       { type: 'BATTLE_STARTED' },
     ])
-    expect(step(battle('active'), { type: 'END_BATTLE' })).toEqual([
-      { type: 'BATTLE_ENDED', removedIds: ['hero', 'orc'] },
+    const victory = { kind: 'victory', text: '' } as const
+    expect(step(battle('active'), { type: 'END_BATTLE', outcome: victory })).toEqual([
+      { type: 'BATTLE_ENDED', outcome: victory },
     ])
+    expect(step(battle('active'), { type: 'END_SCENE' })).toEqual([
+      { type: 'SCENE_ENDED', removedIds: ['hero', 'orc'] },
+    ])
+  })
+
+  it('keeps showing the field after the battle ends, until the scene does', () => {
+    const ended = {
+      ...battle('active'),
+      phase: 'ended' as const,
+      outcome: { kind: 'flee' as const, text: '' },
+    }
+    expect(projectForPlayers(ended).combatants).toHaveLength(2)
+    expect(step(ended, { type: 'DAMAGE', id: 'orc', amount: 5 })).toHaveLength(1)
   })
 })
