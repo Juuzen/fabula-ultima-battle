@@ -128,7 +128,7 @@ Libreria: **Motion** (`motion/react`). `MotionConfig reducedMotion="user"` rispe
   Anche i numeri di PV e PM scorrono verso il nuovo valore (`AnimatedNumber`, che aggiorna il DOM senza far ri-renderizzare React).
 
 - **Entrate e uscite:** i nemici entrano da sinistra e il party da destra, scaglionati di 0,12 s. Chi viene rimosso svanisce. Quando la formazione cambia (riordino, aggiunte), gli sprite e le targhette scivolano nelle nuove posizioni.
-- **Dissolvenze di inizio e fine battaglia:** `PlayerScreen` passa da attesa a battaglia e viceversa con una dissolvenza al nero di 0,6 s per lato (`AnimatePresence mode="wait"`). A fine battaglia la scena svanisce mostrando ancora l'ultimo fotogramma, nemici compresi, prima della schermata di attesa.
+- **Dissolvenze di inizio e fine battaglia:** `PlayerScreen` passa da attesa a battaglia e viceversa con una dissolvenza al nero di 0,6 s per lato (`AnimatePresence mode="wait"`). A fine scena (`END_SCENE`) la battaglia svanisce mostrando ancora l'ultimo fotogramma, nemici e banner dell'esito compresi, prima della schermata di attesa.
 - **Test:** `MotionGlobalConfig.skipAnimations = true`, così i test verificano gli stati finali e non i singoli fotogrammi.
 
 ## Rotte
