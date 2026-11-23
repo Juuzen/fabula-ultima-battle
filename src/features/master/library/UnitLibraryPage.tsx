@@ -45,7 +45,8 @@ export function UnitLibraryPage({ kind }: { kind: UnitKind }) {
   const { t } = useTranslation()
   const units = useUnits(kind)
   // Riposo would refill sheets the field is about to overwrite: not during a fight.
-  const fighting = useBattleStore((s) => s.battle.phase === 'active')
+  // (also after the battle ends: the party is still on the field until the scene ends)
+  const fighting = useBattleStore((s) => s.battle.phase !== 'preparation')
   const [params, setParams] = useSearchParams()
   const [createdId, setCreatedId] = useState<string | null>(null)
   const title = t(kind === 'party' ? 'master.nav.party' : 'master.nav.enemies')

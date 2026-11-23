@@ -6,6 +6,7 @@ import { combatantsOnSide, type BattleState, type Combatant, type Side } from '@
 import { useChoreoStore } from '../choreography/choreoStore'
 import { ActionBanner } from '../effects/ActionBanner'
 import { EffectLayer } from '../effects/EffectLayer'
+import { OutcomeBanner } from '../effects/OutcomeBanner'
 import { FloatingTextLayer, type Anchor } from '../fx/FloatingTextLayer'
 import { EnemyInfoWindow } from '../hud/EnemyInfoWindow'
 import { PartyPanel } from '../hud/PartyPanel'
@@ -114,6 +115,8 @@ export function BattleScene({ battle, hud = true }: { battle: BattleState; hud?:
           <PartyPanel allies={allies} />
         </div>
       )}
+
+      <OutcomeBanner outcome={battle.outcome} />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import type { AssetId, CustomEffect, SoundSettings } from './asset'
+import type { BattleState } from './battle'
 import { customEffectId, isBuiltinEffect, type EffectRef } from './effect'
 import type { BattleEvent } from './events'
 
@@ -47,4 +48,27 @@ export function soundCues(
   if (events.some((e) => e.type === 'KNOCKED_OUT')) push(settings.system.ko)
 
   return cues
+}
+
+export type MusicCue = { assetId: AssetId; loop: boolean }
+
+/**
+ * The track the Display should play: the battle's while it is on; once it ends, the victory
+ * or defeat music (looping or once, as set in the Audio section), and silence for an escape
+ * or a custom ending. Nothing on the waiting screen.
+ */
+export function musicFor(
+  battle: Pick<BattleState, 'phase' | 'outcome' | 'presentation'>,
+  settings: SoundSettings,
+): MusicCue | null {
+  if (battle.phase === 'active') {
+    const assetId = battle.presentation.audio.musicAssetId
+    return assetId ? { assetId, loop: true } : null
+  }
+  const kind = battle.outcome?.kind
+  if (battle.phase === 'ended' && (kind === 'victory' || kind === 'defeat')) {
+    const { assetId, loop } = settings.outcomes[kind]
+    return assetId ? { assetId, loop } : null
+  }
+  return null
 }

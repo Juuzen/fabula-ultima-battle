@@ -197,5 +197,15 @@ describe('battle store', () => {
       const [restored] = createBattleStore({ storage }).getState().battle.combatants
       expect(restored).toMatchObject({ id: 'hero', placement: null, depth: null })
     })
+
+    it('upgrades a v7 save: no outcome yet', () => {
+      const { outcome: _none, ...v7 } = createEmptyBattle()
+      const storage = memoryStorage({
+        [BATTLE_STORAGE_KEY]: JSON.stringify({ state: { battle: v7 }, version: 7 }),
+      })
+      const { battle } = createBattleStore({ storage }).getState()
+      expect(battle.outcome).toBeNull()
+      expect(battle.phase).toBe('preparation')
+    })
   })
 })

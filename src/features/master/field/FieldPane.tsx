@@ -53,7 +53,8 @@ function FieldGroup({ side }: { side: Side }) {
 export function FieldPane() {
   const { t } = useTranslation()
   const empty = useBattleStore((s) => s.battle.combatants.length === 0)
-  const active = useBattleStore((s) => s.battle.phase === 'active')
+  // Started (in progress, or ended with its banner up): the field is set.
+  const active = useBattleStore((s) => s.battle.phase !== 'preparation')
   const [setup, setSetup] = useState(empty && !active)
 
   // Back to an empty field (battle ended, scene cleared): setting up again.

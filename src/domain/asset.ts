@@ -84,6 +84,14 @@ export type CustomEffect = z.infer<typeof CustomEffectSchema>
 export const SYSTEM_SOUNDS = ['hit', 'heal', 'ko', 'battleStart'] as const
 export type SystemSound = (typeof SYSTEM_SOUNDS)[number]
 
+/** Music that replaces the battle's when it ends in victory or defeat. */
+export const OutcomeMusicSchema = z.object({
+  assetId: AssetIdSchema.nullable(),
+  /** Loop it (a theme) or play it once (a fanfare). */
+  loop: z.boolean(),
+})
+export type OutcomeMusic = z.infer<typeof OutcomeMusicSchema>
+
 /** Which sound plays when, stored once in the library and read by the Display. */
 export const SoundSettingsSchema = z.object({
   /** Fallbacks when an action has no sound of its own: hit, heal, KO, start of battle. */
@@ -100,6 +108,8 @@ export const SoundSettingsSchema = z.object({
       z.ZodNullable<typeof AssetIdSchema>
     >,
   ),
+  /** Victory and defeat music; flee and custom endings have none. */
+  outcomes: z.object({ victory: OutcomeMusicSchema, defeat: OutcomeMusicSchema }),
 })
 export type SoundSettings = z.infer<typeof SoundSettingsSchema>
 
@@ -114,6 +124,10 @@ export function createDefaultSoundSettings(): SoundSettings {
       thunder: null,
       light: null,
       shadow: null,
+    },
+    outcomes: {
+      victory: { assetId: null, loop: false },
+      defeat: { assetId: null, loop: false },
     },
   }
 }

@@ -62,12 +62,32 @@
     },
     "battle": {
       "end": "End battle",
-      "endConfirm": "Confirm: end the scene",
       "endCancel": "Cancel",
-      "endHint": "Everyone leaves the field; party HP and MP go back to their sheets.",
+      "endHint": "Choose the outcome: the banner appears to the players and the screen stays as it is until you end the scene.",
       "start": "Start battle",
       "startHint": "Enemies appear on the player screen.",
-      "prepHint": "Enemies you add stay hidden from the players until you start the battle."
+      "prepHint": "Enemies you add stay hidden from the players until you start the battle.",
+      "endTitle": "End of battle",
+      "endKind": "Outcome",
+      "endText": "Banner text",
+      "endTextDefault": "Empty: “{{text}}”.",
+      "endTextRequired": "Required for a custom outcome.",
+      "endShow": "Show the banner",
+      "abortScene": "Or end the scene without a banner",
+      "ended": "Battle over: {{kind}}",
+      "resume": "Resume battle",
+      "resumeHint": "Takes the banner down and goes back to fighting.",
+      "endScene": "End scene",
+      "endSceneConfirm": "Confirm: end the scene",
+      "endSceneHint": "Everyone leaves the field; party HP and MP go back to their sheets. The players see the waiting screen.",
+      "suggest": {
+        "victory": "Victory",
+        "defeat": "Defeat"
+      },
+      "suggestHint": {
+        "victory": "Every enemy is KO: show the victory.",
+        "defeat": "The whole party is KO: show the defeat."
+      }
     },
     "errors": {
       "dismiss": "Dismiss",
@@ -79,7 +99,10 @@
       "INVALID_PRESENTATION": "Invalid setting.",
       "INVALID_ACTION": "Invalid action: check targets and values.",
       "NOT_ENOUGH_MP": "Not enough MP for this action.",
-      "UNIT_ALREADY_DEPLOYED": "This character is already on the field."
+      "UNIT_ALREADY_DEPLOYED": "This character is already on the field.",
+      "BATTLE_NOT_ACTIVE": "Only a battle in progress can end.",
+      "BATTLE_NOT_ENDED": "The battle has not ended.",
+      "INVALID_OUTCOME": "Write the banner text (40 characters at most)."
     },
     "connected": "Player screen connected",
     "notConnected": "Player screen not connected",
@@ -222,7 +245,10 @@
         "battleStart": "Battle start"
       },
       "effectSounds": "Built-in effect sounds",
-      "effectSoundsHint": "They play on impact. Custom effects have their own in the Video section."
+      "effectSoundsHint": "They play on impact. Custom effects have their own in the Video section.",
+      "outcomes": "End of battle",
+      "outcomesHint": "They replace the battle music with a crossfade. Escape and custom endings have no music: the battle fades into silence.",
+      "loopOf": "Loop {{kind}}"
     },
     "customEffect": {
       "add": "New effect",
@@ -571,5 +597,18 @@
     "stop": "Stop",
     "size": "{{size}}",
     "storage": "Storage used: {{used}} of {{quota}}"
+  },
+  "outcome": {
+    "kinds": {
+      "victory": "Victory",
+      "defeat": "Defeat",
+      "flee": "Escape",
+      "custom": "Custom"
+    },
+    "default": {
+      "victory": "Victory!",
+      "defeat": "Defeat…",
+      "flee": "Escaped!"
+    }
   }
 }

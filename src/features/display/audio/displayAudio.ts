@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 
 import { library } from '@/app/library/library'
-import { soundCues, type BattleEvent, type BattleState } from '@/domain'
+import { musicFor, soundCues, type BattleEvent, type BattleState } from '@/domain'
 import { createAudioEngine, type AudioEngine } from '@/infra/audio/audioEngine'
 
 import { useLibraryFeed } from '../state/libraryFeed'
@@ -28,12 +28,16 @@ export function playUpdateSounds(events: BattleEvent[]) {
 }
 
 /**
- * Follows the battle's audio settings: volumes and mute at once, and the current track while
- * the battle is on. In preparation, or with the Master closed, the music fades out.
+ * Follows the battle's audio settings: volumes and mute at once, and the track (see musicFor):
+ * the battle's while it is on, then the victory or defeat music. In preparation, or with the
+ * Master closed, the music fades out.
  */
 export function useDisplayMusic(battle: BattleState | null) {
   const audio = battle?.presentation.audio
-  const track = battle?.phase === 'active' ? (audio?.musicAssetId ?? null) : null
+  const sounds = useLibraryFeed((s) => s.sounds)
+  const cue = battle ? musicFor(battle, sounds) : null
+  const track = cue?.assetId ?? null
+  const loop = cue?.loop ?? true
   const music = audio?.musicVolume
   const sfx = audio?.sfxVolume
   const muted = audio?.muted
@@ -44,6 +48,6 @@ export function useDisplayMusic(battle: BattleState | null) {
   }, [music, sfx, muted])
 
   useEffect(() => {
-    displayAudio()?.playMusic(track)
-  }, [track])
+    displayAudio()?.playMusic(track, { loop })
+  }, [track, loop])
 }

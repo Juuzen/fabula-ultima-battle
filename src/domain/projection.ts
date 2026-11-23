@@ -5,10 +5,11 @@ import type { BattleEvent } from './events'
 /**
  * What the players are allowed to see. During preparation they only get the waiting
  * screen, so no combatant is sent at all (enemies being set up stay secret, not just
- * hidden by CSS). Pure, so the Master can use it for both the sync and its preview.
+ * hidden by CSS). Once the battle has started (and after it ends, until the scene does)
+ * they see everything. Pure, so the Master can use it for both the sync and its preview.
  */
 export function projectForPlayers(battle: BattleState): BattleState {
-  if (battle.phase === 'active') return battle
+  if (battle.phase !== 'preparation') return battle
   return { ...battle, combatants: [] }
 }
 
@@ -31,7 +32,7 @@ export function projectEventsForPlayers(
 ): BattleEvent[] {
   return events.filter((event) => {
     if (event.type === 'BATTLE_LOADED') return false
-    if (next.phase === 'active') return true
+    if (next.phase !== 'preparation') return true
     return event.type !== 'ACTION_PERFORMED' && subjectOf(event) === null
   })
 }

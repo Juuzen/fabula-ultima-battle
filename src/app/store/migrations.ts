@@ -95,5 +95,10 @@ export function migratePersistedBattle(persisted: unknown, fromVersion: number):
     }
   }
 
+  if (fromVersion < 8 && data?.battle) {
+    // v8: how a battle ended (the ended phase is new, so older saves have no outcome).
+    data = { ...data, battle: { outcome: null, ...data.battle } }
+  }
+
   return data
 }

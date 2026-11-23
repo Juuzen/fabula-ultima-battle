@@ -4,17 +4,17 @@ Web app React offline che simula uno schermo di battaglia JRPG (Final Fantasy, O
 
 ## Decisioni di perimetro (v1)
 
-| Tema           | Decisione                                                                                                                                                                                                                                                                                  |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Regole         | **PV** e soglia di **Crisi** (≤ metà PV max), **PM** tracciati e mostrati. Gli **status** (Lento, Confuso, Debole, Scosso, Furente, Avvelenato) sono **solo visivi**, senza effetti sul calcolo. **PI non gestiti.**                                                                       |
-| Turni          | Nessuna gestione dei turni: il GM sceglie chi agisce.                                                                                                                                                                                                                                      |
-| Asset          | Caricati dall'app e salvati in IndexedDB (disponibili offline).                                                                                                                                                                                                                            |
-| Audio          | Riprodotto dalla finestra **Display**.                                                                                                                                                                                                                                                     |
-| Sprite         | PNG statici o GIF animate, specchiati via CSS. **Ritratto separato** per lo slot del party.                                                                                                                                                                                                |
-| Info nemici    | Nome, status e Crisi/KO sempre visibili (targhetta sul campo) fino a fine battaglia. PV/PM solo se rivelati dal GM, per singolo nemico o tutti insieme. Finestra nemici manuale o automatica (compare quando cambia qualcosa e sparisce dopo X secondi).                                   |
-| Fase battaglia | **In preparazione**: i giocatori vedono una schermata di attesa ("In attesa della battaglia…") con sfondo configurabile, e non ricevono nessun combattente. **Inizia battaglia** → **In corso**: party e nemici. **Termina battaglia**: nemici rimossi, si torna alla schermata di attesa. |
-| Lingue         | Codice in inglese, UI localizzata (it di default, en).                                                                                                                                                                                                                                     |
-| Browser        | Basati su Chromium (Chrome/Edge): necessari per i video `.webm` con canale alpha.                                                                                                                                                                                                          |
+| Tema           | Decisione                                                                                                                                                                                                                                                                                                                                                |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Regole         | **PV** e soglia di **Crisi** (≤ metà PV max), **PM** tracciati e mostrati. Gli **status** (Lento, Confuso, Debole, Scosso, Furente, Avvelenato) sono **solo visivi**, senza effetti sul calcolo. **PI non gestiti.**                                                                                                                                     |
+| Turni          | Nessuna gestione dei turni: il GM sceglie chi agisce.                                                                                                                                                                                                                                                                                                    |
+| Asset          | Caricati dall'app e salvati in IndexedDB (disponibili offline).                                                                                                                                                                                                                                                                                          |
+| Audio          | Riprodotto dalla finestra **Display**.                                                                                                                                                                                                                                                                                                                   |
+| Sprite         | PNG statici o GIF animate, specchiati via CSS. **Ritratto separato** per lo slot del party.                                                                                                                                                                                                                                                              |
+| Info nemici    | Nome, status e Crisi/KO sempre visibili (targhetta sul campo) fino a fine battaglia. PV/PM solo se rivelati dal GM, per singolo nemico o tutti insieme. Finestra nemici manuale o automatica (compare quando cambia qualcosa e sparisce dopo X secondi).                                                                                                 |
+| Fase battaglia | **In preparazione**: i giocatori vedono una schermata di attesa ("In attesa della battaglia…") con sfondo configurabile, e non ricevono nessun combattente. **Inizia battaglia** → **In corso**: party e nemici. **Termina battaglia** → **Terminata**: il banner dell'esito, lo schermo resta com'è. **Termina scena**: tutti via, schermata di attesa. |
+| Lingue         | Codice in inglese, UI localizzata (it di default, en).                                                                                                                                                                                                                                                                                                   |
+| Browser        | Basati su Chromium (Chrome/Edge): necessari per i video `.webm` con canale alpha.                                                                                                                                                                                                                                                                        |
 
 ## Principi
 
@@ -46,14 +46,14 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 - Si è in **Crisi** quando `0 < hp ≤ floor(maxHp / 2)`. A 0 PV il combattente è **KO** e non conta come in Crisi.
 - Gli status (`slow`, `dazed`, `weak`, `shaken`, `enraged`, `poisoned`) sono solo marcatori visivi.
 - `applyCommand(state, command)` è un riduttore puro che restituisce `{ ok, state, events }` oppure `{ ok: false, error }`. Non modifica mai l'input.
-- I comandi disponibili sono `ADD_COMBATANT`, `UPDATE_COMBATANT`, `REMOVE_COMBATANT`, `MOVE_COMBATANT`, `DAMAGE`, `HEAL`, `SET_HP`, `SPEND_MP`, `RESTORE_MP`, `SET_MP`, `SET_STATUS`, `SET_REVEAL_STATS`, `SET_PRESENTATION`, `SET_BACKGROUND`, `RENAME_BATTLE`, `LOAD_BATTLE`, `PERFORM_ACTION`, `SYNC_UNIT` e `END_BATTLE`. `SYNC_UNIT` porta sui combattenti schierati da una scheda le modifiche fatte in libreria (nome, PV/PM massimi, aspetto), tenendo il numero delle copie ("Goblin 2" → "Orco 2") e limitando PV/PM attuali ai nuovi massimi. `END_BATTLE` toglie i nemici, lascia il party com'è e nasconde di nuovo le informazioni sui nemici.
+- I comandi disponibili sono `ADD_COMBATANT`, `UPDATE_COMBATANT`, `REMOVE_COMBATANT`, `MOVE_COMBATANT`, `DAMAGE`, `HEAL`, `SET_HP`, `SPEND_MP`, `RESTORE_MP`, `SET_MP`, `SET_STATUS`, `SET_REVEAL_STATS`, `SET_PRESENTATION`, `SET_BACKGROUND`, `RENAME_BATTLE`, `LOAD_BATTLE`, `PERFORM_ACTION`, `SYNC_UNIT`, `START_BATTLE`, `END_BATTLE`, `RESUME_BATTLE` e `END_SCENE`. `SYNC_UNIT` porta sui combattenti schierati da una scheda le modifiche fatte in libreria (nome, PV/PM massimi, aspetto), tenendo il numero delle copie ("Goblin 2" → "Orco 2") e limitando PV/PM attuali ai nuovi massimi. `END_BATTLE` mette l'esito (fase 8); `END_SCENE` toglie tutti dal campo, torna in preparazione e nasconde di nuovo le informazioni sui nemici.
 - Gli eventi (`DAMAGED`, `HEALED`, `CRISIS_ENTERED`, `KNOCKED_OUT`, `REVIVED`…) descrivono cosa è successo. Riportano l'importo effettivamente applicato, cioè senza l'eccesso di danno o di cura. Il Display li userà per la coreografia.
 
 **Store (`src/app/store`).** Usa Zustand (vanilla), un'istanza sola e solo nel Master.
 
 - `dispatch(command)` applica il comando e pubblica un `BattleChange` sul bus `battleStore.changes`, a cui si collega la sincronizzazione. I comandi senza effetto non pubblicano nulla.
 - Non c'è annullamento: le operazioni distruttive chiedono conferma (rimuovere un combattente, terminare la battaglia, sostituire il campo con una scena) e ogni valore si corregge con un'azione del GM.
-- Lo stato della battaglia viene salvato in `localStorage` (`fu-battle.battle`) ed è versionato: ora è alla v7, e `migrations.ts` aggiorna i salvataggi delle versioni precedenti (v2: PM e ritratti; v3: fase della battaglia; v4: sfondo della schermata di attesa; v5: scheda di provenienza dei combattenti; v6: musica, volumi e muto; v7: posizione e profondità dal layout della scena). Al ricaricamento viene validato con Zod; se è corrotto viene scartato.
+- Lo stato della battaglia viene salvato in `localStorage` (`fu-battle.battle`) ed è versionato: ora è alla v8, e `migrations.ts` aggiorna i salvataggi delle versioni precedenti (v2: PM e ritratti; v3: fase della battaglia; v4: sfondo della schermata di attesa; v5: scheda di provenienza dei combattenti; v6: musica, volumi e muto; v7: posizione e profondità dal layout della scena; v8: esito della battaglia). Al ricaricamento viene validato con Zod; se è corrotto viene scartato.
 - Gli hook per React sono `useBattleStore`, `useBattleActions`, `useCombatants(side)` e `useCombatant(id)`.
 
 ## Display statico (fase 2)
@@ -73,7 +73,7 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
 
   La larghezza degli slot (`partySlotWidth`) si adatta al numero di alleati, così il pannello sta sempre nello schermo ed è bilanciato.
 
-- **Targhette nemici:** sono su un livello sopra tutti gli sprite e mostrano nome, Crisi/KO e status. Restano visibili anche a KO finché il GM non termina la battaglia (`END_BATTLE`).
+- **Targhette nemici:** sono su un livello sopra tutti gli sprite e mostrano nome, Crisi/KO e status. Restano visibili anche a KO finché il GM non termina la scena (`END_SCENE`).
 - **Icone di stato:** sono le stesse ovunque: party, targhette, campo e finestra nemici. Ogni icona è un glifo bianco (Lucide, incluso nel pacchetto) su sfondo colorato. Gli status base (Lento, Confuso, Debole, Scosso) stanno in un **cerchio**, quelli maggiori (Furente, Avvelenato) in un **rombo**. L'ordine è sempre lo stesso (`sortStatuses`), così le icone non si spostano. Crisi e KO restano tag testuali. Tutti e 6 gli status più Crisi stanno su una riga sola.
 - **Finestra nemici (in alto, centrata):** è speculare al pannello del party, con carte compatte. Ogni carta ha tre righe fisse:
   1. il nome, con ellissi se è troppo lungo;
@@ -102,7 +102,7 @@ Regola di dipendenza: `features → app → domain`; `infra` implementa le inter
   - combattente selezionato: intestazione con PV/PM, status e note del GM della scheda; elenco delle abilità salvate (tipo, effetto, promemoria) più "Azione libera";
   - scelta un'abilità, il **compositore**: nome, effetto (anche "Nessun effetto"), costo PM se l'attore ha PM, e la lista dei bersagli. Ogni bersaglio spuntato ha il suo esito: tipo (Danno PV, Cura PV, Danno PM, Recupero PM), valore facoltativo e status da aggiungere o togliere (un clic su un'icona aggiunge lo status, o lo toglie se il bersaglio lo ha già). "Agisci" esegue `PERFORM_ACTION`; Invio in un campo fa lo stesso; Esc torna indietro di un livello.
 - **Anteprima flottante** (`master/preview`): lo schermo dei giocatori in una finestra sopra la plancia, in tutte le sezioni. Si trascina dalla barra del titolo (o con le frecce), si ridimensiona dall'angolo in 16:9, si riduce alla sola barra. Aperta/chiusa, posizione e dimensione restano nel browser (`fu-battle.preview-window`); il pulsante "Anteprima" della barra in alto la mostra o la nasconde.
-- **Battaglia:** "Inizia battaglia" è disattivato se non ci sono nemici; "Termina battaglia" chiede una conferma in due passi. In preparazione i nemici mostrano l'etichetta "Nascosti ai giocatori".
+- **Battaglia:** "Inizia battaglia" è disattivato se non ci sono nemici; "Termina battaglia" apre la scelta dell'esito (fase 8); "Termina scena" chiede una conferma in due passi. In preparazione i nemici mostrano l'etichetta "Nascosti ai giocatori".
 - **Libreria in battaglia:** le schede Party e Nemici restano modificabili anche a battaglia in corso. Ogni salvataggio manda `SYNC_UNIT`, così chi è in campo da quella scheda si aggiorna subito. Per un personaggio in campo i PV/PM attuali sono in sola lettura nella scheda (si cambiano dalla plancia e tornano sulla scheda quando esce); una scheda in campo non si può eliminare.
 - **Errori di dominio:** compaiono in un banner localizzato in base al codice, che si può chiudere.
 - **Componenti UI condivisi** (`src/shared/ui`): `Button`, `TextField`, `NumberField`, `Toggle` (`role="switch"`), `Panel`, `Menu` e `Popover`.
@@ -225,7 +225,7 @@ Il Display legge lo stesso database (stessa origine): i file **non passano mai**
 2. altrimenti il suono di sistema: colpo per danni PV o PM (non il costo in PM dell'attore), cura per PV o PM recuperati;
 3. in più il suono del KO, e quello di inizio battaglia su `BATTLE_STARTED`.
 
-**Musica e volumi** sono nello stato autorevole (`presentation.audio`: brano, volume musica e effetti 0–100, muto), quindi viaggiano con la sincronizzazione e restano salvati (persistenza v6). `LOAD_SCENE` porta la musica della scena; `END_BATTLE` la toglie e lascia i volumi. Il Display suona il brano solo a battaglia iniziata.
+**Musica e volumi** sono nello stato autorevole (`presentation.audio`: brano, volume musica e effetti 0–100, muto), quindi viaggiano con la sincronizzazione e restano salvati (persistenza v6). `LOAD_SCENE` porta la musica della scena; `END_SCENE` la toglie e lascia i volumi. Il Display suona il brano solo a battaglia in corso; a battaglia terminata, la musica dell'esito (fase 8).
 
 **Motore audio** (`infra/audio/audioEngine.ts`, Web Audio): un gain per la musica, uno per gli effetti, uno principale per il muto. La musica arriva in streaming da un `<audio>` in loop; ogni cambio di brano è una dissolvenza incrociata di 1,5 s. Gli effetti sonori vengono decodificati una volta e risuonati dalla memoria. Il clic "Premi per iniziare" sblocca l'audio (politica di autoplay); prima di allora gli effetti sonori vengono ignorati, così non si accumulano.
 
@@ -247,6 +247,29 @@ Il Display legge lo stesso database (stessa origine): i file **non passano mai**
 
 **Anteprima live** (`features/master/scenes/layout/`). Dalla sezione "Disposizione in campo" della scena si apre un editor a tutto schermo che mostra la vera `BattleScene` (battaglia di anteprima con `phase: 'active'` e id = chiavi di layout) dentro `FitStage`. `SceneEditingContext` spegne gli ingressi e le transizioni di posizione. `HandlesLayer` disegna sopra lo stage, in pixel di schermo: riquadri cliccabili per ogni sprite (il più in alto vince), maniglie di scala e rotazione, guide d'aggancio (`snapping.ts`: piedi degli altri sprite, centro del campo, griglia da 40 px; Alt le sospende) e la mini-barra Specchia / Avanti / Indietro / Ripristina. Ci sono anche l'elenco degli sprite, l'ispettore con valori esatti (anche su più sprite) e le scorciatoie da tastiera. Durante un trascinamento il layout vive nell'editor e passa alla scena al rilascio; da lì lo salva l'autosalvataggio dell'editor della scena.
 
+## Fine della battaglia (fase 8)
+
+**Ciclo di vita.** Le fasi sono tre: `preparation` → `active` → `ended`.
+
+- `END_BATTLE { outcome }` (solo da `active`) mette `BattleState.outcome` e passa a `ended`: **il campo resta com'è**, nemici KO e targhette compresi, e lo schermo dei giocatori mostra il banner. Si possono ancora correggere valori.
+- `RESUME_BATTLE` toglie il banner e torna ad `active`, per un esito scelto per errore (non c'è annulla).
+- `END_SCENE` (da qualsiasi fase) fa quello che faceva il vecchio `END_BATTLE`: tutti escono dal campo, PV e PM del party tornano sulle schede, si torna in `preparation` e alla schermata di attesa.
+- `START_BATTLE` vale solo in preparazione. Lo schema rifiuta un esito fuori da `ended`, e `ended` senza esito. Persistenza v8.
+
+**Esito** (`domain/outcome.ts`): `kind` è `victory`, `defeat`, `flee` o `custom`; `text` (al massimo 40 caratteri) è il testo del banner. Vuoto vuol dire quello predefinito del tipo ("Vittoria!", "Sconfitta…", "Fuga!"), tradotto dal Display; un esito personalizzato lo richiede.
+
+**Scorciatoie.** `suggestedOutcome(state)` (puro) propone la vittoria quando tutti i nemici sono KO e la sconfitta quando lo è tutto il party (un lato vuoto non conta). La plancia mostra allora "Vittoria"/"Sconfitta" accanto a "Termina battaglia": un clic e il banner compare col testo predefinito. Il modulo di "Termina battaglia" preseleziona lo stesso esito; il GM può comunque sceglierne un altro e il testo. Lì c'è anche "termina la scena senza banner".
+
+**Display** (`effects/OutcomeBanner.tsx`, sopra tutto lo stage):
+
+- **vittoria**: la finestra JRPG si apre a molla, il testo grande in Cinzel con un solo riflesso di luce (niente bagliore a riposo; con "riduci movimento" solo dissolvenza);
+- **sconfitta**: la scena perde colore e si scurisce, il testo scende lentamente, senza finestra;
+- **fuga e personalizzato**: solo testo, su una fascia scura sfumata.
+
+I testi lunghi vanno a capo su due righe bilanciate. Con "Termina scena" il banner sfuma insieme alla battaglia nella schermata di attesa.
+
+**Musica.** In Audio → Fine della battaglia si sceglie un brano per la vittoria e uno per la sconfitta (`SoundSettings.outcomes`), da suonare in loop o una volta sola. `musicFor(battle, settings)` (puro) decide cosa suona: la musica della battaglia in `active`, quella dell'esito in `ended`, silenzio per fuga e personalizzato e in preparazione. Il cambio è la solita dissolvenza incrociata. `RESUME_BATTLE` riporta la musica della battaglia, perché il brano resta in `presentation.audio` finché la scena non termina.
+
 ## Roadmap
 
 | Fase | Contenuto                                                                                                                                                                        | Stato |
@@ -259,4 +282,5 @@ Il Display legge lo stesso database (stessa origine): i file **non passano mai**
 | 5    | Animazioni base: barre fluide, shake, testo dei danni, dissolvenze di inizio e fine battaglia                                                                                    | ✅    |
 | 6    | Sequenza d'azione: avanzata, carica, effetti integrati o nessuno, impatto (stato visivo ritardato), ritorno; plancia master/detail con compositore per bersaglio e azione del GM | ✅    |
 | 7    | Libreria asset (IndexedDB) e audio con crossfade; scelta di sprite, ritratti, sfondo di battaglia e **sfondo della schermata di attesa**                                         | ✅    |
-| 8    | Rifinitura: preset incontri da importare ed esportare, banner di vittoria                                                                                                        |       |
+| 8    | Fine della battaglia: esiti (vittoria, sconfitta, fuga, personalizzato) con banner e musica, scorciatoie, "Termina scena" separato                                               | ✅    |
+| —    | Rimandato: preset di incontri da importare ed esportare                                                                                                                          |       |

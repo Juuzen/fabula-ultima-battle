@@ -62,12 +62,32 @@
     },
     "battle": {
       "end": "Termina battaglia",
-      "endConfirm": "Conferma: termina la scena",
       "endCancel": "Annulla",
-      "endHint": "Tutti escono dal campo; PV e PM del party tornano sulle schede.",
+      "endHint": "Scegli l'esito: il banner compare ai giocatori e lo schermo resta com'è finché non termini la scena.",
       "start": "Inizia battaglia",
       "startHint": "I nemici compaiono sullo schermo dei giocatori.",
-      "prepHint": "I nemici che aggiungi restano nascosti ai giocatori finché non inizi la battaglia."
+      "prepHint": "I nemici che aggiungi restano nascosti ai giocatori finché non inizi la battaglia.",
+      "endTitle": "Fine della battaglia",
+      "endKind": "Esito",
+      "endText": "Testo del banner",
+      "endTextDefault": "Vuoto: «{{text}}».",
+      "endTextRequired": "Obbligatorio per un esito personalizzato.",
+      "endShow": "Mostra il banner",
+      "abortScene": "Oppure termina la scena senza banner",
+      "ended": "Battaglia terminata: {{kind}}",
+      "resume": "Riprendi battaglia",
+      "resumeHint": "Toglie il banner e si torna a combattere.",
+      "endScene": "Termina scena",
+      "endSceneConfirm": "Conferma: termina la scena",
+      "endSceneHint": "Tutti escono dal campo; PV e PM del party tornano sulle schede. I giocatori vedono la schermata di attesa.",
+      "suggest": {
+        "victory": "Vittoria",
+        "defeat": "Sconfitta"
+      },
+      "suggestHint": {
+        "victory": "Tutti i nemici sono KO: mostra la vittoria.",
+        "defeat": "Tutto il party è KO: mostra la sconfitta."
+      }
     },
     "errors": {
       "dismiss": "Chiudi",
@@ -79,7 +99,10 @@
       "INVALID_PRESENTATION": "Impostazione non valida.",
       "INVALID_ACTION": "Azione non valida: controlla bersagli e valori.",
       "NOT_ENOUGH_MP": "PM insufficienti per questa azione.",
-      "UNIT_ALREADY_DEPLOYED": "Questo personaggio è già in campo."
+      "UNIT_ALREADY_DEPLOYED": "Questo personaggio è già in campo.",
+      "BATTLE_NOT_ACTIVE": "Si può terminare solo una battaglia in corso.",
+      "BATTLE_NOT_ENDED": "La battaglia non è terminata.",
+      "INVALID_OUTCOME": "Scrivi il testo del banner (al massimo 40 caratteri)."
     },
     "connected": "Schermo giocatori collegato",
     "notConnected": "Schermo giocatori non collegato",
@@ -222,7 +245,10 @@
         "battleStart": "Inizio battaglia"
       },
       "effectSounds": "Suoni degli effetti predefiniti",
-      "effectSoundsHint": "Suonano all'impatto. Gli effetti personalizzati hanno il loro nel pannello Video."
+      "effectSoundsHint": "Suonano all'impatto. Gli effetti personalizzati hanno il loro nel pannello Video.",
+      "outcomes": "Fine della battaglia",
+      "outcomesHint": "Sostituiscono la musica della battaglia, in dissolvenza. Fuga ed esiti personalizzati non hanno musica: la battaglia sfuma nel silenzio.",
+      "loopOf": "{{kind}} in loop"
     },
     "customEffect": {
       "add": "Nuovo effetto",
@@ -571,5 +597,18 @@
     "stop": "Ferma",
     "size": "{{size}}",
     "storage": "Spazio usato: {{used}} di {{quota}}"
+  },
+  "outcome": {
+    "kinds": {
+      "victory": "Vittoria",
+      "defeat": "Sconfitta",
+      "flee": "Fuga",
+      "custom": "Personalizzato"
+    },
+    "default": {
+      "victory": "Vittoria!",
+      "defeat": "Sconfitta…",
+      "flee": "Fuga!"
+    }
   }
 }

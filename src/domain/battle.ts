@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import { CombatantSchema, type Combatant, type CombatantId, type Side } from './combatant'
+import { OutcomeSchema } from './outcome'
 
 export const ENEMY_PANEL_MODES = ['manual', 'auto'] as const
 export const MIN_AUTO_HIDE_SECONDS = 1
@@ -45,9 +46,13 @@ export const PresentationSchema = z.object({
 })
 export type Presentation = z.infer<typeof PresentationSchema>
 
-export const BATTLE_PHASES = ['preparation', 'active'] as const
+export const BATTLE_PHASES = ['preparation', 'active', 'ended'] as const
 export const BattlePhaseSchema = z.enum(BATTLE_PHASES)
-/** preparation: enemies are being set up and stay hidden from the players. active: fighting. */
+/**
+ * preparation: enemies are being set up and stay hidden from the players. active: fighting.
+ * ended: the battle is over and its banner is up; the screen stays as it is until the GM
+ * ends the scene (back to preparation and the waiting screen).
+ */
 export type BattlePhase = z.infer<typeof BattlePhaseSchema>
 
 export const BattleStateSchema = z
@@ -59,6 +64,12 @@ export const BattleStateSchema = z
     /** Display order: array order within each side. */
     combatants: z.array(CombatantSchema),
     presentation: PresentationSchema,
+    /** How the battle ended: set only in the ended phase. */
+    outcome: OutcomeSchema.nullable(),
+  })
+  .refine((b) => (b.phase === 'ended') === (b.outcome !== null), {
+    message: 'an outcome goes with the ended phase, and only with it',
+    path: ['outcome'],
   })
   .refine((b) => new Set(b.combatants.map((c) => c.id)).size === b.combatants.length, {
     message: 'combatant ids must be unique',
@@ -83,6 +94,7 @@ export function createEmptyBattle(name = ''): BattleState {
     backgroundAssetId: null,
     combatants: [],
     presentation: createDefaultPresentation(),
+    outcome: null,
   }
 }
 

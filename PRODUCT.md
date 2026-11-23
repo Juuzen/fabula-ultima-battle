@@ -33,7 +33,7 @@ Uno schermo di battaglia dedicato alle regole di Fabula Ultima (PV, PM, soglia d
 ## Capabilities and Constraints
 
 - Regole tracciate: PV, PM, Crisi (`0 < PV ≤ floor(PV max / 2)`), KO. Status (Lento, Confuso, Debole, Scosso, Furente, Avvelenato) solo visivi. PI e turni non gestiti: il GM sceglie chi agisce.
-- Fasi di battaglia: In preparazione (schermata di attesa, nessun combattente ai giocatori) → In corso → Termina.
+- Fasi di battaglia: In preparazione (schermata di attesa, nessun combattente ai giocatori) → In corso → Terminata (banner dell'esito) → Termina scena.
 - Informazioni sui nemici: nome, status, Crisi/KO sempre visibili; PV/PM solo se rivelati dal GM. Finestra nemici manuale o automatica.
 - Azioni coreografate (avanzata, carica, effetto, impatto, ritorno) con effetti integrati (taglio, impatto, fuoco, ghiaccio, tuono, luce, ombra) oppure senza effetto grafico. Ogni bersaglio ha il proprio esito (PV, PM, status aggiunti o tolti). Il GM può agire anche senza attore (trappole, pozioni, correzioni): banner e numeri, nessun movimento.
 - Salvataggio in `localStorage` versionato. Nessun annulla: le operazioni distruttive chiedono conferma e ogni valore si corregge con un'azione del GM.
@@ -43,7 +43,8 @@ Uno schermo di battaglia dedicato alle regole di Fabula Ultima (PV, PM, soglia d
 - Rispetto di "riduci movimento" del sistema operativo.
 - Libreria asset nel browser (IndexedDB, offline): immagini, video e audio caricati dalle schede, dalle scene o dalle sezioni Audio e Video, riutilizzabili ovunque. Sfondi anche video in loop; effetti personalizzati da un video, accanto a quelli integrati.
 - Audio dallo schermo giocatori: musica della scena (parte con la battaglia, in loop), cambio brano dal vivo in dissolvenza, volumi separati di musica ed effetti, silenzia. Suoni per abilità, per effetto visivo e di sistema (colpo, cura, KO, inizio battaglia).
-- Ancora da costruire: preset di incontri e banner di vittoria (fase 8).
+- Fine della battaglia: il GM sceglie l'esito (vittoria, sconfitta, fuga o un testo suo) e il banner compare ai giocatori; lo schermo resta com'è finché non termina la scena. Scorciatoia in un clic quando tutti i nemici, o tutto il party, sono KO. Musica di vittoria e di sconfitta, in loop o una volta.
+- Rimandato: preset di incontri da importare ed esportare.
 
 ## Brand Commitments
 

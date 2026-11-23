@@ -213,16 +213,60 @@ describe('Screen Control', () => {
       expect(screen.getByRole('button', { name: 'Inizia battaglia' })).toBeDisabled()
     })
 
-    it('ends the battle only after confirmation; the empty field shows the deploy tabs', async () => {
+    it('ends the battle with an outcome; the field stays until the scene ends', async () => {
       seed({ phase: 'active' })
       const user = setup()
       await user.click(screen.getByRole('button', { name: 'Termina battaglia' }))
-      expect(find('orc')).toBeDefined()
+      const form = screen.getByRole('dialog', { name: 'Termina battaglia' })
+      await user.click(within(form).getByRole('radio', { name: 'Personalizzato' }))
+      const show = within(form).getByRole('button', { name: 'Mostra il banner' })
+      expect(show).toBeDisabled() // a custom ending needs its words
+      await user.type(within(form).getByLabelText('Testo del banner'), 'Tregua')
+      await user.click(show)
 
+      expect(battle().phase).toBe('ended')
+      expect(battle().outcome).toEqual({ kind: 'custom', text: 'Tregua' })
+      expect(find('orc')).toBeDefined()
+      expect(screen.getByText('Battaglia terminata: Personalizzato')).toBeInTheDocument()
+
+      // A wrong ending can be taken back.
+      await user.click(screen.getByRole('button', { name: 'Riprendi battaglia' }))
+      expect(battle().phase).toBe('active')
+      expect(battle().outcome).toBeNull()
+
+      await user.click(screen.getByRole('button', { name: 'Termina battaglia' }))
+      await user.click(screen.getByRole('radio', { name: 'Fuga' }))
+      await user.click(screen.getByRole('button', { name: 'Mostra il banner' }))
+      expect(battle().outcome).toEqual({ kind: 'flee', text: '' })
+
+      await user.click(screen.getByRole('button', { name: 'Termina scena' }))
+      expect(find('orc')).toBeDefined()
       await user.click(screen.getByRole('button', { name: 'Conferma: termina la scena' }))
       expect(battle().combatants).toEqual([])
       expect(battle().phase).toBe('preparation')
       expect(within(field()).getByRole('tablist', { name: 'Schiera' })).toBeInTheDocument()
+    })
+
+    it('offers the obvious ending in one click when a whole side is KO', async () => {
+      seed({ phase: 'active' })
+      const user = setup()
+      expect(screen.queryByRole('button', { name: 'Vittoria' })).not.toBeInTheDocument()
+      act(() => {
+        battleStore.getState().dispatch({ type: 'DAMAGE', id: 'orc', amount: 50 })
+      })
+      await user.click(screen.getByRole('button', { name: 'Vittoria' }))
+      expect(battle().outcome).toEqual({ kind: 'victory', text: '' })
+
+      act(() => {
+        battleStore.getState().dispatch({ type: 'RESUME_BATTLE' })
+        battleStore.getState().dispatch({ type: 'HEAL', id: 'orc', amount: 10 })
+        battleStore.getState().dispatch({ type: 'DAMAGE', id: 'hero', amount: 40 })
+      })
+      // The form preselects it too.
+      await user.click(screen.getByRole('button', { name: 'Termina battaglia' }))
+      expect(screen.getByRole('radio', { name: 'Sconfitta' })).toBeChecked()
+      await user.click(screen.getByRole('button', { name: 'Sconfitta' }))
+      expect(battle().outcome).toEqual({ kind: 'defeat', text: '' })
     })
 
     it('shows domain errors in Italian and lets the GM dismiss them', async () => {
